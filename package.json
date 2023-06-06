@@ -1,6 +1,7 @@
 {
   "name": "topology-fhir",
   "version": "1.0.0",
+  "type": "module",
   "description": "Library for simplifying all things FHIR and SMART",
   "main": "src/smartLaunch.js",
   "types": "src/index.d.ts",
