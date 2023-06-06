@@ -1,8 +1,7 @@
 import Client from "fhirclient/lib/Client";
 
-export = FhirLib
 export as namespace FhirLib
-declare namespace FhirLib {
+declare module 'fhir-lib' {
   enum EMR {
     CERNER = 'cerner',
     EPIC = 'epic',
