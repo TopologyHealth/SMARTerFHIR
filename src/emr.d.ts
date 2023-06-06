@@ -1,1 +1,0 @@
-export type EMRType = 'cerner' | 'epic' | 'smart' | 'none'

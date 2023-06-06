@@ -1,4 +1,5 @@
 "use strict";
+
 const FHIR = require("fhirclient");
 
 const EMR = {
@@ -32,7 +33,7 @@ const SmartLaunchHandler = (clientID, emrType) => {
                 const urlParams = new URLSearchParams(queryString);
                 const iss = urlParams.get('iss');
 
-                if (iss !== null && iss.includes(EMR.EPIC))
+                if (iss !== null && iss.includes(emrType))
                     await epicLaunch(clientID, originString, iss);
 
                 setFhirClient(FHIR.oauth2.ready());
