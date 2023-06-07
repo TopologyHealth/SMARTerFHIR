@@ -5,5 +5,5 @@ declare enum EMR {
     SMART = "smart",
     NONE = "none"
 }
-export declare function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client> | undefined;
+export declare function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client | undefined>;
 export {};

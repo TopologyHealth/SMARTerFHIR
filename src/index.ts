@@ -20,7 +20,7 @@ async function epicLaunch(clientId: string, redirect: string, iss: string): Prom
   });
 }
 
-export function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client> | undefined {
+export async function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client | undefined> {
   const curEMR = emrType;
   const [fhirClient, setFhirClient] = useState<Promise<Client> | undefined>(undefined);
 
