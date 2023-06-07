@@ -6,5 +6,5 @@ declare enum EMR {
     SMART = "smart",
     NONE = "none"
 }
-export declare function SmartLaunchHandler(setFhirClient: React.Dispatch<React.SetStateAction<Promise<Client> | undefined>>, clientID: string, emrType: EMR): void;
+export declare function SmartLaunchHandler(setFhirClient: React.Dispatch<React.SetStateAction<Client | undefined>>, clientID: string, emrType: EMR): void;
 export {};
