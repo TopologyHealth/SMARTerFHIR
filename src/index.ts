@@ -1,21 +1,15 @@
-'use strict'
+import * as FHIR from 'fhirclient';
+import Client from "fhirclient/lib/Client";
+import { useEffect, useState } from "react";
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-const FHIR = require("fhirclient");
-
-const EMR = {
-  CERNER: 'cerner',
-  EPIC: 'epic',
-  SMART: 'smart',
-  NONE: 'none',
+enum EMR {
+  CERNER = 'cerner',
+  EPIC = 'epic',
+  SMART = 'smart',
+  NONE = 'none'
 }
 
-async function epicLaunch(clientId, redirect, iss) {
+async function epicLaunch(clientId: string, redirect: string, iss: string): Promise<string | void> {
   const scope = "launch online_access openid fhirUser"
   const redirect_uri = redirect ?? '';
   return FHIR.oauth2.authorize({
@@ -26,9 +20,9 @@ async function epicLaunch(clientId, redirect, iss) {
   });
 }
 
-function SmartLaunchHandler(clientID, emrType) {
+export function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client> | undefined {
   const curEMR = emrType;
-  const [fhirClient, setFhirClient] = useState(undefined);
+  const [fhirClient, setFhirClient] = useState<Promise<Client> | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
@@ -53,6 +47,3 @@ function SmartLaunchHandler(clientID, emrType) {
   }, [clientID, curEMR]);
   return fhirClient
 }
-
-
-module.exports = SmartLaunchHandler;
