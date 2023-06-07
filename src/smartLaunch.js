@@ -1,5 +1,9 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 const FHIR = require("fhirclient");
 
 const EMR = {
@@ -20,7 +24,7 @@ async function epicLaunch(clientId, redirect, iss) {
     });
 }
 
-const SmartLaunchHandler = (clientID, emrType) => {
+function SmartLaunchHandler(clientID, emrType) {
     const curEMR = emrType;
     const [fhirClient, setFhirClient] = useState(undefined);
 
@@ -48,4 +52,4 @@ const SmartLaunchHandler = (clientID, emrType) => {
     return fhirClient
 }
 
-exports.default = SmartLaunchHandler;
+exports.SmartLaunchHandler = SmartLaunchHandler;
