@@ -20,11 +20,10 @@ async function epicLaunch(clientId: string, redirect: string, iss: string): Prom
   });
 }
 
-export async function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client | undefined> {
+export function SmartLaunchHandler(setFhirClient: React.Dispatch<React.SetStateAction<Promise<Client> | undefined>>, clientID: string, emrType: EMR) {
   const curEMR = emrType;
-  const [fhirClient, setFhirClient] = useState<Promise<Client> | undefined>(undefined);
 
-  useEffect(() => {
+  // useEffect(() => {
     (async () => {
       try {
         // Authorize with the EHR
@@ -44,6 +43,5 @@ export async function SmartLaunchHandler(clientID: string, emrType: EMR): Promis
         }
       }
     })();
-  }, [clientID, curEMR]);
-  return fhirClient
+  // }, [clientID, curEMR]);
 }
