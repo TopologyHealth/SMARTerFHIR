@@ -52,4 +52,4 @@ function SmartLaunchHandler(clientID, emrType) {
     return fhirClient
 }
 
-exports.SmartLaunchHandler = SmartLaunchHandler;
+exports = module.exports = SmartLaunchHandler;
