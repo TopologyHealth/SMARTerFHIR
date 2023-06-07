@@ -1,14 +1,14 @@
 import Client from "fhirclient/lib/Client";
 
-// export as namespace FhirLib
-// declare module 'fhir-lib' {
-  
+export = SmartLaunchHandler
+
+declare namespace FhirLib {
   export function epicLaunch(clientId: string, redirect: string, iss: string): Promise<string | void>
-  export enum EMR {
-    CERNER = 'cerner',
-    EPIC = 'epic',
-    SMART = 'smart',
-    NONE = 'none'
-  }
-  export const SmartLaunchHandler: (clientID: string, emrType: EMR) => Promise<Client> | undefined
-// }
+}
+declare enum EMR {
+  CERNER = 'cerner',
+  EPIC = 'epic',
+  SMART = 'smart',
+  NONE = 'none'
+}
+declare const SmartLaunchHandler: (clientID: string, emrType: EMR) => Promise<Client> | undefined
