@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Library for simplifying all things FHIR and SMART",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build" : "tsc"
+    "build": "tsc"
   },
   "author": "Josh Liben and Raghavan Chandrabalan",
   "keywords": [
