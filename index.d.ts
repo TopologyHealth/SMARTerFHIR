@@ -1,7 +1,7 @@
 import Client from "fhirclient/lib/Client";
 
-declare function SmartLaunchHandler(clientID: string, emrType: SmartLaunchHandler.EMR): Promise<Client> | undefined
-declare namespace SmartLaunchHandler{
+export function SmartLaunchHandler(clientID: string, emrType: FhirLib.EMR): Promise<Client> | undefined
+declare namespace FhirLib{
   export enum EMR {
     CERNER = 'cerner',
     EPIC = 'epic',
@@ -10,5 +10,3 @@ declare namespace SmartLaunchHandler{
   }
   export function epicLaunch(clientId: string, redirect: string, iss: string): Promise<string | void>
 }
-
-export = SmartLaunchHandler;
