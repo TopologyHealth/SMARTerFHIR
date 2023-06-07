@@ -8,4 +8,4 @@ export enum EMR {
   SMART = 'smart',
   NONE = 'none'
 }
-export function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client> | undefined
+export default function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client> | undefined
