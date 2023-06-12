@@ -1,8 +1,7 @@
 import * as FHIR from 'fhirclient';
 import Client from "fhirclient/lib/Client";
-import { useEffect, useState } from "react";
 
-enum EMR {
+export enum EMR {
   CERNER = 'cerner',
   EPIC = 'epic',
   SMART = 'smart',
@@ -20,28 +19,22 @@ async function epicLaunch(clientId: string, redirect: string, iss: string): Prom
   });
 }
 
-export function SmartLaunchHandler(setFhirClient: React.Dispatch<React.SetStateAction<Client | undefined>>, clientID: string, emrType: EMR) {
-  const curEMR = emrType;
+export async function SmartLaunchHandler(setFhirClient: (authenticatedClient: Client) => void, clientID: string, emrType: EMR) {
+  try {
+    // Authorize with the EHR
+    const queryString = window.location.search;
+    const originString = window.location.origin;
+    const urlParams = new URLSearchParams(queryString);
+    const iss = urlParams.get('iss');
 
-  // useEffect(() => {
-    (async () => {
-      try {
-        // Authorize with the EHR
-        const queryString = window.location.search;
-        const originString = window.location.origin;
-        const urlParams = new URLSearchParams(queryString);
-        const iss = urlParams.get('iss');
+    if (iss !== null && iss.includes(emrType))
+      await epicLaunch(clientID, originString, iss);
 
-        if (iss !== null && iss.includes(emrType))
-          await epicLaunch(clientID, originString, iss);
-
-        setFhirClient(await FHIR.oauth2.ready());
-      }
-      catch (e) {
-        if (e instanceof Error) {
-          throw e;
-        }
-      }
-    })();
-  // }, [clientID, curEMR]);
+    setFhirClient(await FHIR.oauth2.ready());
+  }
+  catch (e) {
+    if (e instanceof Error) {
+      throw e;
+    }
+  }
 }
