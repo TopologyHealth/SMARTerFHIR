@@ -5,4 +5,4 @@ export declare enum EMR {
     SMART = "smart",
     NONE = "none"
 }
-export declare function SmartLaunchHandler(setFhirClient: (authenticatedClient: Client) => void, clientID: string, emrType: EMR): Promise<void>;
+export declare function SmartLaunchHandler(clientID: string, emrType: EMR): Promise<Client | undefined>;
