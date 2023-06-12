@@ -1,8 +1,7 @@
 import * as FHIR from 'fhirclient';
 import Client from "fhirclient/lib/Client";
-import { useEffect, useState } from "react";
 
-enum EMR {
+export enum EMR {
   CERNER = 'cerner',
   EPIC = 'epic',
   SMART = 'smart',
