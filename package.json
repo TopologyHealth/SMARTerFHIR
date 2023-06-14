@@ -19,6 +19,7 @@
     "fhirclient": "^2.5.2"
   },
   "devDependencies": {
+    "@types/fhir": "^0.0.37",
     "@types/node": "^20.2.5",
     "typescript": "^5.1.3"
   },
