@@ -21,7 +21,7 @@ export default class EpicClient extends BaseClient {
         const resultResource: FhirClientResourceWithRequiredType = await this.fhirClientDefault.create(hydratedResource, this.createHeaders)
             .then(resource => {
                 if (!resource.resourceType) throw new Error(`Resource ${resource}, must have a resource type.`)
-                return resultResource
+                return resource as FhirClientResourceWithRequiredType
             })
             .catch((reason) => {
                 throw new Error("It failed with:" + reason);
