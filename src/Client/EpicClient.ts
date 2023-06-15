@@ -2,6 +2,7 @@ import SubClient, { FhirClientTypes } from "../FhirClient";
 import { Transformer } from "../Resource/transformer";
 import { FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
 import BaseClient from "./BaseClient";
+import * as R4 from "fhir/r4";
 
 export default class EpicClient extends BaseClient {
     constructor(fhirClientDefault: SubClient) {
@@ -17,7 +18,7 @@ export default class EpicClient extends BaseClient {
 
 
 
-    async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<R4ResourceWithRequiredType> {
+    async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<R4.Resource> {
         const transformedResource = Transformer.toFhirClientType(resource)
 
         const resultResource: FhirClientResourceWithRequiredType = await this.fhirClientDefault.create(transformedResource, this.createHeaders)
