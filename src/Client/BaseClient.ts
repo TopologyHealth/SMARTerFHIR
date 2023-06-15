@@ -1,8 +1,9 @@
 import * as R4 from "fhir/r4";
-import SubClient from "../FhirClient";
 import { Context, FhirClientResourceWithRequiredType, ObjectWithID, R4ResourceWithRequiredType, Subject } from "../types";
+
+import SubClient from "../FhirClient";
 export default abstract class BaseClient {
-    readonly fhirClientDefault: SubClient
+    readonly fhirClientDefault
 
     constructor(fhirClientDefault: SubClient) {
         this.fhirClientDefault = fhirClientDefault
@@ -15,7 +16,6 @@ export default abstract class BaseClient {
     }
 
     private async createPatientSubject(): Promise<Subject> {
-
         const patientID = await this.getIDfromObject(this.fhirClientDefault.patient);
         return {
             "subject": {
