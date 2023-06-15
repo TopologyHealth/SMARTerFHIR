@@ -17,7 +17,7 @@ export default class EpicClient extends BaseClient {
 
     async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<R4.Resource> {
         const transformedResource = Transformer.toFhirClientType(resource)
-        const hydratedResource = this.hydrateResource(transformedResource)
+        const hydratedResource = await this.hydrateResource(transformedResource)
         const resultResource: FhirClientResourceWithRequiredType = await this.fhirClientDefault.create(hydratedResource, this.createHeaders)
             .then(resource => {
                 if (!resource.resourceType) throw new Error(`Resource ${resource}, must have a resource type.`)
