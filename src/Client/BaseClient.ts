@@ -1,6 +1,5 @@
 import * as R4 from "fhir/r4";
 import { Context, FhirClientResourceWithRequiredType, ObjectWithID, R4ResourceWithRequiredType, Subject } from "../types";
-
 import SubClient from "../FhirClient";
 export default abstract class BaseClient {
     readonly fhirClientDefault

@@ -1,8 +1,8 @@
-import BaseClient from "./BaseClient"
 import * as FHIR from 'fhirclient';
-
 import SubClient from "../FhirClient";
-import { EMR } from "../SmartLaunchHandler";
+import { EMR } from "../Launcher/SmartLaunchHandler";
+import BaseClient from "./BaseClient";
+import CernerClient from "./CernerClient";
 import EpicClient from "./EpicClient";
 
 export default class ClientFactory {
@@ -29,16 +29,14 @@ export default class ClientFactory {
     const emrType = this.getEMRType(defaultFhirClient)
     switch (emrType) {
       case EMR.EPIC: {
-        //TODO: remove these after testing
-        const patientID = await defaultFhirClient.patient.id
-        console.log(`patientID: ${patientID}`)
-        return new EpicClient(defaultFhirClient);;
+        return new EpicClient(defaultFhirClient);
       }
       case EMR.CERNER:
+        return new CernerClient(defaultFhirClient);
       case EMR.SMART:
       case EMR.NONE:
       default:
-        return new EpicClient(defaultFhirClient);;
+        return new EpicClient(defaultFhirClient);
     }
   };
 }

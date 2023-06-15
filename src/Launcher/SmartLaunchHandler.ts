@@ -1,4 +1,6 @@
 import * as FHIR from 'fhirclient';
+import { cerner } from './Config';
+import scopes from './scopes.json';
 
 export enum EMR {
   CERNER = 'cerner',
@@ -27,6 +29,17 @@ export default class SmartLaunchHandler {
     });
   }
 
+  async cernerLaunch(clientId: string, redirect: string, iss: string) {
+    const cernerString = cerner.scopes.map(name => (scopes as { [key: string]: any })[name])
+    const redirect_uri = redirect ?? '';
+    return FHIR.oauth2.authorize({
+      clientId: clientId,
+      scope: ["launch", ...cernerString, "online_access", "openid", "fhirUser"].join(" "),
+      iss: iss,
+      "redirect_uri": redirect_uri
+    });
+  }
+
   async authorizeEMR() {
     const queryString = window.location.search;
     const originString = window.location.origin;
@@ -39,6 +52,7 @@ export default class SmartLaunchHandler {
           await this.epicLaunch(this.clientID, originString, iss);
           break;
         case EMR.CERNER:
+          await this.cernerLaunch(this.clientID, originString, iss);
         case EMR.SMART:
         case EMR.NONE:
         default:
