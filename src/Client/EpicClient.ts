@@ -9,27 +9,25 @@ export default class EpicClient extends BaseClient {
         super(fhirClientDefault);
     }
 
-
     private readonly createHeaders: FhirClientTypes.FetchOptions = {
         headers: {
             "Prefer": "return=representation"
         }
     };
 
-
-
     async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<R4.Resource> {
         const transformedResource = Transformer.toFhirClientType(resource)
-
-        const resultResource: FhirClientResourceWithRequiredType = await this.fhirClientDefault.create(transformedResource, this.createHeaders)
-        .then(resource => {
-            if (!resource.resourceType) throw new Error(`Resource ${resource}, must have a resource type.`)
-            return resultResource
-        })
-        .catch((reason) => {
-            throw new Error("It failed with:" + reason);
-        });
-        return Transformer.toR4FhirType(resultResource)
+        const hydratedResource = this.hydrateResource(transformedResource)
+        const resultResource: FhirClientResourceWithRequiredType = await this.fhirClientDefault.create(hydratedResource, this.createHeaders)
+            .then(resource => {
+                if (!resource.resourceType) throw new Error(`Resource ${resource}, must have a resource type.`)
+                return resultResource
+            })
+            .catch((reason) => {
+                throw new Error("It failed with:" + reason);
+            });
+        const resultAsR4 = Transformer.toR4FhirType(resultResource)
+        return resultAsR4
     }
 
 }
