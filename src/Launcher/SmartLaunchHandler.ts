@@ -24,12 +24,6 @@ export default class SmartLaunchHandler {
    * @readonly
    * @enum {string}
    */
-
-  /**
-   * The EMR (Electronic Medical Record) type associated with the SmartLaunchHandler.
-   * @readonly
-   * @enum {string}
-   */
   readonly emrType: EMR;
 
   /**

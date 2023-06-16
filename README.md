@@ -18,9 +18,10 @@ The SMARTer FHIR library is a powerful toolkit for interacting with FHIR (Fast H
 
 ## Installation
 
-You can install the SMARTer FHIR library using...
+You can install the SMARTer FHIR library using... TBD
+
  <!-- npm: -->
-<!-- 
+<!--
 ```bash
 npm install smarter-fhir
 ``` -->
@@ -29,25 +30,50 @@ npm install smarter-fhir
 
 Here's a basic example demonstrating how to use the SMARTer FHIR library:
 
+### Smart Launch
+
+The following is an example of a function to handle the SMART Launch. I.e., when the EMR launches the application, it must be directed to the page that runs the following. E.g., this could be https://www.yourwebsite.com/launch
+
 ```typescript
-import { ClientFactory, EMR } from 'smarter-fhir';
-
-async function launchApp() {
-  const clientFactory = new ClientFactory();
-  const emrClient = await clientFactory.createEMRClient();
-
-  // Use the EMR client to interact with the FHIR server
-  const resource = await emrClient.create(...);
-
-  // Additional operations and interactions with the client
-  // ...
-
-  console.log('Resource created:', resource);
+async function mySmartLaunch() => {
+  try {
+      const queryString = window.location.search;
+      const originString = window.location.origin;
+      const urlParams = new URLSearchParams(queryString);
+      const iss = urlParams.get('iss');
+      let client: Client
+      let smartLaunchHandler: SmartLaunchHandler
+      if (iss !== null) {
+          if (iss.includes('cerner')) {
+              smartLaunchHandler = new SmartLaunchHandler(cernerClientID, EMR.CERNER)
+              smartLaunchHandler.authorizeEMR()
+          } else if (iss.includes('epic')) {
+              smartLaunchHandler = new SmartLaunchHandler(epicClientID, EMR.EPIC)
+              smartLaunchHandler.authorizeEMR()
+          }
+      }
+  }
 }
+```
 
-launchApp().catch((error) => {
-  console.error('Error launching the app:', error);
-});
+### SMART Client
+
+The following is an example of a function to instantiate the SMART Client after SmartLaunch has completed. During SmartLaunch, the EMR will authenticate your application. Once completed, it will redirect to the assigned redirect url. The code below should run upon successful authentication and redirect:
+
+```typescript
+async function mySmartClientInstantiator() => {
+  try {
+    const clientFactory = new ClientFactory();
+    const baseClient = await clientFactory.createEMRClient()
+        .then(async (client) => {
+            if (!client) throw new Error('no client found')
+            return client
+        })
+        .catch((reason) => {
+            throw new Error(`client not found: ${reason}`)
+        })
+    }
+}
 ```
 
 Make sure to import the necessary classes, interfaces, and types based on your requirements.
@@ -58,13 +84,13 @@ For detailed documentation on the SMARTer FHIR library, including classes, metho
 
 ## Contributing
 
-Contributions to the SMARTer FHIR library are welcome! If you encounter any issues or have suggestions for improvement, please submit a GitHub issue or pull request in the repository at [https://github.com/your-repo](https://github.com/your-repo).
+Contributions to the SMARTer FHIR library are welcome! If you encounter any issues or have suggestions for improvement, please submit a GitHub issue or pull request in the repository at [TBD](https://github.com/your-repo).
 
 Before contributing, please review the guidelines and code of conduct outlined in the repository.
 
 ## License
 
-The SMARTer FHIR library is released under the [MIT License](https://opensource.org/licenses/MIT). You are free to use, modify, and distribute this library in accordance with the terms of the license.
+The SMARTer FHIR library is released under the [TBD](https://opensource.org/licenses/MIT). You are free to use, modify, and distribute this library in accordance with the terms of the license.
 
 ## Acknowledgments
 
