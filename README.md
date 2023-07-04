@@ -1,12 +1,12 @@
 # SMARTerFHIR Library
 
-The SMARTer FHIR library is a powerful toolkit for interacting with FHIR (Fast Healthcare Interoperability Resources) servers and implementing SMART on FHIR applications. It's based on tools and digital health standards from [SMART Health IT.](https://smarthealthit.org/) It provides a set of classes and utilities to facilitate FHIR resource handling, launch contexts, and EMR (Electronic Medical Record) integration.
+The SMARTerFHIR library is a powerful toolkit for interacting with FHIR (Fast Healthcare Interoperability Resources) servers and implementing SMART on FHIR applications. It's based on tools and digital health standards from [SMART Health IT.](https://smarthealthit.org/) It provides a set of classes and utilities to facilitate FHIR resource handling, launch contexts, and EMR (Electronic Medical Record) integration.
 
 ## Features
 
 - **FHIR Client**: The library includes a robust FHIR client implementation that supports communication with FHIR servers using the SMART on FHIR protocol.
 
-- **Launch Handling**: SMARTer FHIR provides a `SmartLaunchHandler` class that simplifies the process of launching applications with different EMR systems such as Cerner, Epic, or SMART Health IT. It offers methods for handling launch requests and obtaining authorization tokens.
+- **Launch Handling**: SMARTerFHIR provides a `SmartLaunchHandler` class that simplifies the process of launching applications with different EMR systems such as Cerner, Epic, or SMART Health IT. It offers methods for handling launch requests and obtaining authorization tokens.
 
 - **Resource Transformation**: The library includes a `Transformer` namespace that provides functions for transforming FHIR resources between the standard R4 format and the FHIR client format. This enables seamless integration with different FHIR implementations.
 
@@ -18,7 +18,7 @@ The SMARTer FHIR library is a powerful toolkit for interacting with FHIR (Fast H
 
 ## Installation
 
-You can install the SMARTer FHIR library using... TBD
+You can install the SMARTerFHIR library using... TBD
 
  <!-- npm: -->
 <!--
@@ -28,7 +28,7 @@ npm install smarter-fhir
 
 ## Usage
 
-Here's a basic example demonstrating how to use the SMARTer FHIR library:
+Here's a basic example demonstrating how to use the SMARTerFHIR library:
 
 ### Smart Launch
 
@@ -80,22 +80,22 @@ Make sure to import the necessary classes, interfaces, and types based on your r
 
 ## Documentation
 
-For detailed documentation on the SMARTer FHIR library, including classes, methods, and usage examples, please refer to the official documentation at [https://topology.health/docs](https://topology.health/docs).
+For detailed documentation on the SMARTerFHIR library, including classes, methods, and usage examples, please refer to the official documentation at [https://topology.health/docs](https://topology.health/docs).
 
 ## Contributing
 
-Contributions to the SMARTer FHIR library are welcome! If you encounter any issues or have suggestions for improvement, please submit a GitHub issue or pull request in the repository at [TBD](https://github.com/your-repo).
+Contributions to the SMARTerFHIR library are welcome! If you encounter any issues or have suggestions for improvement, please submit a GitHub issue or pull request in the repository at [TBD](https://github.com/your-repo).
 
 Before contributing, please review the guidelines and code of conduct outlined in the repository.
 
 ## License
 
-The SMARTer FHIR library is released under the [Apache 2.0 License](https://opensource.org/license/apache-2-0/). You are free to use, modify, and distribute this library in accordance with the terms of the license.
+The SMARTerFHIR library is released under the [Apache 2.0 License](https://opensource.org/license/apache-2-0/). You are free to use, modify, and distribute this library in accordance with the terms of the license.
 
 ## Acknowledgments
 
-We would like to express our gratitude to the developers and contributors who have made the SMARTer FHIR library possible. Their hard work and dedication are greatly appreciated.
+We would like to express our gratitude to the developers and contributors who have made the SMARTerFHIR library possible. Their hard work and dedication are greatly appreciated.
 
 ## About
 
-The SMARTer FHIR library is developed and maintained by [Topology Health](https://topology.health). For inquiries, please contact [info@topology.health](mailto:info@topology.health)
+The SMARTerFHIR library is developed and maintained by [Topology Health](https://topology.health). For inquiries, please contact [info@topology.health](mailto:info@topology.health)
