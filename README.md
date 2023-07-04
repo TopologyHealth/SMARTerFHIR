@@ -90,7 +90,7 @@ Before contributing, please review the guidelines and code of conduct outlined i
 
 ## License
 
-The SMARTer FHIR library is released under the [TBD](https://opensource.org/licenses/MIT). You are free to use, modify, and distribute this library in accordance with the terms of the license.
+The SMARTer FHIR library is released under the [Apache 2.0 License](https://opensource.org/license/apache-2-0/). You are free to use, modify, and distribute this library in accordance with the terms of the license.
 
 ## Acknowledgments
 
