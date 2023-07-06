@@ -55,4 +55,11 @@ export default class EpicClient extends BaseClient {
     const resultAsR4 = Transformer.toR4FhirType(resultResource);
     return resultAsR4 as T;
   }
+
+
+  async requestResource(resourceID: string) {
+    const resultResource = await this.fhirClientDefault.request(resourceID)
+    return resultResource as R4.Resource
+  }
 }
+

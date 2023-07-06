@@ -95,4 +95,6 @@ export default abstract class BaseClient {
   abstract create<T extends R4ResourceWithRequiredType>(
     resource: T
   ): Promise<T>;
+
+  abstract requestResource(resourceID: string): Promise<R4.Resource>;
 }
