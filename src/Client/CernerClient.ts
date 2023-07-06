@@ -24,7 +24,7 @@ export default class CernerClient extends BaseClient {
    */
   create<T extends R4ResourceWithRequiredType>(
     resource: T
-  ): Promise<R4.Resource> {
+  ): Promise<T> {
     throw new Error("Method not implemented.");
   }
 }
