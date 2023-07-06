@@ -18,16 +18,4 @@ export default class CernerClient extends BaseClient {
     super(fhirClientDefault);
   }
 
-  /**
-   * Creates a resource.
-   * @override
-   * @param {T} resource - The resource to create.
-   * @returns {Promise<R4.Resource>} - A promise resolving to the created resource.
-   * @throws {Error} - Throws an error indicating the method is not implemented.
-   */
-  create<T extends R4ResourceWithRequiredType>(
-    resource: T
-  ): Promise<T> {
-    throw new Error("Method not implemented.");
-  }
 }

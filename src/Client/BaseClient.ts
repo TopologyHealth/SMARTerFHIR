@@ -1,18 +1,32 @@
 import * as R4 from "fhir/r4";
 import {
+  Author,
   Context,
   FhirClientResourceWithRequiredType,
   ObjectWithID,
   R4ResourceWithRequiredType,
   Subject,
 } from "../types";
-import SubClient from "../FhirClient";
+import SubClient, { FhirClientTypes } from "../FhirClient";
+import { Transformer } from "../Resource/transformer";
+import { Reference } from "fhir/r4";
 
 /**
 Represents the BaseClient abstract class.
 */
 export default abstract class BaseClient {
   readonly fhirClientDefault;
+  /**
+   * Fetch options for create operation headers.
+   * @private
+   * @readonly
+   * @type {FhirClientTypes.FetchOptions}
+   */
+  private readonly createHeaders: FhirClientTypes.FetchOptions = {
+    headers: {
+      Prefer: "return=representation",
+    },
+  };
 
   /**
    * Creates an instance of BaseClient.
@@ -31,7 +45,7 @@ export default abstract class BaseClient {
    */
   private async getIDfromObject<T extends ObjectWithID>(objectWithId: T) {
     const id = await objectWithId.id;
-    if (!id) throw new Error(`Patient id not found`);
+    if (!id) throw new Error(`id not found`);
     return id;
   }
 
@@ -71,6 +85,17 @@ export default abstract class BaseClient {
     };
   }
 
+  private async createReferenceArrayAuthor(): Promise<Author> {
+    const userID = await this.getIDfromObject(this.fhirClientDefault.user);
+    return {
+      author: [
+        {
+          reference: `Practitioner/${userID}`,
+        },
+      ],
+    };
+  }
+
   /**
    * Hydrates a resource with subject and encounter context.
    * @param {T} resource - The resource to hydrate.
@@ -83,18 +108,34 @@ export default abstract class BaseClient {
       ...resource,
       ...("subject" in resource ? {} : await this.createPatientSubject()),
       ...("encounter" in resource ? {} : await this.createEncounterContext()),
+      ...("author" in resource ? {} : await this.createReferenceArrayAuthor()),
     };
   }
 
   /**
-   * Abstract method for creating a resource.
-   * @abstract
+   * Creates a resource.
+   * @override
    * @param {T} resource - The resource to create.
    * @returns {Promise<R4.Resource>} - A promise resolving to the created resource.
+   * @throws {Error} - Throws an error if the resource type is not found or if the operation fails.
    */
-  abstract create<T extends R4ResourceWithRequiredType>(
-    resource: T
-  ): Promise<T>;
+  async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<T> {
+    const transformedResource = Transformer.toFhirClientType(resource);
+    const hydratedResource = await this.hydrateResource(transformedResource);
+    const resultResource: FhirClientResourceWithRequiredType =
+      await this.fhirClientDefault
+        .create(hydratedResource, this.createHeaders)
+        .then((resource) => {
+          if (!resource.resourceType)
+            throw new Error(`Resource ${resource}, must have a resource type.`);
+          return resource as FhirClientResourceWithRequiredType;
+        })
+        .catch((reason) => {
+          throw new Error("It failed with:" + reason);
+        });
+    const resultAsR4 = Transformer.toR4FhirType(resultResource);
+    return resultAsR4 as T;
+  }
 
   abstract requestResource(resourceID: string): Promise<R4.Resource>;
 }

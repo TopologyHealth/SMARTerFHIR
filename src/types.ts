@@ -32,7 +32,7 @@ export type FhirClientResourceWithRequiredType = PartiallyRequired<
  * Represents the ObjectWithID type, which can be either a patient or an encounter from the FHIR client.
  * @typedef {SubClient['patient'] | SubClient['encounter']} ObjectWithID
  */
-export type ObjectWithID = SubClient["patient"] | SubClient["encounter"];
+export type ObjectWithID = SubClient["patient" | "encounter" | "user"];
 
 /**
  * Represents the Subject type, which is an object with a subject reference.
@@ -51,3 +51,5 @@ export type Encounter = { encounter: R4.Reference[] };
  * @typedef {{"context": Encounter}} Context
  */
 export type Context = { context: Encounter };
+
+export type Author = {author: R4.Reference[]}
