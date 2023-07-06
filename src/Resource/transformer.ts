@@ -3,6 +3,8 @@ import {
   R4ResourceWithRequiredType,
 } from "../types";
 
+import * as R4 from "fhir/r4";
+
 /**
 Represents the Transformer namespace for resource transformation.
 @namespace Transformer
@@ -60,7 +62,7 @@ export namespace Transformer {
    */
   export function toR4FhirType<T extends FhirClientResourceWithRequiredType>(
     originalResource: T
-  ): R4ResourceWithRequiredType {
+  ): R4.Resource {
     type originalKey = keyof T;
     const originalResourceKeys = Object.keys(originalResource) as originalKey[];
     const transformedResource: R4ResourceWithRequiredType = {

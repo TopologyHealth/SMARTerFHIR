@@ -38,9 +38,7 @@ export default class EpicClient extends BaseClient {
    * @returns {Promise<R4.Resource>} - A promise resolving to the created resource.
    * @throws {Error} - Throws an error if the resource type is not found or if the operation fails.
    */
-  async create<T extends R4ResourceWithRequiredType>(
-    resource: T
-  ): Promise<R4.Resource> {
+  async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<T> {
     const transformedResource = Transformer.toFhirClientType(resource);
     const hydratedResource = await this.hydrateResource(transformedResource);
     const resultResource: FhirClientResourceWithRequiredType =
@@ -55,6 +53,6 @@ export default class EpicClient extends BaseClient {
           throw new Error("It failed with:" + reason);
         });
     const resultAsR4 = Transformer.toR4FhirType(resultResource);
-    return resultAsR4;
+    return resultAsR4 as T;
   }
 }
