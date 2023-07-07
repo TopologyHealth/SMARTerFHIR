@@ -1,5 +1,4 @@
-import { Resource } from "fhir/r4";
-import SubClient, { FhirClientTypes } from "../FhirClient";
+import SubClient from "../FhirClient";
 import { FhirClientResourceWithRequiredType } from "../types";
 import BaseClient from "./BaseClient";
 

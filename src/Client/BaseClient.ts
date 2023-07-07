@@ -22,14 +22,16 @@ export default abstract class BaseClient {
    * @readonly
    * @type {FhirClientTypes.FetchOptions}
    */
-  protected createHeaders(additionalCreateHeaders: HeadersInit): FhirClientTypes.FetchOptions {
+  protected createHeaders(
+    additionalCreateHeaders: HeadersInit
+  ): FhirClientTypes.FetchOptions {
     return {
       headers: {
         ...this.defaultCreateHeaders,
         ...additionalCreateHeaders,
       },
     };
-  };
+  }
 
   /**
    * Creates an instance of BaseClient.
@@ -138,17 +140,20 @@ export default abstract class BaseClient {
    * @returns {Promise<R4.Resource>} - A promise resolving to the created resource.
    * @throws {Error} - Throws an error if the resource type is not found or if the operation fails.
    */
-  async create<T extends R4ResourceWithRequiredType>(resource: T, additionalHeaders?: FhirClientTypes.FetchOptions): Promise<T> {
+  async create<T extends R4ResourceWithRequiredType>(
+    resource: T,
+    additionalHeaders?: FhirClientTypes.FetchOptions
+  ): Promise<T> {
     const transformedResource = Transformer.toFhirClientType(resource);
     const hydratedResource = await this.hydrateResource(transformedResource);
     const resultResource: FhirClientResourceWithRequiredType =
       await this.fhirClientDefault
         .create(hydratedResource, {
-          ...(additionalHeaders ? additionalHeaders : {})
+          ...(additionalHeaders ? additionalHeaders : {}),
         })
         .then((resource) => {
-          if (!resource.resourceType){
-            console.log(resource)
+          if (!resource.resourceType) {
+            console.log(resource);
             throw new Error(`Resource ${resource}, must have a resource type.`);
           }
           return resource as FhirClientResourceWithRequiredType;
