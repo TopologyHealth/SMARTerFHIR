@@ -1,15 +1,14 @@
 import * as R4 from "fhir/r4";
-import {
-  Author,
-  Context,
-  FhirClientResourceWithRequiredType,
-  ObjectWithID,
-  R4ResourceWithRequiredType,
-  Subject,
-} from "../types";
 import SubClient, { FhirClientTypes } from "../FhirClient";
 import { Transformer } from "../Resource/transformer";
-import { Reference } from "fhir/r4";
+import {
+  Author,
+  FhirClientResourceWithRequiredType,
+  GenericContext,
+  GenericSubject,
+  ObjectWithID,
+  R4ResourceWithRequiredType,
+} from "../types";
 
 /**
 Represents the BaseClient abstract class.
@@ -52,9 +51,9 @@ export default abstract class BaseClient {
   /**
    * Creates a patient subject.
    * @private
-   * @returns {Promise<Subject>} - A promise resolving to the patient subject.
+   * @returns {Promise<GenericSubject>} - A promise resolving to the patient subject.
    */
-  private async createPatientSubject(): Promise<Subject> {
+  private async createPatientSubject(): Promise<GenericSubject> {
     const patientID = await this.getIDfromObject(
       this.fhirClientDefault.patient
     );
@@ -65,27 +64,44 @@ export default abstract class BaseClient {
     };
   }
 
-  /**
-   * Creates an encounter context.
-   * @private
-   * @returns {Promise<Context>} - A promise resolving to the encounter context.
-   */
-  private async createEncounterContext(): Promise<Context> {
+  private async createEncounterReference() {
     const encounterID = await this.getIDfromObject(
       this.fhirClientDefault.encounter
     );
     return {
+      reference: `Encounter/${encounterID}`,
+    };
+  }
+
+  private async createEncounterReferenceArray() {
+    return [await this.createEncounterReference()];
+  }
+
+  private createPeriod(start: string): R4.Period {
+    return {
+      start: start,
+      end: start,
+    };
+  }
+
+  /**
+   * Creates an encounter context.
+   * @private
+   * @returns {Promise<GenericContext>} - A promise resolving to the encounter context.
+   */
+  private async createContext(): Promise<{ context: GenericContext }> {
+    const encounter = await this.createEncounterReferenceArray();
+    const currentDateString = new Date().toISOString();
+    const period: R4.Period = this.createPeriod(currentDateString);
+    return {
       context: {
-        encounter: [
-          {
-            reference: `Encounter/${encounterID}`,
-          },
-        ],
+        encounter: encounter,
+        period: period,
       },
     };
   }
 
-  private async createReferenceArrayAuthor(): Promise<Author> {
+  async createReferenceArrayAuthor(): Promise<Author> {
     const userID = await this.getIDfromObject(this.fhirClientDefault.user);
     return {
       author: [
@@ -107,8 +123,7 @@ export default abstract class BaseClient {
     return {
       ...resource,
       ...("subject" in resource ? {} : await this.createPatientSubject()),
-      ...("encounter" in resource ? {} : await this.createEncounterContext()),
-      ...("author" in resource ? {} : await this.createReferenceArrayAuthor()),
+      ...("encounter" in resource ? {} : await this.createContext()),
     };
   }
 
