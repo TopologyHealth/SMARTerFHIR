@@ -7,7 +7,7 @@ import BaseClient from "./BaseClient";
 Represents the CernerClient class, extending the BaseClient.
 */
 export default class CernerClient extends BaseClient {
-  readonly headers: HeadersInit = {
+  readonly cernerRequestHeaders: HeadersInit = {
     Accept: "application/fhir+json",
   };
   /**
@@ -34,7 +34,7 @@ export default class CernerClient extends BaseClient {
 
   async requestResource(resourceID: string) {
     return super.requestResource(resourceID, {
-      headers: this.headers,
+      headers: this.cernerRequestHeaders,
     });
   }
 }

@@ -15,16 +15,20 @@ Represents the BaseClient abstract class.
 */
 export default abstract class BaseClient {
   readonly fhirClientDefault;
+  readonly defaultCreateHeaders: HeadersInit = {};
   /**
    * Fetch options for create operation headers.
    * @private
    * @readonly
    * @type {FhirClientTypes.FetchOptions}
    */
-  private readonly createHeaders: FhirClientTypes.FetchOptions = {
-    headers: {
-      Prefer: "return=representation",
-    },
+  protected createHeaders(additionalCreateHeaders: HeadersInit): FhirClientTypes.FetchOptions {
+    return {
+      headers: {
+        ...this.defaultCreateHeaders,
+        ...additionalCreateHeaders,
+      },
+    };
   };
 
   /**
@@ -134,15 +138,19 @@ export default abstract class BaseClient {
    * @returns {Promise<R4.Resource>} - A promise resolving to the created resource.
    * @throws {Error} - Throws an error if the resource type is not found or if the operation fails.
    */
-  async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<T> {
+  async create<T extends R4ResourceWithRequiredType>(resource: T, additionalHeaders?: FhirClientTypes.FetchOptions): Promise<T> {
     const transformedResource = Transformer.toFhirClientType(resource);
     const hydratedResource = await this.hydrateResource(transformedResource);
     const resultResource: FhirClientResourceWithRequiredType =
       await this.fhirClientDefault
-        .create(hydratedResource, this.createHeaders)
+        .create(hydratedResource, {
+          ...(additionalHeaders ? additionalHeaders : {})
+        })
         .then((resource) => {
-          if (!resource.resourceType)
+          if (!resource.resourceType){
+            console.log(resource)
             throw new Error(`Resource ${resource}, must have a resource type.`);
+          }
           return resource as FhirClientResourceWithRequiredType;
         })
         .catch((reason) => {
@@ -155,7 +163,7 @@ export default abstract class BaseClient {
   async requestResource(resourceID: string, requestOptions?: RequestInit) {
     const resultResource = await this.fhirClientDefault.request({
       url: resourceID,
-      ...(requestOptions ? {headers: requestOptions.headers} : {})
+      ...(requestOptions ? { headers: requestOptions.headers } : {}),
     });
     return resultResource as R4.Resource;
   }
