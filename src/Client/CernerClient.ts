@@ -1,5 +1,5 @@
-import * as R4 from "fhir/r4";
-import SubClient from "../FhirClient";
+import { Resource } from "fhir/r4";
+import SubClient, { FhirClientTypes } from "../FhirClient";
 import { FhirClientResourceWithRequiredType } from "../types";
 import BaseClient from "./BaseClient";
 
@@ -7,9 +7,9 @@ import BaseClient from "./BaseClient";
 Represents the CernerClient class, extending the BaseClient.
 */
 export default class CernerClient extends BaseClient {
-  requestResource(resourceID: string): Promise<R4.Resource> {
-    throw new Error("Method not implemented.");
-  }
+  readonly headers: HeadersInit = {
+    Accept: "application/fhir+json",
+  };
   /**
    * Creates an instance of CernerClient.
    * @param {SubClient} fhirClientDefault - The default FHIR client to use.
@@ -30,5 +30,11 @@ export default class CernerClient extends BaseClient {
       ...(await super.hydrateResource(resource)),
       ...("author" in resource ? {} : await super.createReferenceArrayAuthor()),
     };
+  }
+
+  async requestResource(resourceID: string) {
+    return super.requestResource(resourceID, {
+      headers: this.headers,
+    });
   }
 }

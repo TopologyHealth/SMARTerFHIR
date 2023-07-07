@@ -152,5 +152,11 @@ export default abstract class BaseClient {
     return resultAsR4 as T;
   }
 
-  abstract requestResource(resourceID: string): Promise<R4.Resource>;
+  async requestResource(resourceID: string, requestOptions?: RequestInit) {
+    const resultResource = await this.fhirClientDefault.request({
+      url: resourceID,
+      ...(requestOptions ? {headers: requestOptions.headers} : {})
+    });
+    return resultResource as R4.Resource;
+  }
 }

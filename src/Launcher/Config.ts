@@ -12,12 +12,11 @@ interface LaunchConfig {
  */
 export const cerner: LaunchConfig = {
   scopes: [
-    "pr_allergyintolerance",
+    "pr_binary",
     "pr_careplan",
     "pr_communication",
     "pr_condition",
     "pr_consent",
-    "pr_device",
     "pr_encounter",
     "pr_goal",
     "pr_medicationrequest",
@@ -34,11 +33,11 @@ export const cerner: LaunchConfig = {
     "pw_questionnaireresponse",
     "pw_documentreference",
     "ur_allergyintolerance",
+    "ur_binary",
     "ur_careplan",
     "ur_communication",
     "ur_condition",
     "ur_consent",
-    "ur_device",
     "ur_documentreference",
     "ur_encounter",
     "ur_immunization",

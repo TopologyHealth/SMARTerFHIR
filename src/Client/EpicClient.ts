@@ -17,10 +17,5 @@ export default class EpicClient extends BaseClient {
   constructor(fhirClientDefault: SubClient) {
     super(fhirClientDefault);
   }
-
-  async requestResource(resourceID: string) {
-    const resultResource = await this.fhirClientDefault.request(resourceID)
-    return resultResource as R4.Resource
-  }
 }
 
