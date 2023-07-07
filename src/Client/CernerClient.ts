@@ -6,6 +6,9 @@ import BaseClient from "./BaseClient";
 Represents the CernerClient class, extending the BaseClient.
 */
 export default class CernerClient extends BaseClient {
+  /* The `cernerRequestHeaders` property is a constant that represents the headers to be included in the request made by the CernerClient class. In this case, it
+specifies that the client accepts the "application/fhir+json" media type. The `readonly` keyword indicates that the property cannot be modified after it is
+initialized. */
   readonly cernerRequestHeaders: HeadersInit = {
     Accept: "application/fhir+json",
   };
@@ -31,6 +34,11 @@ export default class CernerClient extends BaseClient {
     };
   }
 
+  /**
+   * The function `requestResource` is an asynchronous function that makes a request for a resource using a resource ID and Cerner request headers.
+   * @param {string} resourceID - The resourceID parameter is a string that represents the ID of the resource that you want to request.
+   * @returns The `requestResource` function is returning a promise.
+   */
   async requestResource(resourceID: string) {
     return super.requestResource(resourceID, {
       headers: this.cernerRequestHeaders,

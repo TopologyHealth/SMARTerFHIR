@@ -6,6 +6,8 @@ import BaseClient from "./BaseClient";
 Represents the EpicClient class, extending the BaseClient.
 */
 export default class EpicClient extends BaseClient {
+/* The `epicCreateHeaders` property is defining the headers that will be used when making a create request to the Epic FHIR server. In this case, it sets the
+`Prefer` header to `"return=representation"`, which indicates that the server should return the created resource in the response. */
   readonly epicCreateHeaders: HeadersInit = {
     Prefer: "return=representation",
   };

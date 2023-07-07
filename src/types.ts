@@ -34,18 +34,21 @@ export type FhirClientResourceWithRequiredType = PartiallyRequired<
 export type ObjectWithID = SubClient["patient" | "encounter" | "user"];
 
 /**
- * Represents the Subject type, which is an object with a subject reference.
+ * The above type defines a generic subject with a reference to a resource.
+ * @property subject - The `subject` property is of type `R4.Reference`.
  */
 export type GenericSubject = { subject: R4.Reference };
 
 /**
- * Represents the Encounter type, which is an object with an array of encounter references.
+ * The GenericEncounter type is an object that contains an array of R4.Reference objects named "encounter".
+ * @property {R4.Reference[]} encounter - The `encounter` property is an array of `R4.Reference` objects.
  */
 export type GenericEncounter = { encounter: R4.Reference[] };
 
-/**
- * Represents the Context type, which is an object with a context containing encounter references.
- */
 export type GenericContext = R4.DocumentReference["context"];
 
+/**
+ * The above type defines an object with a property called "author" which is an array of R4.Reference objects.
+ * @property {R4.Reference[]} author - An array of references to authors. Each reference is of type R4.Reference.
+ */
 export type Author = { author: R4.Reference[] };
