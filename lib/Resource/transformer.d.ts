@@ -1,4 +1,5 @@
 import { FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
+import * as R4 from "fhir/r4";
 /**
 Represents the Transformer namespace for resource transformation.
 @namespace Transformer
@@ -17,5 +18,5 @@ export declare namespace Transformer {
      * @returns {R4ResourceWithRequiredType} - The converted resource in the R4 FHIR type.
      * @template T - The original resource type.
      */
-    function toR4FhirType<T extends FhirClientResourceWithRequiredType>(originalResource: T): R4ResourceWithRequiredType;
+    function toR4FhirType<T extends FhirClientResourceWithRequiredType>(originalResource: T): R4.Resource;
 }
