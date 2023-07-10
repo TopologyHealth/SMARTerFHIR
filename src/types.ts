@@ -30,24 +30,25 @@ export type FhirClientResourceWithRequiredType = PartiallyRequired<
 
 /**
  * Represents the ObjectWithID type, which can be either a patient or an encounter from the FHIR client.
- * @typedef {SubClient['patient'] | SubClient['encounter']} ObjectWithID
  */
-export type ObjectWithID = SubClient["patient"] | SubClient["encounter"];
+export type ObjectWithID = SubClient["patient" | "encounter" | "user"];
 
 /**
- * Represents the Subject type, which is an object with a subject reference.
- * @typedef {{"subject": R4.Reference}} Subject
+ * The above type defines a generic subject with a reference to a resource.
+ * @property subject - The `subject` property is of type `R4.Reference`.
  */
-export type Subject = { subject: R4.Reference };
+export type GenericSubject = { subject: R4.Reference };
 
 /**
- * Represents the Encounter type, which is an object with an array of encounter references.
- * @typedef {{"encounter": R4.Reference[]}} Encounter
+ * The GenericEncounter type is an object that contains an array of R4.Reference objects named "encounter".
+ * @property {R4.Reference[]} encounter - The `encounter` property is an array of `R4.Reference` objects.
  */
-export type Encounter = { encounter: R4.Reference[] };
+export type GenericEncounter = { encounter: R4.Reference[] };
+
+export type GenericContext = R4.DocumentReference["context"];
 
 /**
- * Represents the Context type, which is an object with a context containing encounter references.
- * @typedef {{"context": Encounter}} Context
+ * The above type defines an object with a property called "author" which is an array of R4.Reference objects.
+ * @property {R4.Reference[]} author - An array of references to authors. Each reference is of type R4.Reference.
  */
-export type Context = { context: Encounter };
+export type Author = { author: R4.Reference[] };

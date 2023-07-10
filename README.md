@@ -35,24 +35,23 @@ Here's a basic example demonstrating how to use the SMARTerFHIR library:
 The following is an example of a function to handle the SMART Launch. I.e., when the EMR launches the application, it must be directed to the page that runs the following. E.g., this could be https://www.yourwebsite.com/launch
 
 ```typescript
-async function mySmartLaunch() => {
-  try {
-      const queryString = window.location.search;
-      const originString = window.location.origin;
-      const urlParams = new URLSearchParams(queryString);
-      const iss = urlParams.get('iss');
-      let client: Client
-      let smartLaunchHandler: SmartLaunchHandler
-      if (iss !== null) {
-          if (iss.includes('cerner')) {
-              smartLaunchHandler = new SmartLaunchHandler(cernerClientID, EMR.CERNER)
-              smartLaunchHandler.authorizeEMR()
-          } else if (iss.includes('epic')) {
-              smartLaunchHandler = new SmartLaunchHandler(epicClientID, EMR.EPIC)
-              smartLaunchHandler.authorizeEMR()
-          }
-      }
-  }
+async function handleSmartLaunch() {
+    try {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const iss = urlParams.get('iss');
+        if (iss?.includes('cerner')) {
+            const smartLaunchHandler = new SmartLaunchHandler(cernerClientID, EMR.CERNER);
+            smartLaunchHandler.authorizeEMR();
+        } else if (iss?.includes('epic')) {
+            const smartLaunchHandler = new SmartLaunchHandler(epicClientID, EMR.EPIC);
+            smartLaunchHandler.authorizeEMR();
+        }
+    } catch (e) {
+        if (e instanceof Error) {
+            throw e;
+        }
+    }
 }
 ```
 
@@ -61,18 +60,16 @@ async function mySmartLaunch() => {
 The following is an example of a function to instantiate the SMART Client after SmartLaunch has completed. During SmartLaunch, the EMR will authenticate your application. Once completed, it will redirect to the assigned redirect url. The code below should run upon successful authentication and redirect:
 
 ```typescript
-async function mySmartClientInstantiator() => {
-  try {
+async function mySmartClientInstantiator() {
     const clientFactory = new ClientFactory();
     const baseClient = await clientFactory.createEMRClient()
         .then(async (client) => {
             if (!client) throw new Error('no client found')
             return client
-        })
-        .catch((reason) => {
+        }).catch((reason) => {
             throw new Error(`client not found: ${reason}`)
         })
-    }
+    return baseClient
 }
 ```
 
