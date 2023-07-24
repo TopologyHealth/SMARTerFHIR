@@ -20,20 +20,11 @@ export default class SmartLaunchHandler {
   readonly clientID: string;
 
   /**
-   * The EMR (Electronic Medical Record) type associated with the SmartLaunchHandler.
-   * @readonly
-   * @enum {string}
-   */
-  readonly emrType: EMR;
-
-  /**
    * Creates an instance of SmartLaunchHandler.
    * @param {string} clientID - The client ID to use for authorization.
-   * @param {EMR} emrType - The EMR type associated with the handler.
    */
-  constructor(clientID: string, emrType: EMR) {
+  constructor(clientID: string) {
     this.clientID = clientID;
-    this.emrType = emrType;
   }
 
   /**
@@ -92,10 +83,11 @@ export default class SmartLaunchHandler {
     const queryString = window.location.search;
     const originString = window.location.origin;
     const urlParams = new URLSearchParams(queryString);
-    const iss = urlParams.get("iss");
+    const iss = urlParams.get("iss") ?? "";
+    const emrType = this.getEMRType(iss)
 
-    if (iss !== null && iss.includes(this.emrType))
-      switch (this.emrType) {
+    if (iss !== null && iss.includes(emrType))
+      switch (emrType) {
         case EMR.EPIC:
           await this.epicLaunch(this.clientID, originString, iss);
           break;
@@ -106,5 +98,11 @@ export default class SmartLaunchHandler {
         default:
           break;
       }
+  }
+
+  getEMRType(iss: string): EMR {
+    const isEMROfType = (emrType: EMR) => iss.includes(emrType);
+    const emrTypes = Object.values(EMR);
+    return emrTypes.find(isEMROfType) ?? EMR.NONE;
   }
 }
