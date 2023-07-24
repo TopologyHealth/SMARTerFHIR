@@ -14,17 +14,10 @@ export default class SmartLaunchHandler {
      */
     readonly clientID: string;
     /**
-     * The EMR (Electronic Medical Record) type associated with the SmartLaunchHandler.
-     * @readonly
-     * @enum {string}
-     */
-    readonly emrType: EMR;
-    /**
      * Creates an instance of SmartLaunchHandler.
      * @param {string} clientID - The client ID to use for authorization.
-     * @param {EMR} emrType - The EMR type associated with the handler.
      */
-    constructor(clientID: string, emrType: EMR);
+    constructor(clientID: string);
     /**
      * Launches the Epic EMR application.
      * @param {string} clientId - The client ID to use for authorization.
@@ -46,4 +39,5 @@ export default class SmartLaunchHandler {
      * @returns {Promise<void>} - A promise resolving to void.
      */
     authorizeEMR(): Promise<void>;
+    getEMRType(iss: string): EMR;
 }
