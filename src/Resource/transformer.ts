@@ -1,4 +1,5 @@
 import {
+  ExtendedResource,
   FhirClientResourceWithRequiredType,
   R4ResourceWithRequiredType,
 } from "../types";
@@ -56,16 +57,16 @@ export namespace Transformer {
 
   /**
    * Converts a resource to the R4 FHIR type.
-   * @param {T} originalResource - The original resource to convert.
+   * @param {FROM_TYPE} originalResource - The original resource to convert.
    * @returns {R4ResourceWithRequiredType} - The converted resource in the R4 FHIR type.
-   * @template T - The original resource type.
+   * @template FROM_TYPE - The original resource type.
    */
-  export function toR4FhirType<T extends FhirClientResourceWithRequiredType>(
-    originalResource: T
-  ): R4.Resource {
-    type originalKey = keyof T;
+  export function toR4FhirType<FROM_TYPE extends FhirClientResourceWithRequiredType, TO_TYPE extends R4ResourceWithRequiredType>(
+    originalResource: FROM_TYPE
+  ): TO_TYPE {
+    type originalKey = keyof FROM_TYPE;
     const originalResourceKeys = Object.keys(originalResource) as originalKey[];
-    const transformedResource: R4ResourceWithRequiredType = {
+    const transformedResource: any = {
       ...originalResourceKeys.reduce(
         (a, v) => ({
           ...a,
@@ -75,6 +76,6 @@ export namespace Transformer {
       ),
       resourceType: originalResource["resourceType"],
     };
-    return transformedResource;
+    return transformedResource as TO_TYPE;
   }
 }

@@ -52,3 +52,15 @@ export type GenericContext = R4.DocumentReference["context"];
  * @property {R4.Reference[]} author - An array of references to authors. Each reference is of type R4.Reference.
  */
 export type Author = { author: R4.Reference[] };
+
+export type UserReadResult = SubClient["user"]["read"] extends (
+  requestOptions?: infer O
+) => Promise<infer R>
+  ? O extends { includeResponse: true }
+    ? R extends Promise<infer T>
+      ? T
+      : never
+    : R
+  : never;
+
+  export type ExtendedResource<T> = T extends R4.Resource ? T : never;
