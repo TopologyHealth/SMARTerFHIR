@@ -10,10 +10,6 @@ import {
   R4ResourceWithRequiredType,
   UserReadResult,
 } from "../types";
-import { fhirclient } from "fhirclient/lib/types";
-import * as FHIR from "fhirclient";
-
-
 
 // type RequestFunction<T, U extends (...args: any[]) => any> = T extends U<infer V> ? V  : never;
 // type EMRUserExtract<R> = R extends RequestFunction<infer T> ? T : never;
@@ -191,8 +187,9 @@ export default abstract class BaseClient {
         .catch((reason) => {
           throw new Error("It failed with:" + reason);
         });
-    const resultAsR4 =
-      Transformer.toR4FhirType<typeof resultResource, T>(resultResource);
+    const resultAsR4 = Transformer.toR4FhirType<typeof resultResource, T>(
+      resultResource
+    );
     return resultAsR4 as T;
   }
 
@@ -214,20 +211,30 @@ export default abstract class BaseClient {
 
   // type SayHiReturnType = ReturnType<typeof (SubClient.user)>
 
-  async getUserRead(): Promise<UserReadResult> {
+  private async getUserRead(): Promise<UserReadResult> {
     const user = await this.fhirClientDefault.user.read();
-    return user
+    return user;
   }
 
   async getPractitionerRead(): Promise<R4.Practitioner> {
-    function isPractitioner(user: UserReadResult): user is FhirClientTypes.FHIR.Practitioner {
-      return user.resourceType == 'Practitioner'
+    function isPractitioner(
+      user: UserReadResult
+    ): user is FhirClientTypes.FHIR.Practitioner {
+      return user.resourceType == "Practitioner";
     }
-    const user = await this.getUserRead()
+    const user = await this.getUserRead();
     if (isPractitioner(user)) {
-       const userInR4 = Transformer.toR4FhirType<typeof user, R4.Practitioner>(user)
-      return userInR4
+      const userInR4 = Transformer.toR4FhirType<typeof user, R4.Practitioner>(
+        user
+      );
+      return userInR4;
     }
-    throw new Error('User is Not a Practitioner')
+    throw new Error("User is Not a Practitioner");
+  }
+
+  async getPatientRead(): Promise<R4.Patient> {
+    const patient = await this.fhirClientDefault.patient.read()
+    const patientInR4 = Transformer.toR4FhirType<typeof patient, R4.Patient>(patient);
+    return patientInR4
   }
 }

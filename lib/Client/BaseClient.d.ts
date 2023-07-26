@@ -1,6 +1,6 @@
 import * as R4 from "fhir/r4";
 import SubClient, { FhirClientTypes } from "../FhirClient";
-import { Author, FhirClientResourceWithRequiredType, R4ResourceWithRequiredType, UserReadResult } from "../types";
+import { Author, FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
 /**
 Represents the BaseClient abstract class.
 */
@@ -88,6 +88,7 @@ export default abstract class BaseClient {
      * @returns a resource of type R4.Resource.
      */
     requestResource(resourceID: string, requestOptions?: RequestInit): Promise<R4.Resource>;
-    getUserRead(): Promise<UserReadResult>;
+    private getUserRead;
     getPractitionerRead(): Promise<R4.Practitioner>;
+    getPatientRead(): Promise<R4.Patient>;
 }
