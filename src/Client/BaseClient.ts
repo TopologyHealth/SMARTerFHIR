@@ -233,8 +233,16 @@ export default abstract class BaseClient {
   }
 
   async getPatientRead(): Promise<R4.Patient> {
-    const patient = await this.fhirClientDefault.patient.read()
-    const patientInR4 = Transformer.toR4FhirType<typeof patient, R4.Patient>(patient);
-    return patientInR4
+    const patient = await this.fhirClientDefault.patient.read();
+    const patientInR4 = Transformer.toR4FhirType<typeof patient, R4.Patient>(
+      patient
+    );
+    return patientInR4;
+  }
+
+  async getEncounterRead(): Promise<R4.Encounter> {
+    const encounter = await this.fhirClientDefault.encounter.read()
+    const encounterInR4 = Transformer.toR4FhirType<typeof encounter, R4.Encounter>(encounter)
+    return encounterInR4;
   }
 }

@@ -91,4 +91,5 @@ export default abstract class BaseClient {
     private getUserRead;
     getPractitionerRead(): Promise<R4.Practitioner>;
     getPatientRead(): Promise<R4.Patient>;
+    getEncounterRead(): Promise<R4.Encounter>;
 }
