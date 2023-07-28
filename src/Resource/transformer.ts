@@ -1,10 +1,7 @@
 import {
-  ExtendedResource,
   FhirClientResourceWithRequiredType,
-  R4ResourceWithRequiredType,
+  R4ResourceWithRequiredType
 } from "../types";
-
-import * as R4 from "fhir/r4";
 
 /**
 Represents the Transformer namespace for resource transformation.
@@ -55,12 +52,11 @@ export namespace Transformer {
     });
   }
 
-  /**
-   * Converts a resource to the R4 FHIR type.
-   * @param {FROM_TYPE} originalResource - The original resource to convert.
-   * @returns {R4ResourceWithRequiredType} - The converted resource in the R4 FHIR type.
-   * @template FROM_TYPE - The original resource type.
-   */
+/**
+ * The function `toR4FhirType` converts a resource object from one type to another in a FHIR R4 format.
+ * @param {FROM_TYPE} originalResource - The originalResource parameter is of type FROM_TYPE, which is a FhirClientResourceWithRequiredType.
+ * @returns a transformed resource of type TO_TYPE.
+ */
   export function toR4FhirType<FROM_TYPE extends FhirClientResourceWithRequiredType, TO_TYPE extends R4ResourceWithRequiredType>(
     originalResource: FROM_TYPE
   ): TO_TYPE {

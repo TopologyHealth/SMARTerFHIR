@@ -37,17 +37,11 @@ The following is an example of a function to handle the SMART Launch. I.e., when
 ```typescript
 async function handleSmartLaunch() {
     try {
-        const queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        const iss = urlParams.get('iss');
-        if (iss?.includes('cerner')) {
-            const smartLaunchHandler = new SmartLaunchHandler(cernerClientID, EMR.CERNER);
-            smartLaunchHandler.authorizeEMR();
-        } else if (iss?.includes('epic')) {
-            const smartLaunchHandler = new SmartLaunchHandler(epicClientID, EMR.EPIC);
-            smartLaunchHandler.authorizeEMR();
-        }
-    } catch (e) {
+        const emrClientID = MY_EMR_CLIENT_ID
+        const smartLaunchHandler = new SmartLaunchHandler(emrClientID)
+        smartLaunchHandler.authorizeEMR()
+    }
+    catch (e) {
         if (e instanceof Error) {
             throw e;
         }

@@ -85,8 +85,8 @@ export default class SmartLaunchHandler {
     const urlParams = new URLSearchParams(queryString);
     const iss = urlParams.get("iss") ?? "";
     const emrType = this.getEMRType(iss)
-
-    if (iss !== null && iss.includes(emrType))
+    const isValidIss = iss !== null && iss.includes(emrType);
+    if (isValidIss)
       switch (emrType) {
         case EMR.EPIC:
           await this.epicLaunch(this.clientID, originString, iss);
@@ -100,6 +100,12 @@ export default class SmartLaunchHandler {
       }
   }
 
+/**
+ * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
+ * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
+ * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
+ * returns `EMR.NONE`.
+ */
   getEMRType(iss: string): EMR {
     const isEMROfType = (emrType: EMR) => iss.includes(emrType);
     const emrTypes = Object.values(EMR);
