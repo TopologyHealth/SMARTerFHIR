@@ -88,8 +88,24 @@ export default abstract class BaseClient {
      * @returns a resource of type R4.Resource.
      */
     requestResource(resourceID: string, requestOptions?: RequestInit): Promise<R4.Resource>;
+    /**
+     * The function `getUserRead` is a private asynchronous function that retrieves user data using the `read` method of the `fhirClientDefault` object and returns a
+     * `UserReadResult` promise.
+     * @returns a Promise that resolves to a UserReadResult object.
+     */
     private getUserRead;
+    /**
+     * The function `getPractitionerRead` retrieves a user and checks if they are a practitioner, then converts the user to an R4 Practitioner if they are, otherwise
+     * it throws an error.
+     * @param {UserReadResult} user - The `user` parameter is of type `UserReadResult`, which is a result object returned from the `getUserRead()` function. It
+     * represents a user resource in the FHIR format.
+     * @returns a Promise that resolves to a FHIR R4 Practitioner resource.
+     */
     getPractitionerRead(): Promise<R4.Practitioner>;
+    /**
+     * The function `getPatientRead` retrieves a patient record from a FHIR server and transforms it into an R4.Patient object.
+     * @returns a Promise that resolves to an instance of the R4.Patient type.
+     */
     getPatientRead(): Promise<R4.Patient>;
     getEncounterRead(): Promise<R4.Encounter>;
 }
