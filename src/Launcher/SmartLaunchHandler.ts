@@ -20,20 +20,11 @@ export default class SmartLaunchHandler {
   readonly clientID: string;
 
   /**
-   * The EMR (Electronic Medical Record) type associated with the SmartLaunchHandler.
-   * @readonly
-   * @enum {string}
-   */
-  readonly emrType: EMR;
-
-  /**
    * Creates an instance of SmartLaunchHandler.
    * @param {string} clientID - The client ID to use for authorization.
-   * @param {EMR} emrType - The EMR type associated with the handler.
    */
-  constructor(clientID: string, emrType: EMR) {
+  constructor(clientID: string) {
     this.clientID = clientID;
-    this.emrType = emrType;
   }
 
   /**
@@ -92,10 +83,11 @@ export default class SmartLaunchHandler {
     const queryString = window.location.search;
     const originString = window.location.origin;
     const urlParams = new URLSearchParams(queryString);
-    const iss = urlParams.get("iss");
-
-    if (iss !== null && iss.includes(this.emrType))
-      switch (this.emrType) {
+    const iss = urlParams.get("iss") ?? "";
+    const emrType = this.getEMRType(iss)
+    const isValidIss = iss !== null && iss.includes(emrType);
+    if (isValidIss)
+      switch (emrType) {
         case EMR.EPIC:
           await this.epicLaunch(this.clientID, originString, iss);
           break;
@@ -106,5 +98,17 @@ export default class SmartLaunchHandler {
         default:
           break;
       }
+  }
+
+/**
+ * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
+ * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
+ * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
+ * returns `EMR.NONE`.
+ */
+  getEMRType(iss: string): EMR {
+    const isEMROfType = (emrType: EMR) => iss.includes(emrType);
+    const emrTypes = Object.values(EMR);
+    return emrTypes.find(isEMROfType) ?? EMR.NONE;
   }
 }

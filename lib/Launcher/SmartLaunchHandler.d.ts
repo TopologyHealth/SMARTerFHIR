@@ -14,17 +14,10 @@ export default class SmartLaunchHandler {
      */
     readonly clientID: string;
     /**
-     * The EMR (Electronic Medical Record) type associated with the SmartLaunchHandler.
-     * @readonly
-     * @enum {string}
-     */
-    readonly emrType: EMR;
-    /**
      * Creates an instance of SmartLaunchHandler.
      * @param {string} clientID - The client ID to use for authorization.
-     * @param {EMR} emrType - The EMR type associated with the handler.
      */
-    constructor(clientID: string, emrType: EMR);
+    constructor(clientID: string);
     /**
      * Launches the Epic EMR application.
      * @param {string} clientId - The client ID to use for authorization.
@@ -46,4 +39,11 @@ export default class SmartLaunchHandler {
      * @returns {Promise<void>} - A promise resolving to void.
      */
     authorizeEMR(): Promise<void>;
+    /**
+     * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
+     * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
+     * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
+     * returns `EMR.NONE`.
+     */
+    getEMRType(iss: string): EMR;
 }

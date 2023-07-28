@@ -8,8 +8,8 @@ import {
   GenericSubject,
   ObjectWithID,
   R4ResourceWithRequiredType,
+  UserReadResult,
 } from "../types";
-
 /**
 Represents the BaseClient abstract class.
 */
@@ -182,7 +182,9 @@ export default abstract class BaseClient {
         .catch((reason) => {
           throw new Error("It failed with:" + reason);
         });
-    const resultAsR4 = Transformer.toR4FhirType(resultResource);
+    const resultAsR4 = Transformer.toR4FhirType<typeof resultResource, T>(
+      resultResource
+    );
     return resultAsR4 as T;
   }
 
@@ -200,5 +202,60 @@ export default abstract class BaseClient {
       ...(requestOptions ? { headers: requestOptions.headers } : {}),
     });
     return resultResource as R4.Resource;
+  }
+
+/**
+ * The function `getUserRead` is a private asynchronous function that retrieves user data using the `read` method of the `fhirClientDefault` object and returns a
+ * `UserReadResult` promise.
+ * @returns a Promise that resolves to a UserReadResult object.
+ */
+  private async getUserRead(): Promise<UserReadResult> {
+    const user = await this.fhirClientDefault.user.read();
+    return user;
+  }
+
+/**
+ * The function `getPractitionerRead` retrieves a user and checks if they are a practitioner, then converts the user to an R4 Practitioner if they are, otherwise
+ * it throws an error.
+ * @param {UserReadResult} user - The `user` parameter is of type `UserReadResult`, which is a result object returned from the `getUserRead()` function. It
+ * represents a user resource in the FHIR format.
+ * @returns a Promise that resolves to a FHIR R4 Practitioner resource.
+ */
+  async getPractitionerRead(): Promise<R4.Practitioner> {
+    function isPractitioner(
+      user: UserReadResult
+    ): user is FhirClientTypes.FHIR.Practitioner {
+      return user.resourceType == "Practitioner";
+    }
+    const user = await this.getUserRead();
+    if (isPractitioner(user)) {
+      const userInR4 = Transformer.toR4FhirType<typeof user, R4.Practitioner>(
+        user
+      );
+      return userInR4;
+    }
+    throw new Error("User is Not a Practitioner");
+  }
+
+/**
+ * The function `getPatientRead` retrieves a patient record from a FHIR server and transforms it into an R4.Patient object.
+ * @returns a Promise that resolves to an instance of the R4.Patient type.
+ */
+  async getPatientRead(): Promise<R4.Patient> {
+    const patient = await this.fhirClientDefault.patient.read();
+    const patientInR4 = Transformer.toR4FhirType<typeof patient, R4.Patient>(
+      patient
+    );
+    return patientInR4;
+  }
+
+/* The `getEncounterRead` function is an asynchronous function that retrieves an encounter record from a FHIR server and transforms it into an R4.Encounter object. */
+  async getEncounterRead(): Promise<R4.Encounter> {
+    const encounter = await this.fhirClientDefault.encounter.read();
+    const encounterInR4 = Transformer.toR4FhirType<
+      typeof encounter,
+      R4.Encounter
+    >(encounter);
+    return encounterInR4;
   }
 }

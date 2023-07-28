@@ -43,3 +43,17 @@ export type GenericContext = R4.DocumentReference["context"];
 export type Author = {
     author: R4.Reference[];
 };
+/**
+ * Represents the result of a user read operation for a SubClient.
+ * This type is a conditional type that extracts the response type from the function return type.
+ * If the function returns a Promise, it resolves to the inferred type 'T'.
+ * If the 'includeResponse' property is present in the request options, it returns the inferred type 'T'.
+ * Otherwise, it returns the inferred type 'R'.
+ *
+ * @template O - Type of the request options.
+ * @template R - Type of the original Promise return type.
+ * @template T - Inferred type from the Promise.
+ */
+export type UserReadResult = SubClient["user"]["read"] extends (requestOptions?: infer O) => Promise<infer R> ? O extends {
+    includeResponse: true;
+} ? R extends Promise<infer T> ? T : never : R : never;
