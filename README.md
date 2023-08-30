@@ -57,7 +57,7 @@ The following is an example of a function to instantiate the SMART Client after 
 async function mySmartClientInstantiator() {
     const clientFactory = new ClientFactory();
     const baseClient = await clientFactory.createEMRClient()
-        .then(async (client) => {
+        .then((client) => {
             if (!client) throw new Error('no client found')
             return client
         }).catch((reason) => {
@@ -68,6 +68,26 @@ async function mySmartClientInstantiator() {
 ```
 
 Make sure to import the necessary classes, interfaces, and types based on your requirements.
+
+### Standalone Launch
+
+For a [Standalone Launch](https://build.fhir.org/ig/HL7/smart-app-launch/app-launch.html#launch-app-standalone-launch), the user begins by authenticating through their EMR and is redirected to your application on success. 
+
+The following example function instantiates a SMART Client within your application after the redirect from a standalone launch:
+
+```typescript
+async function myStandaloneSmartClientInstantiator() {
+    const clientFactory = new ClientFactory();
+    const baseClient = await clientFactory.createStandaloneEMRClient()
+        .then((client) => {
+            if (!client) throw new Error('no client found')
+            return client
+        }).catch((reason) => {
+            throw new Error(`client not found: ${reason}`)
+        })
+    return baseClient;
+}
+```
 
 ## Documentation
 

@@ -16,7 +16,8 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "fhirclient": "^2.5.2"
+    "fhirclient": "^2.5.2",
+    "jwt-decode": "^3.1.2"
   },
   "devDependencies": {
     "@types/fhir": "^0.0.37",

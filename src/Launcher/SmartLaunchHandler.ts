@@ -100,12 +100,12 @@ export default class SmartLaunchHandler {
       }
   }
 
-/**
- * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
- * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
- * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
- * returns `EMR.NONE`.
- */
+  /**
+   * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
+   * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
+   * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
+   * returns `EMR.NONE`.
+   */
   getEMRType(iss: string): EMR {
     const isEMROfType = (emrType: EMR) => iss.includes(emrType);
     const emrTypes = Object.values(EMR);

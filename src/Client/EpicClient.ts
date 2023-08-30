@@ -2,6 +2,9 @@ import SubClient from "../FhirClient";
 import { R4ResourceWithRequiredType } from "../types";
 import BaseClient from "./BaseClient";
 
+export const EPIC_TOKEN_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token";
+export const EPIC_R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/";
+
 /**
 Represents the EpicClient class, extending the BaseClient.
 */
