@@ -1,4 +1,3 @@
-import { EMR } from "../Launcher/SmartLaunchHandler";
 import BaseClient from "./BaseClient";
 /**
 Represents the ClientFactory class for creating EMR clients.
@@ -22,10 +21,10 @@ export default class ClientFactory {
      */
     createStandaloneEMRClient(): Promise<BaseClient>;
     /**
-     * The function `getEMRType` takes a decoded JWT object and returns the corresponding known EMR type.
+     * Retrieves the EMR type from a decoded JWT object.
      * @param {string} decoded_jwt - A decoded JWT token that should contain the issuer of an Electronic Medical Record (EMR).
      * @returns the EMR type that matches the input JWT `decoded_jwt`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
      * returns `EMR.NONE`.
      */
-    getStandaloneEMRType(decoded_jwt: unknown): EMR;
+    private getStandaloneEMRType;
 }
