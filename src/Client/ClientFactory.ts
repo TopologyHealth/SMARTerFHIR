@@ -11,12 +11,12 @@ import EpicClient from "./EpicClient"
 Represents the ClientFactory class for creating EMR clients.
 */
 export default class ClientFactory {
+
 	/**
-   * Retrieves the EMR type based on the FHIR client.
-   * @private
-   * @param {SubClient} clientOrToken - The FHIR client.
-   * @returns {EMR} - The EMR type.
-   */
+ * The function `getEMRType` determines the type of Electronic Medical Record (EMR) based on the provided client or token.
+ * @param {SubClient | JWT} clientOrToken - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
+ * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
+ */
 	private getEMRType(clientOrToken: SubClient | JWT): EMR {
 		if (clientOrToken instanceof SubClient) {
 			if (clientOrToken.state.serverUrl.includes("cerner")) {
@@ -37,10 +37,13 @@ export default class ClientFactory {
 		}
 	}
 
+
 	/**
-   * Creates an EMR client based on the EMR type.
-   * @returns {Promise<BaseClient>} - A promise resolving to the created EMR client.
-   */
+	 * The function `createEMRClient` creates an EMR client based on the specified launch type.
+	 * @param {LAUNCH} launchType - The `launchType` parameter is an optional parameter of type `LAUNCH` that specifies the type of EMR launch. It has a default value
+	 * of `LAUNCH.EMR`.
+	 * @returns a Promise that resolves to an instance of the `BaseClient` class.
+	 */
 	async createEMRClient(launchType: LAUNCH = LAUNCH.EMR): Promise<BaseClient> {
 		const defaultFhirClient = await this.createDefaultFhirClient(launchType)
 		const emrType = this.getEMRType(defaultFhirClient)
@@ -56,6 +59,12 @@ export default class ClientFactory {
 		}
 	}
 
+	/**
+	 * The function creates a default FHIR client based on the launch type.
+	 * @param {LAUNCH} launchType - The `launchType` parameter is an enum type called `LAUNCH`. It represents the type of launch for the FHIR client. There are two
+	 * possible values for `LAUNCH`:
+	 * @returns a Promise that resolves to a SubClient object.
+	 */
 	private async createDefaultFhirClient(launchType: LAUNCH): Promise<SubClient> {
 		switch (launchType) {
 		case LAUNCH.EMR:
@@ -67,6 +76,12 @@ export default class ClientFactory {
 		}
 	}
 
+	/**
+	 * The function `getEmrEndpoints` returns the endpoints based on the EMR type obtained from the JWT.
+	 * @param {JWT} jwt - The "jwt" parameter is a JSON Web Token (JWT) that is used for authentication and authorization purposes. It contains information about the
+	 * user and their permissions.
+	 * @returns an object of type EMR_ENDPOINTS.
+	 */
 	private getEmrEndpoints(jwt: JWT): EMR_ENDPOINTS {
 		const emrType = this.getEMRType(jwt)
 		switch (emrType) {
@@ -81,6 +96,7 @@ export default class ClientFactory {
 		}
 	}
 	
+	/* The `buildStandaloneFhirClient` function is responsible for creating a standalone FHIR client. */
 	private async buildStandaloneFhirClient() {
 		const code = getCodeFromBrowserUrl()
 		const decodedJwt = codeToJwt(code)
@@ -96,6 +112,17 @@ export default class ClientFactory {
 	}
 }
 
+/**
+ * The function `getAccessToken` is an async function that makes a POST request to a token endpoint with the provided code and client ID, and returns the access
+ * token from the response.
+ * @param {URL} tokenEndpoint - The `tokenEndpoint` parameter is the URL of the token endpoint where you need to send the authorization code to obtain an access
+ * token. This endpoint is typically provided by the OAuth server or authorization server.
+ * @param {string} code - The `code` parameter is the authorization code that you received from the authorization server after the user has granted permission to
+ * your application. This code is used to exchange for an access token.
+ * @param {string} clientId - The `clientId` parameter is the identifier for the client application that is requesting the access token. It is typically provided
+ * by the authorization server when registering the client application.
+ * @returns a Promise that resolves to a TokenResponse object.
+ */
 async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string) {
 	return await fetch(tokenEndpoint, {
 		mode: "cors",
@@ -118,10 +145,19 @@ async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string
 		})
 }
 
+/**
+ * The codeToJwt function decodes a JWT token using the jwt_decode library.
+ * @param {string} code - The `code` parameter is a string that represents a JSON Web Token (JWT).
+ * @returns the decoded JSON Web Token (JWT) object.
+ */
 function codeToJwt(code: string) {
 	return jwt_decode<JWT>(code)
 }
 
+/**
+ * The function retrieves a JWT token from the browser URL parameters.
+ * @returns a string value.
+ */
 function getCodeFromBrowserUrl(): string {
 	const urlParams = new URLSearchParams(window.location.search)
 	const code = urlParams.get("code")

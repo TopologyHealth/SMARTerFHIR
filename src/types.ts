@@ -80,6 +80,11 @@ export enum LAUNCH {
   BACKEND
 }
 
+/**
+ * The type represents a JSON Web Token (JWT) with properties for client_id and an optional epic.eci property.
+ * @property {string} client_id - A string representing the client ID.
+ * @property {string}  - - `client_id`: A string representing the client ID associated with the JWT.
+ */
 export type JWT = {
   client_id: string
   "epic.eci"?: string

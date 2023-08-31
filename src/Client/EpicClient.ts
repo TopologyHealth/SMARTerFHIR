@@ -9,6 +9,8 @@ const EPIC_R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR
 Represents the EpicClient class, extending the BaseClient.
 */
 export default class EpicClient extends BaseClient {
+	/* The `defaultEndpoints` property is defining the default endpoints for the Epic FHIR server. It is of type `EMR_ENDPOINTS`, which is an interface that defines
+	the structure of the endpoints. */
 	public readonly defaultEndpoints: EMR_ENDPOINTS = {
 		token: new URL(EPIC_TOKEN_ENDPOINT),
 		r4: new URL(EPIC_R4_ENDPOINT)

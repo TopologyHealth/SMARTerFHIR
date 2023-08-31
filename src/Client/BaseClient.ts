@@ -11,21 +11,31 @@ import {
 	UserReadResult,
 } from "../types"
 import { error } from "console"
+
 /**
-Represents the BaseClient abstract class.
-*/
+ * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
+ * @property {URL} token - A URL that represents the endpoint for accessing the token service in an EMR (Electronic Medical Record) system.
+ * @property {URL} r4 - The "r4" property in the EMR_ENDPOINTS type represents a URL that is used to access the R4 version of an EMR (Electronic Medical Record)
+ * endpoint.
+ */
 export type EMR_ENDPOINTS = {
 	token: URL,
 	r4: URL
 }
+/**
+Represents the BaseClient abstract class.
+*/
 export default abstract class BaseClient {
 	readonly fhirClientDefault
-	/* The line `readonly defaultCreateHeaders: HeadersInit = {};` is declaring a readonly property `defaultCreateHeaders` of type `HeadersInit` with an initial
-  value of an empty object `{}`. */
+
 	readonly defaultCreateHeaders: HeadersInit = {}
 
 	private static readonly defaultEndpoints?: EMR_ENDPOINTS = undefined
 
+	/**
+	 * The function `getEndpoints` returns the default endpoints if they exist, otherwise it throws an error.
+	 * @returns The `defaultEndpoints` if it exists, otherwise an error is thrown.
+	 */
 	static getEndpoints(): EMR_ENDPOINTS {
 		if (this.defaultEndpoints)
 			return this.defaultEndpoints
