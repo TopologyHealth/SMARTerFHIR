@@ -10,7 +10,6 @@ import {
 	R4ResourceWithRequiredType,
 	UserReadResult,
 } from "../types"
-import { error } from "console"
 
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
@@ -39,7 +38,7 @@ export default abstract class BaseClient {
 	static getEndpoints(): EMR_ENDPOINTS {
 		if (this.defaultEndpoints)
 			return this.defaultEndpoints
-		throw error("No Endpoints found")
+		throw new Error("No Endpoints found")
 	}
 
 	/**

@@ -2,10 +2,16 @@ import * as FHIR from "fhirclient"
 import jwt_decode from "jwt-decode"
 import SubClient, { FhirClientTypes } from "../FhirClient"
 import { EMR } from "../Launcher/SmartLaunchHandler"
-import { JWT, LAUNCH } from "../types"
+import { JWT} from "../types"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
+
+export enum LAUNCH {
+  EMR,
+  STANDALONE,
+  BACKEND
+}
 
 /**
 Represents the ClientFactory class for creating EMR clients.
