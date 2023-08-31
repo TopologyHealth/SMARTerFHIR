@@ -57,3 +57,17 @@ export type Author = {
 export type UserReadResult = SubClient["user"]["read"] extends (requestOptions?: infer O) => Promise<infer R> ? O extends {
     includeResponse: true;
 } ? R extends Promise<infer T> ? T : never : R : never;
+export declare enum LAUNCH {
+    EMR = 0,
+    STANDALONE = 1,
+    BACKEND = 2
+}
+/**
+ * The type represents a JSON Web Token (JWT) with properties for client_id and an optional epic.eci property.
+ * @property {string} client_id - A string representing the client ID.
+ * @property {string}  - - `client_id`: A string representing the client ID associated with the JWT.
+ */
+export type JWT = {
+    client_id: string;
+    "epic.eci"?: string;
+};
