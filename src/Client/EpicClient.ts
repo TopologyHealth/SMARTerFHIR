@@ -1,15 +1,19 @@
 import SubClient from "../FhirClient"
 import { R4ResourceWithRequiredType } from "../types"
-import BaseClient from "./BaseClient"
+import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 
-export const EPIC_TOKEN_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token"
-export const EPIC_R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/"
+const EPIC_TOKEN_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token"
+const EPIC_R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/"
 
 /**
 Represents the EpicClient class, extending the BaseClient.
 */
 export default class EpicClient extends BaseClient {
-/* The `epicCreateHeaders` property is defining the headers that will be used when making a create request to the Epic FHIR server. In this case, it sets the
+	public readonly defaultEndpoints: EMR_ENDPOINTS = {
+		token: new URL(EPIC_TOKEN_ENDPOINT),
+		r4: new URL(EPIC_R4_ENDPOINT)
+	}
+	/* The `epicCreateHeaders` property is defining the headers that will be used when making a create request to the Epic FHIR server. In this case, it sets the
 `Prefer` header to `"return=representation"`, which indicates that the server should return the created resource in the response. */
 	readonly epicCreateHeaders: HeadersInit = {
 		Prefer: "return=representation",

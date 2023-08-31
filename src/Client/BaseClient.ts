@@ -10,14 +10,28 @@ import {
 	R4ResourceWithRequiredType,
 	UserReadResult,
 } from "../types"
+import { error } from "console"
 /**
 Represents the BaseClient abstract class.
 */
+export type EMR_ENDPOINTS = {
+	token: URL,
+	r4: URL
+}
 export default abstract class BaseClient {
 	readonly fhirClientDefault
 	/* The line `readonly defaultCreateHeaders: HeadersInit = {};` is declaring a readonly property `defaultCreateHeaders` of type `HeadersInit` with an initial
   value of an empty object `{}`. */
 	readonly defaultCreateHeaders: HeadersInit = {}
+
+	private static readonly defaultEndpoints?: EMR_ENDPOINTS = undefined
+
+	static getEndpoints(): EMR_ENDPOINTS {
+		if (this.defaultEndpoints)
+			return this.defaultEndpoints
+		throw error("No Endpoints found")
+	}
+
 	/**
    * Fetch options for create operation headers.
    * @private

@@ -74,6 +74,12 @@ export type UserReadResult = SubClient["user"]["read"] extends (
   : R
   : never;
 
+export enum LAUNCH {
+  EMR,
+  STANDALONE,
+  BACKEND
+}
+
 export type JWT = {
   client_id: string
   "epic.eci"?: string
