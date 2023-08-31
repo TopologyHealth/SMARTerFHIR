@@ -74,12 +74,6 @@ export type UserReadResult = SubClient["user"]["read"] extends (
   : R
   : never;
 
-export enum LAUNCH {
-  EMR,
-  STANDALONE,
-  BACKEND
-}
-
 /**
  * The type represents a JSON Web Token (JWT) with properties for client_id and an optional epic.eci property.
  * @property {string} client_id - A string representing the client ID.

@@ -1,5 +1,9 @@
-import { LAUNCH } from "../types";
 import BaseClient from "./BaseClient";
+export declare enum LAUNCH {
+    EMR = 0,
+    STANDALONE = 1,
+    BACKEND = 2
+}
 /**
 Represents the ClientFactory class for creating EMR clients.
 */
