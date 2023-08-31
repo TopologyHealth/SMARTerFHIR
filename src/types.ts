@@ -1,5 +1,5 @@
-import * as R4 from "fhir/r4";
-import SubClient, { FhirClientTypes } from "./FhirClient";
+import * as R4 from "fhir/r4"
+import SubClient, { FhirClientTypes } from "./FhirClient"
 
 /**
 Represents the PartiallyRequired type, which makes specified properties required and the rest optional.
@@ -73,3 +73,8 @@ export type UserReadResult = SubClient["user"]["read"] extends (
   : never
   : R
   : never;
+
+export type JWT = {
+  client_id: string
+  "epic.eci"?: string
+}
