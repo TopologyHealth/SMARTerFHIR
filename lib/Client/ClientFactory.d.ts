@@ -1,30 +1,35 @@
+import { LAUNCH } from "../types";
 import BaseClient from "./BaseClient";
 /**
 Represents the ClientFactory class for creating EMR clients.
 */
 export default class ClientFactory {
     /**
-     * Retrieves the EMR type based on the FHIR client.
-     * @private
-     * @param {SubClient} client - The FHIR client.
-     * @returns {EMR} - The EMR type.
-     */
+ * The function `getEMRType` determines the type of Electronic Medical Record (EMR) based on the provided client or token.
+ * @param {SubClient | JWT} clientOrToken - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
+ * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
+ */
     private getEMRType;
     /**
-     * Creates an EMR client based on the EMR type.
-     * @returns {Promise<BaseClient>} - A promise resolving to the created EMR client.
+     * The function `createEMRClient` creates an EMR client based on the specified launch type.
+     * @param {LAUNCH} launchType - The `launchType` parameter is an optional parameter of type `LAUNCH` that specifies the type of EMR launch. It has a default value
+     * of `LAUNCH.EMR`.
+     * @returns a Promise that resolves to an instance of the `BaseClient` class.
      */
-    createEMRClient(): Promise<BaseClient>;
+    createEMRClient(launchType?: LAUNCH): Promise<BaseClient>;
     /**
-     * Creates an EMR client based on the EMR type when called after a standalone launch.
-     * @returns {Promise<BaseClient>} - A promise resolving to the created EMR client.
+     * The function creates a default FHIR client based on the launch type.
+     * @param {LAUNCH} launchType - The `launchType` parameter is an enum type called `LAUNCH`. It represents the type of launch for the FHIR client. There are two
+     * possible values for `LAUNCH`:
+     * @returns a Promise that resolves to a SubClient object.
      */
-    createStandaloneEMRClient(): Promise<BaseClient>;
+    private createDefaultFhirClient;
     /**
-     * Retrieves the EMR type from a decoded JWT object.
-     * @param {string} decoded_jwt - A decoded JWT token that should contain the issuer of an Electronic Medical Record (EMR).
-     * @returns the EMR type that matches the input JWT `decoded_jwt`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
-     * returns `EMR.NONE`.
+     * The function `getEmrEndpoints` returns the endpoints based on the EMR type obtained from the JWT.
+     * @param {JWT} jwt - The "jwt" parameter is a JSON Web Token (JWT) that is used for authentication and authorization purposes. It contains information about the
+     * user and their permissions.
+     * @returns an object of type EMR_ENDPOINTS.
      */
-    private getStandaloneEMRType;
+    private getEmrEndpoints;
+    private buildStandaloneFhirClient;
 }
