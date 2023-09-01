@@ -1,5 +1,5 @@
 import BaseClient from "./BaseClient";
-export declare enum LAUNCH {
+declare enum LAUNCH {
     EMR = 0,
     STANDALONE = 1,
     BACKEND = 2
@@ -37,3 +37,4 @@ export default class ClientFactory {
     private getEmrEndpoints;
     private buildStandaloneFhirClient;
 }
+export {};

@@ -40,11 +40,10 @@ module.exports = {
 			"unix"
 		],
 		"quotes": [
-			"error",
-			"double"
+			"off"
 		],
 		"semi": [
-			"error",
+			"off",
 			"never"
 		]
 	}

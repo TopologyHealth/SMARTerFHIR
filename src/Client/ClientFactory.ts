@@ -2,15 +2,24 @@ import * as FHIR from "fhirclient"
 import jwt_decode from "jwt-decode"
 import SubClient, { FhirClientTypes } from "../FhirClient"
 import { EMR } from "../Launcher/SmartLaunchHandler"
-import { JWT} from "../types"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
 
-export enum LAUNCH {
+enum LAUNCH {
   EMR,
   STANDALONE,
   BACKEND
+}
+
+/**
+ * The type represents a JSON Web Token (JWT) with properties for client_id and an optional epic.eci property.
+ * @property {string} client_id - A string representing the client ID.
+ * @property {string}  - - `client_id`: A string representing the client ID associated with the JWT.
+ */
+type JWT = {
+  client_id: string
+  "epic.eci"?: string
 }
 
 /**
