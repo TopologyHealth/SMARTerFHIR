@@ -6,7 +6,7 @@ import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
 
-enum LAUNCH {
+export enum LAUNCH {
   EMR,
   STANDALONE,
   BACKEND
