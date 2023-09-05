@@ -29,16 +29,20 @@ export default abstract class BaseClient {
 
 	readonly defaultCreateHeaders: HeadersInit = {}
 
-	private static readonly defaultEndpoints?: EMR_ENDPOINTS = undefined
+	static readonly TOKEN_ENDPOINT: string | undefined = undefined
+	static readonly R4_ENDPOINT: string | undefined = undefined
 
-	/**
-	 * The function `getEndpoints` returns the default endpoints if they exist, otherwise it throws an error.
-	 * @returns The `defaultEndpoints` if it exists, otherwise an error is thrown.
-	 */
-	static getEndpoints(): EMR_ENDPOINTS {
-		if (this.defaultEndpoints)
-			return this.defaultEndpoints
-		throw new Error("No Endpoints found")
+	public abstract getEndpoints(): EMR_ENDPOINTS
+
+	protected static constructEndpoints(tokenEP: string | undefined, r4EP: string | undefined) {
+		if (tokenEP == undefined)
+			throw Error('Token Endpoint not defined')
+		if (r4EP === undefined)
+			throw Error('R4 Endpoint not defined')
+		return {
+			token: new URL(tokenEP),
+			r4: new URL(r4EP)
+		}
 	}
 
 	/**

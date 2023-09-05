@@ -17,12 +17,13 @@ Represents the BaseClient abstract class.
 export default abstract class BaseClient {
     readonly fhirClientDefault: SubClient;
     readonly defaultCreateHeaders: HeadersInit;
-    private static readonly defaultEndpoints?;
-    /**
-     * The function `getEndpoints` returns the default endpoints if they exist, otherwise it throws an error.
-     * @returns The `defaultEndpoints` if it exists, otherwise an error is thrown.
-     */
-    static getEndpoints(): EMR_ENDPOINTS;
+    static readonly TOKEN_ENDPOINT: string | undefined;
+    static readonly R4_ENDPOINT: string | undefined;
+    abstract getEndpoints(): EMR_ENDPOINTS;
+    protected static constructEndpoints(tokenEP: string | undefined, r4EP: string | undefined): {
+        token: URL;
+        r4: URL;
+    };
     /**
    * Fetch options for create operation headers.
    * @private

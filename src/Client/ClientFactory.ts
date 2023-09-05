@@ -107,7 +107,7 @@ export default class ClientFactory {
 		case EMR.SMART:
 		case EMR.NONE:
 		default:
-			return BaseClient.getEndpoints()
+			throw new Error('EMR type not defined.')
 		}
 	}
 	

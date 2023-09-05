@@ -1,11 +1,18 @@
 import SubClient from "../FhirClient";
 import { FhirClientResourceWithRequiredType } from "../types";
-import BaseClient from "./BaseClient";
+import BaseClient, { EMR_ENDPOINTS } from "./BaseClient";
 
 /**
 Represents the CernerClient class, extending the BaseClient.
 */
 export default class CernerClient extends BaseClient {
+
+  static getEndpoints(): EMR_ENDPOINTS {
+		return BaseClient.constructEndpoints(undefined, undefined)
+	}
+  getEndpoints(): EMR_ENDPOINTS {
+    throw new Error("Method not implemented.");
+  }
   /* The `cernerRequestHeaders` property is a constant that represents the headers to be included in the request made by the CernerClient class. In this case, it
 specifies that the client accepts the "application/fhir+json" media type. The `readonly` keyword indicates that the property cannot be modified after it is
 initialized. */

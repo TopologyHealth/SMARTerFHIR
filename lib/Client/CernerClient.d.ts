@@ -1,10 +1,12 @@
 import SubClient from "../FhirClient";
 import { FhirClientResourceWithRequiredType } from "../types";
-import BaseClient from "./BaseClient";
+import BaseClient, { EMR_ENDPOINTS } from "./BaseClient";
 /**
 Represents the CernerClient class, extending the BaseClient.
 */
 export default class CernerClient extends BaseClient {
+    static getEndpoints(): EMR_ENDPOINTS;
+    getEndpoints(): EMR_ENDPOINTS;
     readonly cernerRequestHeaders: HeadersInit;
     /**
      * Creates an instance of CernerClient.
