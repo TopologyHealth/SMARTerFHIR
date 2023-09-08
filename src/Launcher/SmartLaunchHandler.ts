@@ -58,7 +58,7 @@ export default class SmartLaunchHandler {
    */
   async cernerLaunch(clientId: string, redirect: string, iss: string) {
     const cernerString = cerner.scopes.map(
-      (name) => (scopes as { [key: string]: any })[name]
+      (name) => (scopes as { [key: string]: string })[name]
     );
     const redirect_uri = redirect ?? "";
     return FHIR.oauth2.authorize({
@@ -93,6 +93,7 @@ export default class SmartLaunchHandler {
           break;
         case EMR.CERNER:
           await this.cernerLaunch(this.clientID, originString, iss);
+          break;
         case EMR.SMART:
         case EMR.NONE:
         default:
