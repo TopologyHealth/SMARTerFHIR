@@ -83,9 +83,9 @@ export default class ClientFactory {
 	private async createDefaultFhirClient(launchType: LAUNCH): Promise<SubClient> {
 		switch (launchType) {
 		case LAUNCH.EMR:
-			return await FHIR.oauth2.ready()
+			return FHIR.oauth2.ready()
 		case LAUNCH.STANDALONE: 
-			return await this.buildStandaloneFhirClient()
+			return this.buildStandaloneFhirClient()
 		default:
 			throw new Error("Unsupported provider for standalone launch")
 		}
