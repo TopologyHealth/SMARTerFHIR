@@ -169,9 +169,9 @@ export default class ClientFactory {
  */
 async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string) {
 	return await fetch(tokenEndpoint, {
-		mode: "cors",
 		method: "POST",
 		headers: {
+			"Access-Control-Allow-Origin": "http://localhost",
 			accept: "application/x-www-form-urlencoded"
 		},
 		body: new URLSearchParams({
