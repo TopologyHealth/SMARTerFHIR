@@ -119,7 +119,7 @@ export default class ClientFactory {
 
 	private getEmrTypeFromObject(object: unknown): EMR {
 		if (instanceOfJWT(object)) return this.getEMRType(object)
-		if (instanceOfEmr(object)) return object
+		if (instanceOfEmr(object)) return (object as EMR)
 		throw new Error('Invalid object type.')
 	}
 
@@ -142,7 +142,7 @@ export default class ClientFactory {
 			return { endpoints: this.getEmrEndpoints(decodedJwt), clientId: decodedJwt.client_id }
 		} catch (reason) {
 			const clientIdFromEnv = process.env.REACT_APP_EMR_CLIENT_ID
-			const emrType = (process.env.REACT_APP_EMR_TYPE as EMR)
+			const emrType = ((process.env.REACT_APP_EMR_TYPE as string).toLowerCase() as EMR)
 			const isRequiredParamsGiven = emrType && clientIdFromEnv
 			if (!isRequiredParamsGiven) {
 				if (reason instanceof InvalidTokenError)

@@ -10,7 +10,7 @@ export enum EMR {
 }
 
 export function instanceOfEmr(object: unknown): object is EMR {
-  return Object.values(EMR).includes(object as EMR)
+  return Object.values(EMR).includes((object as string) as EMR)
 }
 
 /**
