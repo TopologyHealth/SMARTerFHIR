@@ -35,5 +35,7 @@ export default class ClientFactory {
      * @returns an object of type EMR_ENDPOINTS.
      */
     private getEmrEndpoints;
+    private getEmrTypeFromObject;
     private buildStandaloneFhirClient;
+    private getRequiredTokenParameters;
 }

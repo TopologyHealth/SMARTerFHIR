@@ -1,15 +1,15 @@
 import * as FHIR from "fhirclient"
-import jwt_decode from "jwt-decode"
+import jwt_decode, { InvalidTokenError } from "jwt-decode"
 import SubClient, { FhirClientTypes } from "../FhirClient"
-import { EMR } from "../Launcher/SmartLaunchHandler"
+import { EMR, instanceOfEmr } from "../Launcher/SmartLaunchHandler"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
 
 export enum LAUNCH {
-  EMR,
-  STANDALONE,
-  BACKEND
+	EMR,
+	STANDALONE,
+	BACKEND
 }
 
 /**
@@ -18,9 +18,14 @@ export enum LAUNCH {
  * @property {string}  - - `client_id`: A string representing the client ID associated with the JWT.
  */
 type JWT = {
-  client_id: string
-  "epic.eci"?: string
+	client_id: string
+	"epic.eci"?: string
 }
+
+function instanceOfJWT(object: unknown): object is JWT {
+	return (object as JWT).client_id !== undefined
+}
+
 
 /**
 Represents the ClientFactory class for creating EMR clients.
@@ -44,7 +49,7 @@ export default class ClientFactory {
 				return EMR.EPIC
 			}
 			return EMR.NONE
-		}	else {
+		} else {
 			if ("epic.eci" in clientOrToken) {
 				return EMR.EPIC
 			}
@@ -63,14 +68,14 @@ export default class ClientFactory {
 		const defaultFhirClient = await this.createDefaultFhirClient(launchType)
 		const emrType = this.getEMRType(defaultFhirClient)
 		switch (emrType) {
-		case EMR.EPIC:
-			return new EpicClient(defaultFhirClient)
-		case EMR.CERNER:
-			return new CernerClient(defaultFhirClient)
-		case EMR.SMART:
-		case EMR.NONE:
-		default:
-			throw new Error("Unsupported provider for EMR Client creation")
+			case EMR.EPIC:
+				return new EpicClient(defaultFhirClient)
+			case EMR.CERNER:
+				return new CernerClient(defaultFhirClient)
+			case EMR.SMART:
+			case EMR.NONE:
+			default:
+				throw new Error("Unsupported provider for EMR Client creation")
 		}
 	}
 
@@ -82,12 +87,12 @@ export default class ClientFactory {
 	 */
 	private async createDefaultFhirClient(launchType: LAUNCH): Promise<SubClient> {
 		switch (launchType) {
-		case LAUNCH.EMR:
-			return FHIR.oauth2.ready()
-		case LAUNCH.STANDALONE: 
-			return this.buildStandaloneFhirClient()
-		default:
-			throw new Error("Unsupported provider for standalone launch")
+			case LAUNCH.EMR:
+				return FHIR.oauth2.ready()
+			case LAUNCH.STANDALONE:
+				return this.buildStandaloneFhirClient()
+			default:
+				throw new Error("Unsupported provider for standalone launch")
 		}
 	}
 
@@ -97,33 +102,57 @@ export default class ClientFactory {
 	 * user and their permissions.
 	 * @returns an object of type EMR_ENDPOINTS.
 	 */
-	private getEmrEndpoints(jwt: JWT): EMR_ENDPOINTS {
-		const emrType = this.getEMRType(jwt)
-		switch (emrType) {
-		case EMR.EPIC:
-			return EpicClient.getEndpoints()
-		case EMR.CERNER:
-			return CernerClient.getEndpoints()
-		case EMR.SMART:
-		case EMR.NONE:
-		default:
-			throw new Error('EMR type not defined.')
+	private getEmrEndpoints(emrType: EMR): EMR_ENDPOINTS;
+	private getEmrEndpoints(jwt: JWT): EMR_ENDPOINTS;
+	private getEmrEndpoints(object: unknown): EMR_ENDPOINTS {
+		switch (this.getEmrTypeFromObject(object)) {
+			case EMR.EPIC:
+				return EpicClient.getEndpoints()
+			case EMR.CERNER:
+				return CernerClient.getEndpoints()
+			case EMR.SMART:
+			case EMR.NONE:
+			default:
+				throw new Error('EMR type not defined.')
 		}
 	}
-	
+
+	private getEmrTypeFromObject(object: unknown): EMR {
+		if (instanceOfJWT(object)) return this.getEMRType(object)
+		if (instanceOfEmr(object)) return object
+		throw new Error('Invalid object type.')
+	}
+
 	/* The `buildStandaloneFhirClient` function is responsible for creating a standalone FHIR client. */
 	private async buildStandaloneFhirClient() {
 		const code = getCodeFromBrowserUrl()
-		const decodedJwt = codeToJwt(code)
-		const clientId: string = decodedJwt.client_id
-		const {token: tokenEndpoint, r4: r4Endpoint}: EMR_ENDPOINTS = this.getEmrEndpoints(decodedJwt)
-		const tokenResponse = await getAccessToken(tokenEndpoint, code, clientId)	
-		const defaultFhirClient = FHIR.client(r4Endpoint.toString())
+		const { endpoints, clientId}: { endpoints: EMR_ENDPOINTS; clientId: string} = this.getRequiredTokenParameters(code)
+		const tokenResponse = await getAccessToken(endpoints.token, code, clientId)
+		const defaultFhirClient = FHIR.client(endpoints.r4.toString())
 		defaultFhirClient.state.clientId = clientId
 		defaultFhirClient.state.tokenResponse = {
 			...tokenResponse
 		}
 		return defaultFhirClient
+	}
+
+	private getRequiredTokenParameters(code: string) {
+		try {
+			const decodedJwt: JWT = codeToJwt(code)
+			return { endpoints: this.getEmrEndpoints(decodedJwt), clientId: decodedJwt.client_id }
+		} catch (reason) {
+			const clientIdFromEnv = process.env.REACT_APP_EMR_CLIENT_ID
+			const emrType = (process.env.REACT_APP_EMR_TYPE as EMR)
+			const isRequiredParamsGiven = emrType && clientIdFromEnv
+			if (!isRequiredParamsGiven) {
+				if (reason instanceof InvalidTokenError)
+					throw new InvalidTokenError('Cannot decode the Code for the EMR type. You must provide the client_id and emr_type explicitly')
+				throw reason
+			} else {
+				if (!emrType) throw new Error('EMR type cannot be inferred. You must provide the emr_type explicitly')
+				return { endpoints: this.getEmrEndpoints(emrType), clientId: clientIdFromEnv }
+			}
+		}
 	}
 }
 
