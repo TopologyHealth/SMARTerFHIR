@@ -126,7 +126,7 @@ export default class ClientFactory {
 	/* The `buildStandaloneFhirClient` function is responsible for creating a standalone FHIR client. */
 	private async buildStandaloneFhirClient() {
 		const code = getCodeFromBrowserUrl()
-		const { endpoints, clientId}: { endpoints: EMR_ENDPOINTS; clientId: string} = this.getRequiredTokenParameters(code)
+		const { endpoints, clientId }: { endpoints: EMR_ENDPOINTS; clientId: string } = this.getRequiredTokenParameters(code)
 		const tokenResponse = await getAccessToken(endpoints.token, code, clientId)
 		const defaultFhirClient = FHIR.client(endpoints.r4.toString())
 		defaultFhirClient.state.clientId = clientId
@@ -171,7 +171,7 @@ async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string
 	return await fetch(tokenEndpoint, {
 		method: "POST",
 		headers: {
-			"Access-Control-Allow-Origin": "http://localhost",
+			"Access-Control-Allow-Origin": "*",
 			accept: "application/x-www-form-urlencoded"
 		},
 		body: new URLSearchParams({
