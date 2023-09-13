@@ -59,8 +59,8 @@ export default class ClientFactory {
 	 * of `LAUNCH.EMR`.
 	 * @returns a Promise that resolves to an instance of the `BaseClient` class.
 	 */
-	async createEMRClient(launchType: LAUNCH = LAUNCH.EMR): Promise<BaseClient> {
-		const defaultFhirClient = await this.createDefaultFhirClient(launchType)
+	async createEMRClient(launchType: LAUNCH = LAUNCH.EMR, redirect_uri?: string): Promise<BaseClient> {
+		const defaultFhirClient = await this.createDefaultFhirClient(launchType, redirect_uri)
 		const emrType = this.getEMRType(defaultFhirClient)
 		switch (emrType) {
 		case EMR.EPIC:
@@ -80,12 +80,12 @@ export default class ClientFactory {
 	 * possible values for `LAUNCH`:
 	 * @returns a Promise that resolves to a SubClient object.
 	 */
-	private async createDefaultFhirClient(launchType: LAUNCH): Promise<SubClient> {
+	private async createDefaultFhirClient(launchType: LAUNCH, redirect_uri?: string): Promise<SubClient> {
 		switch (launchType) {
 		case LAUNCH.EMR:
 			return await FHIR.oauth2.ready()
 		case LAUNCH.STANDALONE: 
-			return await this.buildStandaloneFhirClient()
+			return await this.buildStandaloneFhirClient(redirect_uri ?? window.location.href)
 		default:
 			throw new Error("Unsupported provider for standalone launch")
 		}
@@ -112,12 +112,12 @@ export default class ClientFactory {
 	}
 	
 	/* The `buildStandaloneFhirClient` function is responsible for creating a standalone FHIR client. */
-	private async buildStandaloneFhirClient() {
+	private async buildStandaloneFhirClient(redirect_uri: string) {
 		const code = getCodeFromBrowserUrl()
 		const decodedJwt = codeToJwt(code)
 		const clientId: string = decodedJwt.client_id
 		const {token: tokenEndpoint, r4: r4Endpoint}: EMR_ENDPOINTS = this.getEmrEndpoints(decodedJwt)
-		const tokenResponse = await getAccessToken(tokenEndpoint, code, clientId)	
+		const tokenResponse = await getAccessToken(tokenEndpoint, code, clientId, redirect_uri)	
 		const defaultFhirClient = FHIR.client(r4Endpoint.toString())
 		defaultFhirClient.state.clientId = clientId
 		defaultFhirClient.state.tokenResponse = {
@@ -138,7 +138,7 @@ export default class ClientFactory {
  * by the authorization server when registering the client application.
  * @returns a Promise that resolves to a TokenResponse object.
  */
-async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string) {
+async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string, redirect_uri: string) {
 	return await fetch(tokenEndpoint, {
 		mode: "cors",
 		method: "POST",
@@ -148,7 +148,7 @@ async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string
 		body: new URLSearchParams({
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": window.location.origin,
+			"redirect_uri": redirect_uri,
 			"client_id": clientId
 		})
 	})

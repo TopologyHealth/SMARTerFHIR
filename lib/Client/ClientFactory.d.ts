@@ -20,7 +20,7 @@ export default class ClientFactory {
      * of `LAUNCH.EMR`.
      * @returns a Promise that resolves to an instance of the `BaseClient` class.
      */
-    createEMRClient(launchType?: LAUNCH): Promise<BaseClient>;
+    createEMRClient(launchType?: LAUNCH, redirect_uri?: string): Promise<BaseClient>;
     /**
      * The function creates a default FHIR client based on the launch type.
      * @param {LAUNCH} launchType - The `launchType` parameter is an enum type called `LAUNCH`. It represents the type of launch for the FHIR client. There are two
