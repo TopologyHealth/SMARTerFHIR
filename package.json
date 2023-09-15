@@ -1,6 +1,6 @@
 {
   "name": "@TopologyHealth/smarterfhir",
-  "version": "0.3.1-beta",
+  "version": "0.3.2-beta",
   "description": "Library for simplifying all things FHIR and SMART",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
