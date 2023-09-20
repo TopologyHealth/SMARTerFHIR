@@ -86,7 +86,7 @@ export default class SmartLaunchHandler {
     const iss = urlParams.get("iss") ?? "";
     const emrType = this.getEMRType(iss)
     const isValidIss = iss !== null && iss.includes(emrType);
-    if (isValidIss)
+    if (isValidIss) {
       switch (emrType) {
         case EMR.EPIC:
           await this.epicLaunch(this.clientID, originString, iss);
@@ -98,6 +98,29 @@ export default class SmartLaunchHandler {
         default:
           break;
       }
+    }
+  }
+
+  /**
+   * Begins a standalone launch flow with the provided EMR.
+   * @param {EMR} emrType - The EMR to authenticate with
+   * @param {string} redirectUriOverride - Override the "redirect_uri" sent during authentication. By default, this will be the current URL minus any parameters
+   * @returns {void} - This function will cause a browser redirect if successful
+   */
+  authorizeStandalone(emrType: EMR, redirectUriOverride?: string) {
+    const redirectUri = redirectUriOverride ?? (window.location.origin + window.location.pathname)
+    switch (emrType) {
+      case EMR.EPIC:
+        const standaloneUrl = `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=https%3A%2F%2Ffhir.epic.com%2Finterconnect-fhir-oauth%2Fapi%2Ffhir%2FR4`
+        window.location.href = standaloneUrl;
+        break;
+      case EMR.CERNER:
+      case EMR.SMART:
+      case EMR.NONE:
+      default:
+        throw new Error("This EMR is not supported for standalone launch")
+    }
+    
   }
 
   /**

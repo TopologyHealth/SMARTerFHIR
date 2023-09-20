@@ -71,9 +71,18 @@ Make sure to import the necessary classes, interfaces, and types based on your r
 
 ### Standalone Launch
 
-For a [Standalone Launch](https://build.fhir.org/ig/HL7/smart-app-launch/app-launch.html#launch-app-standalone-launch), the user begins by authenticating through their EMR and is redirected to your application on success. 
+For a [Standalone Launch](https://build.fhir.org/ig/HL7/smart-app-launch/app-launch.html#launch-app-standalone-launch), the user begins by authenticating through their EMR and is redirected to your application on success.
 
-The following example function instantiates a SMART Client within your application after the redirect from a standalone launch:
+The following example function uses SMARTerFHIR to begin the standalone launch flow with an EMR, which will redirect the user to the EMR to continue the flow:
+
+```typescript
+async function startStandaloneLaunch(emrType: EMR, emrClientId: string) {
+    const smartLaunchHandler = new SmartLaunchHandler(emrClientID)
+    smartLaunchHandler.authorizeStandaloneEMR(emrType)
+}
+```
+
+The following example function will instantiate a SMART Client if executed after the EMR redirects from a standalone launch:
 
 ```typescript
 async function myStandaloneSmartClientInstantiator() {

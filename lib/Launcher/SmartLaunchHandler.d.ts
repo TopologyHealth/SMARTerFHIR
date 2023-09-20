@@ -40,6 +40,13 @@ export default class SmartLaunchHandler {
      */
     authorizeEMR(): Promise<void>;
     /**
+     * Begins a standalone launch flow with the provided EMR.
+     * @param {EMR} emrType - The EMR to authenticate with
+     * @param {string} redirectUriOverride - Override the "redirect_uri" sent during authentication. By default, this will be the current URL minus any parameters
+     * @returns {void} - This function will cause a browser redirect if successful
+     */
+    authorizeStandalone(emrType: EMR, redirectUriOverride?: string): void;
+    /**
      * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
      * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
      * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
