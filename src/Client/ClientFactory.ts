@@ -5,6 +5,7 @@ import { EMR } from "../Launcher/SmartLaunchHandler"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
+import Client from "../FhirClient"
 
 export enum LAUNCH {
   EMR,
@@ -117,7 +118,8 @@ export default class ClientFactory {
 		const decodedJwt = codeToJwt(code)
 		const clientId: string = decodedJwt.client_id
 		const {token: tokenEndpoint, r4: r4Endpoint}: EMR_ENDPOINTS = this.getEmrEndpoints(decodedJwt)
-		const tokenResponse = await getAccessToken(tokenEndpoint, code, clientId)	
+		const redirectUri = window.location.origin + window.location.pathname // The current URL minus any parameters
+		const tokenResponse = await getAccessToken(tokenEndpoint, code, clientId, redirectUri)	
 		const defaultFhirClient = FHIR.client(r4Endpoint.toString())
 		defaultFhirClient.state.clientId = clientId
 		defaultFhirClient.state.tokenResponse = {
@@ -136,9 +138,10 @@ export default class ClientFactory {
  * your application. This code is used to exchange for an access token.
  * @param {string} clientId - The `clientId` parameter is the identifier for the client application that is requesting the access token. It is typically provided
  * by the authorization server when registering the client application.
+ * @param {string} redirectUri - The `redirectUri` parameter is the redirection URI that will be sent to the authorization server.
  * @returns a Promise that resolves to a TokenResponse object.
  */
-async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string) {
+async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string, redirectUri: string) {
 	return await fetch(tokenEndpoint, {
 		mode: "cors",
 		method: "POST",
@@ -148,7 +151,7 @@ async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string
 		body: new URLSearchParams({
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": window.location.origin,
+			"redirect_uri": redirectUri,
 			"client_id": clientId
 		})
 	})
