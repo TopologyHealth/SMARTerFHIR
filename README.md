@@ -18,7 +18,9 @@ The SMARTerFHIR library is a powerful toolkit for interacting with FHIR (Fast He
 
 ## Installation
 
-You can install the SMARTerFHIR library using... TBD
+Using npm's git repo support: `npm install git@github.com:TopologyHealth/SMARTerFHIR.git`
+
+Support for the npm registry will be coming soon
 
  <!-- npm: -->
 <!--
