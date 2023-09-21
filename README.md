@@ -87,7 +87,7 @@ The following example function will instantiate a SMART Client if executed after
 ```typescript
 async function myStandaloneSmartClientInstantiator() {
     const clientFactory = new ClientFactory();
-    const baseClient = await clientFactory.createStandaloneEMRClient()
+    const baseClient = await clientFactory.createEMRClient(LAUNCH.STANDALONE)
         .then((client) => {
             if (!client) throw new Error('no client found')
             return client
