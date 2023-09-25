@@ -78,7 +78,7 @@ The following example function uses SMARTerFHIR to begin the standalone launch f
 ```typescript
 async function startStandaloneLaunch(emrType: EMR, emrClientId: string) {
     const smartLaunchHandler = new SmartLaunchHandler(emrClientID)
-    smartLaunchHandler.authorizeStandaloneEMR(emrType)
+    smartLaunchHandler.authorizeEMR(LAUNCH.STANDALONE, emrType)
 }
 ```
 

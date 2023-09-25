@@ -10,6 +10,9 @@ import {
 	R4ResourceWithRequiredType,
 	UserReadResult,
 } from "../types"
+import { EMR } from "../Launcher/SmartLaunchHandler"
+import EpicClient from "./EpicClient"
+import CernerClient from "./CernerClient"
 
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
@@ -19,7 +22,8 @@ import {
  */
 export type EMR_ENDPOINTS = {
 	token: URL,
-	r4: URL
+	r4: URL,
+	auth: URL
 }
 /**
 Represents the BaseClient abstract class.
@@ -35,14 +39,45 @@ export default abstract class BaseClient {
 
 	public abstract getEndpoints(): EMR_ENDPOINTS
 
-	protected static constructEndpoints(tokenEP: string | undefined, r4EP: string | undefined) {
+/**
+ * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
+ * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
+ * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
+ * @returns an object of type EMR_ENDPOINTS.
+ */
+	public static getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
+		switch (emrType) {
+			case EMR.EPIC:
+				return EpicClient.getEndpoints()
+			case EMR.CERNER:
+				return CernerClient.getEndpoints()
+			case EMR.SMART:
+			case EMR.NONE:
+			default:
+				throw new Error(`Endpoints not found for EMR type: ${emrType}`)
+		}
+	}
+
+/**
+ * The function constructs and returns an object containing three endpoints (token, r4, and auth) based on the provided tokenEP, r4EP, and authorizeEP values.
+ * @param {string | undefined} tokenEP - The `tokenEP` parameter is a string that represents the token endpoint. This endpoint is used to obtain an access token
+ * for authentication and authorization purposes.
+ * @param {string | undefined} r4EP - The `r4EP` parameter is the endpoint URL for the R4 API. It is used to make requests to the R4 API.
+ * @param {string | undefined} authorizeEP - The `authorizeEP` parameter is the endpoint URL for the authorization server. It is used for initiating the
+ * authorization process and obtaining an authorization code or access token.
+ * @returns An object with three properties: "token", "r4", and "auth". Each property is assigned a new URL object based on the corresponding input parameters.
+ */
+	protected static constructEndpoints(tokenEP: string | undefined, r4EP: string | undefined, authorizeEP: string | undefined) {
 		if (tokenEP == undefined)
 			throw Error('Token Endpoint not defined')
 		if (r4EP === undefined)
 			throw Error('R4 Endpoint not defined')
+		if (authorizeEP === undefined)
+			throw Error('Auth Endpoint not defined')
 		return {
 			token: new URL(tokenEP),
-			r4: new URL(r4EP)
+			r4: new URL(r4EP),
+			auth: new URL(authorizeEP)
 		}
 	}
 

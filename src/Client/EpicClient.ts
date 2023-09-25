@@ -9,10 +9,10 @@ import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 export default class EpicClient extends BaseClient {
 	static readonly AUTHORIZE_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize"
 	static readonly TOKEN_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token"
-	static readonly R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/"
+	static readonly R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4"
 
 	static getEndpoints(): EMR_ENDPOINTS {
-		return BaseClient.constructEndpoints(EpicClient.TOKEN_ENDPOINT, EpicClient.R4_ENDPOINT)
+		return BaseClient.constructEndpoints(EpicClient.TOKEN_ENDPOINT, EpicClient.R4_ENDPOINT, EpicClient.AUTHORIZE_ENDPOINT)
 	}
 
 	getEndpoints(): EMR_ENDPOINTS {

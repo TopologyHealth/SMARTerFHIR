@@ -1,3 +1,4 @@
+import { LAUNCH } from "../Client/ClientFactory";
 export declare enum EMR {
     CERNER = "cerner",
     EPIC = "epic",
@@ -38,14 +39,29 @@ export default class SmartLaunchHandler {
      * Authorizes the EMR based on the current URL query parameters.
      * @returns {Promise<void>} - A promise resolving to void.
      */
-    authorizeEMR(): Promise<void>;
+    authorizeEMR(launchType?: LAUNCH, emrType?: EMR, redirectUriOverride?: string): Promise<void>;
     /**
-     * Begins a standalone launch flow with the provided EMR.
-     * @param {EMR} emrType - The EMR to authenticate with
-     * @param {string} redirectUriOverride - Override the "redirect_uri" sent during authentication. By default, this will be the current URL minus any parameters
-     * @returns {void} - This function will cause a browser redirect if successful
+     * The function `executeStandaloneLaunch` is used to launch a standalone application for a specific EMR type, with an optional redirect URI override.
+     * @param {EMR | undefined} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of EMR (Electronic Medical
+     * Record) systems. It can have the following values:
+     * @param {string | undefined} redirectUriOverride - The `redirectUriOverride` parameter is a string that represents the URL where the user should be redirected
+     * after the standalone launch is completed. If this parameter is not provided, the default value is set to the current URL of the window.
+     * @returns Nothing is being returned. The function has a return type of `void`, which means it does not return any value.
      */
-    authorizeStandalone(emrType: EMR, redirectUriOverride?: string): void;
+    private executeStandaloneLaunch;
+    /**
+     * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
+     * @param {EMR} emrType - The `emrType` parameter represents the type of EMR (Electronic Medical Record) system. It is of type `EMR`.
+     * @param {string} redirectUri - The `redirectUri` parameter is the URL where the user will be redirected to after completing the authentication process.
+     * @returns a URL string.
+     */
+    private generateStandaloneUrl;
+    /**
+     * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
+     * corresponding EMR system.
+     * @returns nothing (undefined).
+     */
+    private executeEMRLaunch;
     /**
      * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
      * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).

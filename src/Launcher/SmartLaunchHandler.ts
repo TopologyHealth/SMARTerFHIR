@@ -1,6 +1,8 @@
 import * as FHIR from "fhirclient";
 import { cerner } from "./Config";
 import scopes from "./scopes.json";
+import { LAUNCH } from "../Client/ClientFactory";
+import BaseClient from "../Client/BaseClient";
 
 export enum EMR {
   CERNER = "cerner",
@@ -79,12 +81,65 @@ export default class SmartLaunchHandler {
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
-  async authorizeEMR() {
+  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR, emrType?: EMR, redirectUriOverride?: string) {
+    if (launchType === LAUNCH.EMR) {
+      return await this.executeEMRLaunch();
+    }
+    if (launchType === LAUNCH.STANDALONE) {
+      return this.executeStandaloneLaunch(emrType, redirectUriOverride);
+    }
+    throw new Error('Invalid Smart Launch Type')
+  }
+
+/**
+ * The function `executeStandaloneLaunch` is used to launch a standalone application for a specific EMR type, with an optional redirect URI override.
+ * @param {EMR | undefined} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of EMR (Electronic Medical
+ * Record) systems. It can have the following values:
+ * @param {string | undefined} redirectUriOverride - The `redirectUriOverride` parameter is a string that represents the URL where the user should be redirected
+ * after the standalone launch is completed. If this parameter is not provided, the default value is set to the current URL of the window.
+ * @returns Nothing is being returned. The function has a return type of `void`, which means it does not return any value.
+ */
+  private executeStandaloneLaunch(emrType: EMR | undefined, redirectUriOverride: string | undefined) {
+    if (!emrType)
+      throw new Error('EmrType must be specified for Standalone Launch');
+    const redirectUri = redirectUriOverride ?? (window.location.origin + window.location.pathname);
+    const standaloneUrl = this.generateStandaloneUrl(emrType, redirectUri);
+    switch (emrType) {
+      case EMR.EPIC:
+      case EMR.CERNER:
+      case EMR.SMART:
+        window.location.href = standaloneUrl;
+        break;
+      case EMR.NONE:
+      default:
+        throw new Error("This EMR is not supported for standalone launch");
+    }
+    return;
+  }
+
+/**
+ * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
+ * @param {EMR} emrType - The `emrType` parameter represents the type of EMR (Electronic Medical Record) system. It is of type `EMR`.
+ * @param {string} redirectUri - The `redirectUri` parameter is the URL where the user will be redirected to after completing the authentication process.
+ * @returns a URL string.
+ */
+  private generateStandaloneUrl(emrType: EMR, redirectUri: string) {
+    const { r4: r4Endpoint, auth: authEndpoint } = BaseClient.getEndpointsForEmr(emrType)
+    const r4EndpointBase64 = btoa(r4Endpoint.toString())
+    return `${authEndpoint}?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=${r4EndpointBase64}`;
+  }
+
+/**
+ * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
+ * corresponding EMR system.
+ * @returns nothing (undefined).
+ */
+  private async executeEMRLaunch() {
     const queryString = window.location.search;
     const originString = window.location.origin;
     const urlParams = new URLSearchParams(queryString);
     const iss = urlParams.get("iss") ?? "";
-    const emrType = this.getEMRType(iss)
+    const emrType = this.getEMRType(iss);
     const isValidIss = iss !== null && iss.includes(emrType);
     if (isValidIss) {
       switch (emrType) {
@@ -100,28 +155,7 @@ export default class SmartLaunchHandler {
           break;
       }
     }
-  }
-
-  /**
-   * Begins a standalone launch flow with the provided EMR.
-   * @param {EMR} emrType - The EMR to authenticate with
-   * @param {string} redirectUriOverride - Override the "redirect_uri" sent during authentication. By default, this will be the current URL minus any parameters
-   * @returns {void} - This function will cause a browser redirect if successful
-   */
-  authorizeStandalone(emrType: EMR, redirectUriOverride?: string) {
-    const redirectUri = redirectUriOverride ?? (window.location.origin + window.location.pathname)
-    const standaloneUrl = `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=https%3A%2F%2Ffhir.epic.com%2Finterconnect-fhir-oauth%2Fapi%2Ffhir%2FR4`
-    switch (emrType) {
-      case EMR.EPIC:
-        window.location.href = standaloneUrl;
-        break;
-      case EMR.CERNER:
-      case EMR.SMART:
-      case EMR.NONE:
-      default:
-        throw new Error("This EMR is not supported for standalone launch")
-    }
-    
+    return;
   }
 
   /**
