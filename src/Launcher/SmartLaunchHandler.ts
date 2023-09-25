@@ -110,9 +110,9 @@ export default class SmartLaunchHandler {
    */
   authorizeStandalone(emrType: EMR, redirectUriOverride?: string) {
     const redirectUri = redirectUriOverride ?? (window.location.origin + window.location.pathname)
+    const standaloneUrl = `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=https%3A%2F%2Ffhir.epic.com%2Finterconnect-fhir-oauth%2Fapi%2Ffhir%2FR4`
     switch (emrType) {
       case EMR.EPIC:
-        const standaloneUrl = `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=https%3A%2F%2Ffhir.epic.com%2Finterconnect-fhir-oauth%2Fapi%2Ffhir%2FR4`
         window.location.href = standaloneUrl;
         break;
       case EMR.CERNER:
