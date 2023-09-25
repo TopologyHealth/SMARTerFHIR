@@ -1,7 +1,6 @@
 import * as R4 from "fhir/r4";
 import SubClient, { FhirClientTypes } from "../FhirClient";
 import { Author, FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
-import { EMR } from "../Launcher/SmartLaunchHandler";
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
  * @property {URL} token - A URL that represents the endpoint for accessing the token service in an EMR (Electronic Medical Record) system.
@@ -23,13 +22,6 @@ export default abstract class BaseClient {
     static readonly TOKEN_ENDPOINT: string | undefined;
     static readonly R4_ENDPOINT: string | undefined;
     abstract getEndpoints(): EMR_ENDPOINTS;
-    /**
-     * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
-     * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
-     * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
-     * @returns an object of type EMR_ENDPOINTS.
-     */
-    static getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS;
     /**
      * The function constructs and returns an object containing three endpoints (token, r4, and auth) based on the provided tokenEP, r4EP, and authorizeEP values.
      * @param {string | undefined} tokenEP - The `tokenEP` parameter is a string that represents the token endpoint. This endpoint is used to obtain an access token

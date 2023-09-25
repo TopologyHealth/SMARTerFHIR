@@ -11,7 +11,7 @@ export default class CernerClient extends BaseClient {
   static readonly R4_ENDPOINT = "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d"
 
   static getEndpoints(): EMR_ENDPOINTS {
-    return BaseClient.constructEndpoints(CernerClient.TOKEN_ENDPOINT, CernerClient.R4_ENDPOINT)
+    return BaseClient.constructEndpoints(CernerClient.TOKEN_ENDPOINT, CernerClient.R4_ENDPOINT, CernerClient.AUTHORIZE_ENDPOINT)
   }
   getEndpoints(): EMR_ENDPOINTS {
     throw new Error("Method not implemented.");

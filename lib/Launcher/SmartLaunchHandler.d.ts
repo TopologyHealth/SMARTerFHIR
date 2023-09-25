@@ -57,6 +57,13 @@ export default class SmartLaunchHandler {
      */
     private generateStandaloneUrl;
     /**
+   * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
+   * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
+   * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
+   * @returns an object of type EMR_ENDPOINTS.
+   */
+    private getEndpointsForEmr;
+    /**
      * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
      * corresponding EMR system.
      * @returns nothing (undefined).

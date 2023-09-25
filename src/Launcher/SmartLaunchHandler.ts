@@ -1,8 +1,10 @@
 import * as FHIR from "fhirclient";
+import { EMR_ENDPOINTS } from "../Client/BaseClient";
+import CernerClient from "../Client/CernerClient";
+import { LAUNCH } from "../Client/ClientFactory";
+import EpicClient from "../Client/EpicClient";
 import { cerner } from "./Config";
 import scopes from "./scopes.json";
-import { LAUNCH } from "../Client/ClientFactory";
-import BaseClient from "../Client/BaseClient";
 
 export enum EMR {
   CERNER = "cerner",
@@ -91,14 +93,14 @@ export default class SmartLaunchHandler {
     throw new Error('Invalid Smart Launch Type')
   }
 
-/**
- * The function `executeStandaloneLaunch` is used to launch a standalone application for a specific EMR type, with an optional redirect URI override.
- * @param {EMR | undefined} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of EMR (Electronic Medical
- * Record) systems. It can have the following values:
- * @param {string | undefined} redirectUriOverride - The `redirectUriOverride` parameter is a string that represents the URL where the user should be redirected
- * after the standalone launch is completed. If this parameter is not provided, the default value is set to the current URL of the window.
- * @returns Nothing is being returned. The function has a return type of `void`, which means it does not return any value.
- */
+  /**
+   * The function `executeStandaloneLaunch` is used to launch a standalone application for a specific EMR type, with an optional redirect URI override.
+   * @param {EMR | undefined} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of EMR (Electronic Medical
+   * Record) systems. It can have the following values:
+   * @param {string | undefined} redirectUriOverride - The `redirectUriOverride` parameter is a string that represents the URL where the user should be redirected
+   * after the standalone launch is completed. If this parameter is not provided, the default value is set to the current URL of the window.
+   * @returns Nothing is being returned. The function has a return type of `void`, which means it does not return any value.
+   */
   private executeStandaloneLaunch(emrType: EMR | undefined, redirectUriOverride: string | undefined) {
     if (!emrType)
       throw new Error('EmrType must be specified for Standalone Launch');
@@ -117,23 +119,42 @@ export default class SmartLaunchHandler {
     return;
   }
 
-/**
- * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
- * @param {EMR} emrType - The `emrType` parameter represents the type of EMR (Electronic Medical Record) system. It is of type `EMR`.
- * @param {string} redirectUri - The `redirectUri` parameter is the URL where the user will be redirected to after completing the authentication process.
- * @returns a URL string.
- */
+  /**
+   * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
+   * @param {EMR} emrType - The `emrType` parameter represents the type of EMR (Electronic Medical Record) system. It is of type `EMR`.
+   * @param {string} redirectUri - The `redirectUri` parameter is the URL where the user will be redirected to after completing the authentication process.
+   * @returns a URL string.
+   */
   private generateStandaloneUrl(emrType: EMR, redirectUri: string) {
-    const { r4: r4Endpoint, auth: authEndpoint } = BaseClient.getEndpointsForEmr(emrType)
+    const { r4: r4Endpoint, auth: authEndpoint } = this.getEndpointsForEmr(emrType)
     const r4EndpointBase64 = btoa(r4Endpoint.toString())
     return `${authEndpoint}?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=${r4EndpointBase64}`;
   }
 
-/**
- * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
- * corresponding EMR system.
- * @returns nothing (undefined).
+  /**
+ * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
+ * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
+ * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
+ * @returns an object of type EMR_ENDPOINTS.
  */
+  private getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
+    switch (emrType) {
+      case EMR.EPIC:
+        return EpicClient.getEndpoints()
+      case EMR.CERNER:
+        return CernerClient.getEndpoints()
+      case EMR.SMART:
+      case EMR.NONE:
+      default:
+        throw new Error(`Endpoints not found for EMR type: ${emrType}`)
+    }
+  }
+
+  /**
+   * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
+   * corresponding EMR system.
+   * @returns nothing (undefined).
+   */
   private async executeEMRLaunch() {
     const queryString = window.location.search;
     const originString = window.location.origin;
