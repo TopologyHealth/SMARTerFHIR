@@ -7,9 +7,9 @@ import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
 
 export enum LAUNCH {
-  EMR,
-  STANDALONE,
-  BACKEND
+	EMR,
+	STANDALONE,
+	BACKEND
 }
 
 /**
@@ -18,8 +18,8 @@ export enum LAUNCH {
  * @property {string}  - - `client_id`: A string representing the client ID associated with the JWT.
  */
 type JWT = {
-  client_id: string
-  "epic.eci"?: string
+	client_id: string
+	"epic.eci"?: string
 }
 
 /**
@@ -44,7 +44,7 @@ export default class ClientFactory {
 				return EMR.EPIC
 			}
 			return EMR.NONE
-		}	else {
+		} else {
 			if ("epic.eci" in clientOrToken) {
 				return EMR.EPIC
 			}
@@ -63,14 +63,14 @@ export default class ClientFactory {
 		const defaultFhirClient = await this.createDefaultFhirClient(launchType)
 		const emrType = this.getEMRType(defaultFhirClient)
 		switch (emrType) {
-		case EMR.EPIC:
-			return new EpicClient(defaultFhirClient)
-		case EMR.CERNER:
-			return new CernerClient(defaultFhirClient)
-		case EMR.SMART:
-		case EMR.NONE:
-		default:
-			throw new Error("Unsupported provider for EMR Client creation")
+			case EMR.EPIC:
+				return new EpicClient(defaultFhirClient)
+			case EMR.CERNER:
+				return new CernerClient(defaultFhirClient)
+			case EMR.SMART:
+			case EMR.NONE:
+			default:
+				throw new Error("Unsupported provider for EMR Client creation")
 		}
 	}
 
@@ -82,12 +82,12 @@ export default class ClientFactory {
 	 */
 	private async createDefaultFhirClient(launchType: LAUNCH): Promise<SubClient> {
 		switch (launchType) {
-		case LAUNCH.EMR:
-			return await FHIR.oauth2.ready()
-		case LAUNCH.STANDALONE: 
-			return await this.buildStandaloneFhirClient()
-		default:
-			throw new Error("Unsupported provider for standalone launch")
+			case LAUNCH.EMR:
+				return await FHIR.oauth2.ready()
+			case LAUNCH.STANDALONE:
+				return await this.buildStandaloneFhirClient()
+			default:
+				throw new Error("Unsupported provider for standalone launch")
 		}
 	}
 
@@ -100,24 +100,25 @@ export default class ClientFactory {
 	private getEmrEndpoints(jwt: JWT): EMR_ENDPOINTS {
 		const emrType = this.getEMRType(jwt)
 		switch (emrType) {
-		case EMR.EPIC:
-			return EpicClient.getEndpoints()
-		case EMR.CERNER:
-			return CernerClient.getEndpoints()
-		case EMR.SMART:
-		case EMR.NONE:
-		default:
-			throw new Error('EMR type not defined.')
+			case EMR.EPIC:
+				return EpicClient.getEndpoints()
+			case EMR.CERNER:
+				return CernerClient.getEndpoints()
+			case EMR.SMART:
+			case EMR.NONE:
+			default:
+				throw new Error('EMR type not defined.')
 		}
 	}
-	
+
 	/* The `buildStandaloneFhirClient` function is responsible for creating a standalone FHIR client. */
 	private async buildStandaloneFhirClient() {
 		const code = getCodeFromBrowserUrl()
 		const decodedJwt = codeToJwt(code)
 		const clientId: string = decodedJwt.client_id
-		const {token: tokenEndpoint, r4: r4Endpoint}: EMR_ENDPOINTS = this.getEmrEndpoints(decodedJwt)
-		const tokenResponse = await getAccessToken(tokenEndpoint, code, clientId)	
+		const { token: tokenEndpoint, r4: r4Endpoint }: EMR_ENDPOINTS = this.getEmrEndpoints(decodedJwt)
+		const redirectUri = window.location.origin + window.location.pathname // The current URL minus any parameters
+		const tokenResponse = await getAccessToken(tokenEndpoint, code, clientId, redirectUri)
 		const defaultFhirClient = FHIR.client(r4Endpoint.toString())
 		defaultFhirClient.state.clientId = clientId
 		defaultFhirClient.state.tokenResponse = {
@@ -136,9 +137,10 @@ export default class ClientFactory {
  * your application. This code is used to exchange for an access token.
  * @param {string} clientId - The `clientId` parameter is the identifier for the client application that is requesting the access token. It is typically provided
  * by the authorization server when registering the client application.
+ * @param {string} redirectUri - The `redirectUri` parameter is the redirection URI that will be sent to the authorization server.
  * @returns a Promise that resolves to a TokenResponse object.
  */
-async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string) {
+async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string, redirectUri: string) {
 	return await fetch(tokenEndpoint, {
 		mode: "cors",
 		method: "POST",
@@ -148,7 +150,7 @@ async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string
 		body: new URLSearchParams({
 			"grant_type": "authorization_code",
 			"code": code,
-			"redirect_uri": window.location.origin,
+			"redirect_uri": redirectUri,
 			"client_id": clientId
 		})
 	})
