@@ -1,6 +1,6 @@
 {
   "name": "@topologyhealth/smarterfhir",
-  "version": "0.3.2-beta-test2",
+  "version": "0.3.2-beta",
   "description": "Library for simplifying all things FHIR and SMART",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -43,8 +43,5 @@
   },
   "peerDependencies": {
     "fhirclient": "^2.5.2"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   }
 }

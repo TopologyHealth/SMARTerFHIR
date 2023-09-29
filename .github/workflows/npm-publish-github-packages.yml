@@ -6,9 +6,6 @@ name: Node.js Package
 on:
   release:
     types: [prereleased]
-  push:
-    branches:
-      - npm-publish-public
 
 jobs:
   build:
@@ -33,6 +30,6 @@ jobs:
           node-version: 16
           registry-url: https://npm.pkg.github.com/
       - run: npm ci
-      - run: npm publish --access public
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
