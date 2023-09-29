@@ -1,5 +1,5 @@
 {
-  "name": "@TopologyHealth/smarterfhir",
+  "name": "@topologyhealth/smarterfhir",
   "version": "0.3.2-beta-test",
   "description": "Library for simplifying all things FHIR and SMART",
   "main": "lib/index.js",
