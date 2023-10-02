@@ -172,6 +172,15 @@ async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string
 		method: "POST",
 		headers: {
 			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Credentials": "true",
+			"Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
+			"Access-Control-Allow-Headers": "true",
+			"Origin": "true",
+			"Accept": "true",
+			"X-Requested-With": "true",
+			"Content-Type": "true",
+			"Access-Control-Request-Method": "true",
+			"Access-Control-Request-Headers": "true",
 			accept: "application/x-www-form-urlencoded"
 		},
 		body: new URLSearchParams({
