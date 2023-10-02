@@ -130,6 +130,7 @@ export default class ClientFactory {
 		const tokenResponse = await getAccessToken(endpoints.token, code, clientId)
 		const defaultFhirClient = FHIR.client(endpoints.r4.toString())
 		defaultFhirClient.state.clientId = clientId
+		defaultFhirClient.state.tokenUri = endpoints.token.toString()
 		defaultFhirClient.state.tokenResponse = {
 			...tokenResponse
 		}
