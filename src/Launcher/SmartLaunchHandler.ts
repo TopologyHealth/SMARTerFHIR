@@ -17,6 +17,25 @@ export function instanceOfEmr(object: unknown): object is EMR {
   return Object.values(EMR).includes((object as string) as EMR)
 }
 
+  /**
+ * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
+ * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
+ * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
+ * @returns an object of type EMR_ENDPOINTS.
+ */
+  export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
+  switch (emrType) {
+    case EMR.EPIC:
+      return EpicClient.getEndpoints()
+    case EMR.CERNER:
+      return CernerClient.getEndpoints()
+    case EMR.SMART:
+    case EMR.NONE:
+    default:
+      throw new Error(`Endpoints not found for EMR type: ${emrType}`)
+  }
+}
+
 /**
  * Represents the SmartLaunchHandler class.
  */
@@ -45,8 +64,11 @@ export default class SmartLaunchHandler {
   async epicLaunch(
     clientId: string,
     redirect: string,
-    iss: string
+    iss: string,
+    launchType: LAUNCH
   ): Promise<string | void> {
+    if (launchType === LAUNCH.BACKEND)
+      throw new Error("This doesn't work for backend launch")
     const scope = "launch online_access openid fhirUser";
     const redirect_uri = redirect ?? "";
     return FHIR.oauth2.authorize({
@@ -64,7 +86,7 @@ export default class SmartLaunchHandler {
    * @param {string} iss - The issuer for authorization.
    * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
    */
-  async cernerLaunch(clientId: string, redirect: string, iss: string) {
+  async cernerLaunch(clientId: string, redirect: string, iss: string, launchType: LAUNCH) {
     const cernerString = cerner.scopes.map(
       (name) => (scopes as { [key: string]: string })[name]
     );
@@ -72,11 +94,11 @@ export default class SmartLaunchHandler {
     return FHIR.oauth2.authorize({
       clientId: clientId,
       scope: [
-        "launch",
+        launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch",
         ...cernerString,
         "online_access",
         "openid",
-        "fhirUser",
+        launchType === LAUNCH.STANDALONE ?  "profile" : "fhirUser",
       ].join(" "),
       iss: iss,
       redirect_uri: redirect_uri,
@@ -87,13 +109,13 @@ export default class SmartLaunchHandler {
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
-  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR, emrType?: EMR, redirectUriOverride?: string) {
-    if (launchType === LAUNCH.EMR) {
-      return await this.executeEMRLaunch();
+  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR) {
+    if (launchType !== LAUNCH.BACKEND) {
+      return await this.executeWebLaunch(launchType);
     }
-    if (launchType === LAUNCH.STANDALONE) {
-      return this.executeStandaloneLaunch(emrType, redirectUriOverride);
-    }
+    // if (launchType === LAUNCH.STANDALONE) {
+    //   return this.executeStandaloneLaunch(emrType, redirectUriOverride);
+    // }
     throw new Error('Invalid Smart Launch Type')
   }
 
@@ -105,23 +127,25 @@ export default class SmartLaunchHandler {
    * after the standalone launch is completed. If this parameter is not provided, the default value is set to the current URL of the window.
    * @returns Nothing is being returned. The function has a return type of `void`, which means it does not return any value.
    */
-  private executeStandaloneLaunch(emrType: EMR | undefined, redirectUriOverride: string | undefined) {
-    if (!emrType)
-      throw new Error('EmrType must be specified for Standalone Launch');
-    const redirectUri = redirectUriOverride ?? (window.location.origin + window.location.pathname);
-    const standaloneUrl = this.generateStandaloneUrl(emrType, redirectUri);
-    switch (emrType) {
-      case EMR.EPIC:
-      case EMR.CERNER:
-      case EMR.SMART:
-        window.location.href = standaloneUrl;
-        break;
-      case EMR.NONE:
-      default:
-        throw new Error("This EMR is not supported for standalone launch");
-    }
-    return;
-  }
+  /* The commented code block is defining a private method called `executeStandaloneLaunch` within the `SmartLaunchHandler` class. This method is used to launch a
+  standalone application for a specific EMR type, with an optional redirect URI override. */
+  // private executeStandaloneLaunch(emrType: EMR | undefined, redirectUriOverride: string | undefined) {
+  //   if (!emrType)
+  //     throw new Error('EmrType must be specified for Standalone Launch');
+  //   const redirectUri = redirectUriOverride ?? (window.location.origin + window.location.pathname);
+  //   const standaloneUrl = this.generateStandaloneUrl(emrType, redirectUri);
+  //   switch (emrType) {
+  //     case EMR.EPIC:
+  //     case EMR.CERNER:
+  //     case EMR.SMART:
+  //       window.location.href = standaloneUrl;
+  //       break;
+  //     case EMR.NONE:
+  //     default:
+  //       throw new Error("This EMR is not supported for standalone launch");
+  //   }
+  //   return;
+  // }
 
   /**
    * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
@@ -130,28 +154,9 @@ export default class SmartLaunchHandler {
    * @returns a URL string.
    */
   private generateStandaloneUrl(emrType: EMR, redirectUri: string) {
-    const { r4: r4Endpoint, auth: authEndpoint } = this.getEndpointsForEmr(emrType)
+    const { r4: r4Endpoint, auth: authEndpoint } = getEndpointsForEmr(emrType)
     const r4EndpointBase64 = btoa(r4Endpoint.toString())
     return `${authEndpoint}?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=${r4EndpointBase64}`;
-  }
-
-  /**
- * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
- * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
- * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
- * @returns an object of type EMR_ENDPOINTS.
- */
-  private getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
-    switch (emrType) {
-      case EMR.EPIC:
-        return EpicClient.getEndpoints()
-      case EMR.CERNER:
-        return CernerClient.getEndpoints()
-      case EMR.SMART:
-      case EMR.NONE:
-      default:
-        throw new Error(`Endpoints not found for EMR type: ${emrType}`)
-    }
   }
 
   /**
@@ -159,26 +164,26 @@ export default class SmartLaunchHandler {
    * corresponding EMR system.
    * @returns nothing (undefined).
    */
-  private async executeEMRLaunch() {
+  private async executeWebLaunch(launchType: LAUNCH) {
     const queryString = window.location.search;
     const originString = window.location.origin;
     const urlParams = new URLSearchParams(queryString);
-    const iss = urlParams.get("iss") ?? "";
+    const iss = urlParams.get("iss") ?? undefined;
+    if (!iss)
+      throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
     const emrType = this.getEMRType(iss);
-    const isValidIss = iss !== null && iss.includes(emrType);
-    if (isValidIss) {
-      switch (emrType) {
-        case EMR.EPIC:
-          await this.epicLaunch(this.clientID, originString, iss);
-          break;
-        case EMR.CERNER:
-          await this.cernerLaunch(this.clientID, originString, iss);
-          break;
-        case EMR.SMART:
-        case EMR.NONE:
-        default:
-          break;
-      }
+    if (emrType === EMR.NONE || !emrType)
+      throw new Error('EMR type cannot be inferred from the ISS')
+    switch (emrType) {
+      case EMR.EPIC:
+        await this.epicLaunch(this.clientID, originString, iss, launchType);
+        break;
+      case EMR.CERNER:
+        await this.cernerLaunch(this.clientID, originString, iss, launchType);
+        break;
+      case EMR.SMART:
+      default:
+        break;
     }
     return;
   }
