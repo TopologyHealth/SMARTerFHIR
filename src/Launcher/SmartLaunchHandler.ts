@@ -13,6 +13,10 @@ export enum EMR {
   NONE = "none",
 }
 
+export function instanceOfEmr(object: unknown): object is EMR {
+  return Object.values(EMR).includes((object as string) as EMR)
+}
+
 /**
  * Represents the SmartLaunchHandler class.
  */

@@ -5,6 +5,7 @@ export declare enum EMR {
     SMART = "smart",
     NONE = "none"
 }
+export declare function instanceOfEmr(object: unknown): object is EMR;
 /**
  * Represents the SmartLaunchHandler class.
  */
