@@ -69,7 +69,12 @@ export default class SmartLaunchHandler {
   ): Promise<string | void> {
     if (launchType === LAUNCH.BACKEND)
       throw new Error("This doesn't work for backend launch")
-    const scope = "launch online_access openid fhirUser";
+    const scope = [
+      launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
+      "online_access",
+      "openid",
+       "fhirUser"
+    ].join(" ")
     const redirect_uri = redirect ?? "";
     return FHIR.oauth2.authorize({
       client_id: clientId,
