@@ -22,6 +22,11 @@ type JWT = {
 	"epic.eci"?: string
 }
 
+/**
+ * The function checks if an object is an instance of the JWT class by verifying if it has a client_id property.
+ * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type.
+ * @returns a boolean value.
+ */
 function instanceOfJWT(object: unknown): object is JWT {
 	return (object as JWT).client_id !== undefined
 }
@@ -118,6 +123,13 @@ export default class ClientFactory {
 	}
 
 
+/**
+ * The function `getEmrTypeFromObject` takes an object as input and returns the corresponding EMR type if the object is of type JWT or EMR, otherwise it throws an
+ * error.
+ * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type. It is used as input to determine the EMR (Electronic
+ * Medical Record) type. The function checks if the `object` is an instance of JWT (JSON Web Token) or EMR, and returns
+ * @returns an EMR (Electronic Medical Record) object.
+ */
 	private getEmrTypeFromObject(object: unknown): EMR {
 		if (instanceOfJWT(object)) return this.getEMRType(object)
 		if (instanceOfEmr(object)) return (object as EMR)
@@ -139,6 +151,7 @@ export default class ClientFactory {
 		return defaultFhirClient
 	}
 
+/* The `getRequiredTokenParameters` function is responsible for retrieving the required token parameters based on the provided code. */
 	private getRequiredTokenParameters(code: string) {
 		try {
 			const decodedJwt: JWT = codeToJwt(code)
@@ -174,19 +187,6 @@ export default class ClientFactory {
 async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string, redirectUri: string) {
 	return await fetch(tokenEndpoint, {
 		method: "POST",
-		// headers: {
-		// 	"Access-Control-Allow-Origin": "*",
-		// 	"Access-Control-Allow-Credentials": "true",
-		// 	"Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
-		// 	"Access-Control-Allow-Headers": "true",
-		// 	"Origin": "true",
-		// 	"Accept": "true",
-		// 	"X-Requested-With": "true",
-		// 	"Content-Type": "true",
-		// 	"Access-Control-Request-Method": "true",
-		// 	"Access-Control-Request-Headers": "true",
-		// 	accept: "application/x-www-form-urlencoded"
-		// },
 		body: new URLSearchParams({
 			"grant_type": "authorization_code",
 			"code": code,

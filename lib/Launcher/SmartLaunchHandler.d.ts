@@ -6,6 +6,11 @@ export declare enum EMR {
     SMART = "smart",
     NONE = "none"
 }
+/**
+ * The function `instanceOfEmr` checks if an object is an instance of the EMR enum.
+ * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type.
+ * @returns a boolean value.
+ */
 export declare function instanceOfEmr(object: unknown): object is EMR;
 /**
 * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
@@ -63,14 +68,6 @@ export default class SmartLaunchHandler {
      * @returns {Promise<void>} - A promise resolving to void.
      */
     authorizeEMR(launchType?: LAUNCH): Promise<void>;
-    /**
-     * The function `executeStandaloneLaunch` is used to launch a standalone application for a specific EMR type, with an optional redirect URI override.
-     * @param {EMR | undefined} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of EMR (Electronic Medical
-     * Record) systems. It can have the following values:
-     * @param {string | undefined} redirectUriOverride - The `redirectUriOverride` parameter is a string that represents the URL where the user should be redirected
-     * after the standalone launch is completed. If this parameter is not provided, the default value is set to the current URL of the window.
-     * @returns Nothing is being returned. The function has a return type of `void`, which means it does not return any value.
-     */
     /**
      * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
      * @param {EMR} emrType - The `emrType` parameter represents the type of EMR (Electronic Medical Record) system. It is of type `EMR`.

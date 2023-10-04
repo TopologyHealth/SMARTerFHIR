@@ -13,6 +13,11 @@ export enum EMR {
   NONE = "none",
 }
 
+/**
+ * The function `instanceOfEmr` checks if an object is an instance of the EMR enum.
+ * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type.
+ * @returns a boolean value.
+ */
 export function instanceOfEmr(object: unknown): object is EMR {
   return Object.values(EMR).includes((object as string) as EMR)
 }
@@ -157,34 +162,6 @@ async cernerLaunch(
   // }
   throw new Error('Invalid Smart Launch Type')
 }
-
-  /**
-   * The function `executeStandaloneLaunch` is used to launch a standalone application for a specific EMR type, with an optional redirect URI override.
-   * @param {EMR | undefined} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of EMR (Electronic Medical
-   * Record) systems. It can have the following values:
-   * @param {string | undefined} redirectUriOverride - The `redirectUriOverride` parameter is a string that represents the URL where the user should be redirected
-   * after the standalone launch is completed. If this parameter is not provided, the default value is set to the current URL of the window.
-   * @returns Nothing is being returned. The function has a return type of `void`, which means it does not return any value.
-   */
-  /* The commented code block is defining a private method called `executeStandaloneLaunch` within the `SmartLaunchHandler` class. This method is used to launch a
-  standalone application for a specific EMR type, with an optional redirect URI override. */
-  // private executeStandaloneLaunch(emrType: EMR | undefined, redirectUriOverride: string | undefined) {
-  //   if (!emrType)
-  //     throw new Error('EmrType must be specified for Standalone Launch');
-  //   const redirectUri = redirectUriOverride ?? (window.location.origin + window.location.pathname);
-  //   const standaloneUrl = this.generateStandaloneUrl(emrType, redirectUri);
-  //   switch (emrType) {
-  //     case EMR.EPIC:
-  //     case EMR.CERNER:
-  //     case EMR.SMART:
-  //       window.location.href = standaloneUrl;
-  //       break;
-  //     case EMR.NONE:
-  //     default:
-  //       throw new Error("This EMR is not supported for standalone launch");
-  //   }
-  //   return;
-  // }
 
   /**
    * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
