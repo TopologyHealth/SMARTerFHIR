@@ -23,11 +23,12 @@ export default class SmartLaunchHandler {
      * @readonly
      */
     readonly clientID: string;
+    readonly clientSecret?: string;
     /**
      * Creates an instance of SmartLaunchHandler.
      * @param {string} clientID - The client ID to use for authorization.
      */
-    constructor(clientID: string);
+    constructor(clientID: string, clientSecret?: string);
     /**
      * Launches the Epic EMR application.
      * @param {string} clientId - The client ID to use for authorization.

@@ -17,13 +17,13 @@ export function instanceOfEmr(object: unknown): object is EMR {
   return Object.values(EMR).includes((object as string) as EMR)
 }
 
-  /**
- * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
- * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
- * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
- * @returns an object of type EMR_ENDPOINTS.
- */
-  export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
+/**
+* The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
+* @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
+* systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
+* @returns an object of type EMR_ENDPOINTS.
+*/
+export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
   switch (emrType) {
     case EMR.EPIC:
       return EpicClient.getEndpoints()
@@ -46,12 +46,15 @@ export default class SmartLaunchHandler {
    */
   readonly clientID: string;
 
+  readonly clientSecret?: string
+
   /**
    * Creates an instance of SmartLaunchHandler.
    * @param {string} clientID - The client ID to use for authorization.
    */
-  constructor(clientID: string) {
+  constructor(clientID: string, clientSecret?: string) {
     this.clientID = clientID;
+    this.clientSecret = clientSecret
   }
 
   /**
@@ -73,7 +76,7 @@ export default class SmartLaunchHandler {
       launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
       "online_access",
       "openid",
-       "fhirUser"
+      "fhirUser"
     ].join(" ")
     const redirect_uri = redirect ?? "";
     return FHIR.oauth2.authorize({
@@ -81,6 +84,7 @@ export default class SmartLaunchHandler {
       iss: iss,
       redirect_uri: redirect_uri,
       scope: scope,
+      clientSecret: this.clientSecret
     });
   }
 
@@ -103,7 +107,7 @@ export default class SmartLaunchHandler {
         ...cernerString,
         "online_access",
         "openid",
-        launchType === LAUNCH.STANDALONE ?  "profile" : "fhirUser",
+        launchType === LAUNCH.STANDALONE ? "profile" : "fhirUser",
       ].join(" "),
       iss: iss,
       redirect_uri: redirect_uri,
