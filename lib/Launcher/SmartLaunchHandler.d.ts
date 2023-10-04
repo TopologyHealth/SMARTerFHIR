@@ -30,21 +30,34 @@ export default class SmartLaunchHandler {
      */
     constructor(clientID: string, clientSecret?: string);
     /**
+     * Launches an EMR application.
+     * @param {string} clientId - The client ID to use for authorization.
+     * @param {string} redirect - The redirect URI to use for authorization.
+     * @param {string} iss - The issuer for authorization.
+     * @param {LAUNCH} launchType - The type of launch.
+     * @param {string[]} emrSpecificScopes - Additional scopes specific to the EMR.
+     * @param {string} clientSecret - The client secret for authorization.
+     * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+     */
+    private launchEMR;
+    /**
      * Launches the Epic EMR application.
      * @param {string} clientId - The client ID to use for authorization.
      * @param {string} redirect - The redirect URI to use for authorization.
      * @param {string} iss - The issuer for authorization.
+     * @param {LAUNCH} launchType - The type of launch.
      * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
      */
-    epicLaunch(clientId: string, redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
+    epicLaunch(redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
     /**
      * Launches the Cerner EMR application.
      * @param {string} clientId - The client ID to use for authorization.
      * @param {string} redirect - The redirect URI to use for authorization.
      * @param {string} iss - The issuer for authorization.
+     * @param {LAUNCH} launchType - The type of launch.
      * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
      */
-    cernerLaunch(clientId: string, redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
+    cernerLaunch(redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
     /**
      * Authorizes the EMR based on the current URL query parameters.
      * @returns {Promise<void>} - A promise resolving to void.
