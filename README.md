@@ -30,73 +30,45 @@ npm install smarter-fhir
 
 Here's a basic example demonstrating how to use the SMARTerFHIR library:
 
-### Smart Launch
+### Web Launch (using EMR or Standalone Launch)
 
 The following is an example of a function to handle the SMART Launch. I.e., when the EMR launches the application, it must be directed to the page that runs the following. E.g., this could be https://www.yourwebsite.com/launch
 
 ```typescript
-async function handleSmartLaunch() {
+async function handleWebLaunch() {
     try {
-        const emrClientID = MY_EMR_CLIENT_ID
+        const emrClientID = YOUR_EMR_CLIENT_ID
         const smartLaunchHandler = new SmartLaunchHandler(emrClientID)
-        smartLaunchHandler.authorizeEMR()
+        await smartLaunchHandler.authorizeEMR(LAUNCH.EMR) //Replace with 'LAUNCH.STANDALONE' for Standalone Launch
     }
     catch (e) {
         if (e instanceof Error) {
             throw e;
         }
+        throw new Error(`Unknown Error: ${e}`)
     }
 }
 ```
 
 ### SMART Client
 
-The following is an example of a function to instantiate the SMART Client after SmartLaunch has completed. During SmartLaunch, the EMR will authenticate your application. Once completed, it will redirect to the assigned redirect url. The code below should run upon successful authentication and redirect:
+The following is an example of a function to instantiate the SMART Client after a Web Launch has completed. During Launch, the EMR will authenticate your application. Once completed, it will redirect to the assigned redirect url. The code below should run upon successful authentication and redirect:
 
 ```typescript
 async function mySmartClientInstantiator() {
-    const clientFactory = new ClientFactory();
-    const baseClient = await clientFactory.createEMRClient()
-        .then((client) => {
-            if (!client) throw new Error('no client found')
-            return client
-        }).catch((reason) => {
-            throw new Error(`client not found: ${reason}`)
-        })
-    return baseClient
+    try {
+        const clientFactory = new ClientFactory();
+        const client = await clientFactory.createEMRClient(LAUNCH.EMR) //Replace with 'LAUNCH.STANDALONE' for Standalone Launch
+        if (!client) throw new Error('no client found')
+    } catch (reason) {
+        if (!(reason instanceof Error))
+            throw new Error(`Unknown Error: ${reason}`)
+        console.error(reason.message)
+    }
 }
 ```
 
 Make sure to import the necessary classes, interfaces, and types based on your requirements.
-
-### Standalone Launch
-
-For a [Standalone Launch](https://build.fhir.org/ig/HL7/smart-app-launch/app-launch.html#launch-app-standalone-launch), the user begins by authenticating through their EMR and is redirected to your application on success.
-
-The following example function uses SMARTerFHIR to begin the standalone launch flow with an EMR, which will redirect the user to the EMR to continue the flow:
-
-```typescript
-async function startStandaloneLaunch(emrType: EMR, emrClientId: string) {
-    const smartLaunchHandler = new SmartLaunchHandler(emrClientID)
-    smartLaunchHandler.authorizeEMR(LAUNCH.STANDALONE, emrType)
-}
-```
-
-The following example function will instantiate a SMART Client if executed after the EMR redirects from a standalone launch:
-
-```typescript
-async function myStandaloneSmartClientInstantiator() {
-    const clientFactory = new ClientFactory();
-    const baseClient = await clientFactory.createEMRClient(LAUNCH.STANDALONE)
-        .then((client) => {
-            if (!client) throw new Error('no client found')
-            return client
-        }).catch((reason) => {
-            throw new Error(`client not found: ${reason}`)
-        })
-    return baseClient;
-}
-```
 
 ## Documentation
 
