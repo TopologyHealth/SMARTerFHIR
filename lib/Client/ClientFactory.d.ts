@@ -35,5 +35,14 @@ export default class ClientFactory {
      * @returns an object of type EMR_ENDPOINTS.
      */
     private getEmrEndpoints;
+    /**
+     * The function `getEmrTypeFromObject` takes an object as input and returns the corresponding EMR type if the object is of type JWT or EMR, otherwise it throws an
+     * error.
+     * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type. It is used as input to determine the EMR (Electronic
+     * Medical Record) type. The function checks if the `object` is an instance of JWT (JSON Web Token) or EMR, and returns
+     * @returns an EMR (Electronic Medical Record) object.
+     */
+    private getEmrTypeFromObject;
     private buildStandaloneFhirClient;
+    private getRequiredTokenParameters;
 }
