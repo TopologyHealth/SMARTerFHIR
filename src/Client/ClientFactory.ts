@@ -1,6 +1,5 @@
 import * as FHIR from "fhirclient"
-import jwt_decode, { InvalidTokenError } from "jwt-decode"
-import SubClient, { FhirClientTypes } from "../FhirClient"
+import SubClient from "../FhirClient"
 import { EMR, instanceOfEmr } from "../Launcher/SmartLaunchHandler"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
@@ -95,7 +94,7 @@ export default class ClientFactory {
 			case LAUNCH.EMR:
 			case LAUNCH.STANDALONE:
 				return FHIR.oauth2.ready()
-				// return this.buildStandaloneFhirClient()
+			// return this.buildStandaloneFhirClient()
 			default:
 				throw new Error("Unsupported provider for standalone launch")
 		}
@@ -123,13 +122,13 @@ export default class ClientFactory {
 	}
 
 
-/**
- * The function `getEmrTypeFromObject` takes an object as input and returns the corresponding EMR type if the object is of type JWT or EMR, otherwise it throws an
- * error.
- * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type. It is used as input to determine the EMR (Electronic
- * Medical Record) type. The function checks if the `object` is an instance of JWT (JSON Web Token) or EMR, and returns
- * @returns an EMR (Electronic Medical Record) object.
- */
+	/**
+	 * The function `getEmrTypeFromObject` takes an object as input and returns the corresponding EMR type if the object is of type JWT or EMR, otherwise it throws an
+	 * error.
+	 * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type. It is used as input to determine the EMR (Electronic
+	 * Medical Record) type. The function checks if the `object` is an instance of JWT (JSON Web Token) or EMR, and returns
+	 * @returns an EMR (Electronic Medical Record) object.
+	 */
 	private getEmrTypeFromObject(object: unknown): EMR {
 		if (instanceOfJWT(object)) return this.getEMRType(object)
 		if (instanceOfEmr(object)) return (object as EMR)
@@ -137,39 +136,39 @@ export default class ClientFactory {
 	}
 
 	/* The `buildStandaloneFhirClient` function is responsible for creating a standalone FHIR client. */
-	private async buildStandaloneFhirClient() {
-		const code = getCodeFromBrowserUrl()
-		const { endpoints, clientId }: { endpoints: EMR_ENDPOINTS; clientId: string } = this.getRequiredTokenParameters(code)
-		const redirectUri = window.location.origin + window.location.pathname // The current URL minus any parameters
-		const tokenResponse = await getAccessToken(endpoints.token, code, clientId, redirectUri)
-		const defaultFhirClient = FHIR.client(endpoints.r4.toString())
-		defaultFhirClient.state.clientId = clientId
-		defaultFhirClient.state.tokenUri = endpoints.token.toString()
-		defaultFhirClient.state.tokenResponse = {
-			...tokenResponse
-		}
-		return defaultFhirClient
-	}
+	// private async buildStandaloneFhirClient() {
+	// 	const code = getCodeFromBrowserUrl()
+	// 	const { endpoints, clientId }: { endpoints: EMR_ENDPOINTS; clientId: string } = this.getRequiredTokenParameters(code)
+	// 	const redirectUri = window.location.origin + window.location.pathname // The current URL minus any parameters
+	// 	const tokenResponse = await getAccessToken(endpoints.token, code, clientId, redirectUri)
+	// 	const defaultFhirClient = FHIR.client(endpoints.r4.toString())
+	// 	defaultFhirClient.state.clientId = clientId
+	// 	defaultFhirClient.state.tokenUri = endpoints.token.toString()
+	// 	defaultFhirClient.state.tokenResponse = {
+	// 		...tokenResponse
+	// 	}
+	// 	return defaultFhirClient
+	// }
 
-/* The `getRequiredTokenParameters` function is responsible for retrieving the required token parameters based on the provided code. */
-	private getRequiredTokenParameters(code: string) {
-		try {
-			const decodedJwt: JWT = codeToJwt(code)
-			return { endpoints: this.getEmrEndpoints(decodedJwt), clientId: decodedJwt.client_id }
-		} catch (reason) {
-			const clientIdFromEnv = process.env.REACT_APP_EMR_CLIENT_ID
-			const emrType = ((process.env.REACT_APP_EMR_TYPE as string).toLowerCase() as EMR)
-			const isRequiredParamsGiven = emrType && clientIdFromEnv
-			if (!isRequiredParamsGiven) {
-				if (reason instanceof InvalidTokenError)
-					throw new InvalidTokenError('Cannot decode the Code for the EMR type. You must provide the client_id and emr_type explicitly')
-				throw reason
-			} else {
-				if (!emrType) throw new Error('EMR type cannot be inferred. You must provide the emr_type explicitly')
-				return { endpoints: this.getEmrEndpoints(emrType), clientId: clientIdFromEnv }
-			}
-		}
-	}
+	/* The `getRequiredTokenParameters` function is responsible for retrieving the required token parameters based on the provided code. */
+	// 	private getRequiredTokenParameters(code: string) {
+	// 		try {
+	// 			const decodedJwt: JWT = codeToJwt(code)
+	// 			return { endpoints: this.getEmrEndpoints(decodedJwt), clientId: decodedJwt.client_id }
+	// 		} catch (reason) {
+	// 			const clientIdFromEnv = process.env.REACT_APP_EMR_CLIENT_ID
+	// 			const emrType = ((process.env.REACT_APP_EMR_TYPE as string).toLowerCase() as EMR)
+	// 			const isRequiredParamsGiven = emrType && clientIdFromEnv
+	// 			if (!isRequiredParamsGiven) {
+	// 				if (reason instanceof InvalidTokenError)
+	// 					throw new InvalidTokenError('Cannot decode the Code for the EMR type. You must provide the client_id and emr_type explicitly')
+	// 				throw reason
+	// 			} else {
+	// 				if (!emrType) throw new Error('EMR type cannot be inferred. You must provide the emr_type explicitly')
+	// 				return { endpoints: this.getEmrEndpoints(emrType), clientId: clientIdFromEnv }
+	// 			}
+	// 		}
+	// 	}
 }
 
 /**
@@ -184,41 +183,42 @@ export default class ClientFactory {
  * @param {string} redirectUri - The `redirectUri` parameter is the redirection URI that will be sent to the authorization server.
  * @returns a Promise that resolves to a TokenResponse object.
  */
-async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string, redirectUri: string) {
-	return await fetch(tokenEndpoint, {
-		method: "POST",
-		body: new URLSearchParams({
-			"grant_type": "authorization_code",
-			"code": code,
-			"redirect_uri": redirectUri,
-			"client_id": clientId
-		})
-	})
-		.then(async (response) => await response.json())
-		.then(json => {
-			const tokenResponse = json as FhirClientTypes.TokenResponse
-			if (!tokenResponse.access_token) throw new Error("Could not find any access token from the oauth endpoint's response")
-			return tokenResponse
-		})
-}
+// async function getAccessToken(tokenEndpoint: URL, code: string, clientId: string, redirectUri: string) {
+// 	return await fetch(tokenEndpoint, {
+// 		method: "POST",
+// 		body: new URLSearchParams({
+// 			"grant_type": "authorization_code",
+// 			"code": code,
+// 			"redirect_uri": redirectUri,
+// 			"client_id": clientId
+// 		})
+// 	})
+// 		.then(async (response) => await response.json())
+// 		.then(json => {
+// 			const tokenResponse = json as FhirClientTypes.TokenResponse
+// 			if (!tokenResponse.access_token) throw new Error("Could not find any access token from the oauth endpoint's response")
+// 			return tokenResponse
+// 		})
+// }
 
 /**
  * The codeToJwt function decodes a JWT token using the jwt_decode library.
  * @param {string} code - The `code` parameter is a string that represents a JSON Web Token (JWT).
  * @returns the decoded JSON Web Token (JWT) object.
  */
-function codeToJwt(code: string) {
-	return jwt_decode<JWT>(code)
-}
+// function codeToJwt(code: string) {
+// 	return jwt_decode<JWT>(code)
+// }
 
 /**
  * The function retrieves a JWT token from the browser URL parameters.
  * @returns a string value.
  */
-function getCodeFromBrowserUrl(): string {
-	const urlParams = new URLSearchParams(window.location.search)
-	const code = urlParams.get("code")
-	if (code === null) throw new Error("Could not find any JWT token.")
-	return code
-}
+// function getCodeFromBrowserUrl(): string {
+// 	const urlParams = new URLSearchParams(window.location.search)
+// 	const code = urlParams.get("code")
+// 	if (code === null) throw new Error("Could not find any JWT token.")
+// 	return code
+// }
+
 

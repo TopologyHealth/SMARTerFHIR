@@ -69,13 +69,6 @@ export default class SmartLaunchHandler {
      */
     authorizeEMR(launchType?: LAUNCH): Promise<void>;
     /**
-     * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
-     * @param {EMR} emrType - The `emrType` parameter represents the type of EMR (Electronic Medical Record) system. It is of type `EMR`.
-     * @param {string} redirectUri - The `redirectUri` parameter is the URL where the user will be redirected to after completing the authentication process.
-     * @returns a URL string.
-     */
-    private generateStandaloneUrl;
-    /**
      * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
      * corresponding EMR system.
      * @returns nothing (undefined).
@@ -87,5 +80,5 @@ export default class SmartLaunchHandler {
      * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
      * returns `EMR.NONE`.
      */
-    getEMRType(iss: string): EMR;
+    getEMRType(iss?: string): EMR;
 }

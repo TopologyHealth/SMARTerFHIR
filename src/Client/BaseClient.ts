@@ -214,7 +214,10 @@ export default abstract class BaseClient {
 					...(additionalHeaders ? additionalHeaders : {}),
 				})
 				.then((resource) => {
-					if (!resource.resourceType) {
+					if (!(resource as R4ResourceWithRequiredType).resourceType) {
+						return resource.body as FhirClientResourceWithRequiredType
+					}
+					if (!(resource as R4ResourceWithRequiredType).resourceType) {
 						console.log(resource)
 						throw new Error(`Resource ${resource}, must have a resource type.`)
 					}

@@ -43,6 +43,25 @@ export default class ClientFactory {
      * @returns an EMR (Electronic Medical Record) object.
      */
     private getEmrTypeFromObject;
-    private buildStandaloneFhirClient;
-    private getRequiredTokenParameters;
 }
+/**
+ * The function `getAccessToken` is an async function that makes a POST request to a token endpoint with the provided code and client ID, and returns the access
+ * token from the response.
+ * @param {URL} tokenEndpoint - The `tokenEndpoint` parameter is the URL of the token endpoint where you need to send the authorization code to obtain an access
+ * token. This endpoint is typically provided by the OAuth server or authorization server.
+ * @param {string} code - The `code` parameter is the authorization code that you received from the authorization server after the user has granted permission to
+ * your application. This code is used to exchange for an access token.
+ * @param {string} clientId - The `clientId` parameter is the identifier for the client application that is requesting the access token. It is typically provided
+ * by the authorization server when registering the client application.
+ * @param {string} redirectUri - The `redirectUri` parameter is the redirection URI that will be sent to the authorization server.
+ * @returns a Promise that resolves to a TokenResponse object.
+ */
+/**
+ * The codeToJwt function decodes a JWT token using the jwt_decode library.
+ * @param {string} code - The `code` parameter is a string that represents a JSON Web Token (JWT).
+ * @returns the decoded JSON Web Token (JWT) object.
+ */
+/**
+ * The function retrieves a JWT token from the browser URL parameters.
+ * @returns a string value.
+ */

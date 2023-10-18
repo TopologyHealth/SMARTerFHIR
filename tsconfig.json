@@ -8,6 +8,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "./lib",
+    "sourceMap": true,
     "strict": true,
     "lib": [
       "dom",
