@@ -55,6 +55,15 @@ export default class SmartLaunchHandler {
      */
     epicLaunch(redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
     /**
+     * Launches the SMART Health IT EMR application.
+     * @param {string} clientId - The client ID to use for authorization.
+     * @param {string} redirect - The redirect URI to use for authorization.
+     * @param {string} iss - The issuer for authorization.
+     * @param {LAUNCH} launchType - The type of launch.
+     * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+     */
+    smartHealthITLaunch(redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
+    /**
      * Launches the Cerner EMR application.
      * @param {string} clientId - The client ID to use for authorization.
      * @param {string} redirect - The redirect URI to use for authorization.

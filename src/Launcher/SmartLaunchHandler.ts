@@ -124,6 +124,28 @@ async epicLaunch(
 }
 
 /**
+ * Launches the SMART Health IT EMR application.
+ * @param {string} clientId - The client ID to use for authorization.
+ * @param {string} redirect - The redirect URI to use for authorization.
+ * @param {string} iss - The issuer for authorization.
+ * @param {LAUNCH} launchType - The type of launch.
+ * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+ */
+async smartHealthITLaunch(
+  redirect: string,
+  iss: string,
+  launchType: LAUNCH
+): Promise<string | void> {
+
+  return this.launchEMR(
+    redirect,
+    iss,
+    launchType,
+    []
+  );
+}
+
+/**
  * Launches the Cerner EMR application.
  * @param {string} clientId - The client ID to use for authorization.
  * @param {string} redirect - The redirect URI to use for authorization.
@@ -198,6 +220,8 @@ async cernerLaunch(
       await this.cernerLaunch(originString, iss, launchType);
       break;
     case EMR.SMART:
+      await this.smartHealthITLaunch(originString, iss, launchType)
+      break;
     default:
       break;
   }
