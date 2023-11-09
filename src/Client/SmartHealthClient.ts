@@ -1,4 +1,5 @@
 import SubClient from "../FhirClient"
+import { EMR } from "../Launcher/SmartLaunchHandler"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 
 
@@ -16,6 +17,10 @@ export default class SmartHealthClient extends BaseClient {
 
 	getEndpoints(): EMR_ENDPOINTS {
 		return SmartHealthClient.getEndpoints()
+	}
+
+	getEMRType(): EMR {
+		return EMR.SMART
 	}
 
 	/**

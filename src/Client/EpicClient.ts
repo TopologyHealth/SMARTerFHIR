@@ -1,4 +1,5 @@
 import SubClient from "../FhirClient"
+import { EMR } from "../Launcher/SmartLaunchHandler"
 import { R4ResourceWithRequiredType } from "../types"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 
@@ -17,6 +18,10 @@ export default class EpicClient extends BaseClient {
 
 	getEndpoints(): EMR_ENDPOINTS {
 		return EpicClient.getEndpoints()
+	}
+
+	getEMRType(): EMR {
+		return EMR.EPIC
 	}
 
 	/* The `epicCreateHeaders` property is defining the headers that will be used when making a create request to the Epic FHIR server. In this case, it sets the

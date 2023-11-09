@@ -1,4 +1,5 @@
 import SubClient from "../FhirClient";
+import { EMR } from "../Launcher/SmartLaunchHandler";
 import { R4ResourceWithRequiredType } from "../types";
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient";
 /**
@@ -10,6 +11,7 @@ export default class EpicClient extends BaseClient {
     static readonly R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4";
     static getEndpoints(): EMR_ENDPOINTS;
     getEndpoints(): EMR_ENDPOINTS;
+    getEMRType(): EMR;
     readonly epicCreateHeaders: HeadersInit;
     /**
    * Creates an instance of EpicClient.

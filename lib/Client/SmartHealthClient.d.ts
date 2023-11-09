@@ -1,4 +1,5 @@
 import SubClient from "../FhirClient";
+import { EMR } from "../Launcher/SmartLaunchHandler";
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient";
 /**
  Represents the SmartHealthClient class, extending the BaseClient.
@@ -9,6 +10,7 @@ export default class SmartHealthClient extends BaseClient {
     static readonly R4_ENDPOINT = "https://launch.smarthealthit.org/v/r4/fhir";
     static getEndpoints(): EMR_ENDPOINTS;
     getEndpoints(): EMR_ENDPOINTS;
+    getEMRType(): EMR;
     /**
    * Creates an instance of SmartHealthClient.
    * @param {SubClient} fhirClientDefault - The default FHIR client to use.

@@ -10,6 +10,7 @@ import {
 	R4ResourceWithRequiredType,
 	UserReadResult,
 } from "../types"
+import { EMR } from "../Launcher/SmartLaunchHandler"
 
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
@@ -35,6 +36,7 @@ export default abstract class BaseClient {
 	static readonly R4_ENDPOINT: string | undefined;
 
 	public abstract getEndpoints(): EMR_ENDPOINTS
+	public abstract getEMRType(): EMR
 
 	/**
 	 * The function constructs and returns an object containing three endpoints (token, r4, and auth) based on the provided tokenEP, r4EP, and authorizeEP values.
