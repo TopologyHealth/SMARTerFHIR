@@ -8,6 +8,7 @@ import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
  Represents the EpicClient class, extending the BaseClient.
  */
 export default class EpicClient extends BaseClient {
+	EMR_TYPE: EMR = EMR.EPIC
 	static readonly AUTHORIZE_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize"
 	static readonly TOKEN_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token"
 	static readonly R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4"
@@ -18,10 +19,6 @@ export default class EpicClient extends BaseClient {
 
 	getEndpoints(): EMR_ENDPOINTS {
 		return EpicClient.getEndpoints()
-	}
-
-	getEMRType(): EMR {
-		return EMR.EPIC
 	}
 
 	/* The `epicCreateHeaders` property is defining the headers that will be used when making a create request to the Epic FHIR server. In this case, it sets the

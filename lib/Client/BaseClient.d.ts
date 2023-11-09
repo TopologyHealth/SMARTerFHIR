@@ -19,11 +19,12 @@ Represents the BaseClient abstract class.
 export default abstract class BaseClient {
     readonly fhirClientDefault: SubClient;
     readonly defaultCreateHeaders: HeadersInit;
+    abstract readonly EMR_TYPE: EMR;
     static readonly AUTHORIZE_ENDPOINT: string | undefined;
     static readonly TOKEN_ENDPOINT: string | undefined;
     static readonly R4_ENDPOINT: string | undefined;
     abstract getEndpoints(): EMR_ENDPOINTS;
-    abstract getEMRType(): EMR;
+    getEMRType(): EMR;
     /**
      * The function constructs and returns an object containing three endpoints (token, r4, and auth) based on the provided tokenEP, r4EP, and authorizeEP values.
      * @param {string | undefined} tokenEP - The `tokenEP` parameter is a string that represents the token endpoint. This endpoint is used to obtain an access token

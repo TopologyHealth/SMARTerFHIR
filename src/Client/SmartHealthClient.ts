@@ -7,6 +7,7 @@ import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
  Represents the SmartHealthClient class, extending the BaseClient.
  */
 export default class SmartHealthClient extends BaseClient {
+	readonly EMR_TYPE: EMR = EMR.SMART
 	static readonly AUTHORIZE_ENDPOINT = "https://launch.smarthealthit.org/v/r4/auth/authorize"
 	static readonly TOKEN_ENDPOINT = "https://launch.smarthealthit.org/v/r4/auth/token"
 	static readonly R4_ENDPOINT = "https://launch.smarthealthit.org/v/r4/fhir"
@@ -17,10 +18,6 @@ export default class SmartHealthClient extends BaseClient {
 
 	getEndpoints(): EMR_ENDPOINTS {
 		return SmartHealthClient.getEndpoints()
-	}
-
-	getEMRType(): EMR {
-		return EMR.SMART
 	}
 
 	/**

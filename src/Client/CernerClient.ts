@@ -7,6 +7,7 @@ import BaseClient, { EMR_ENDPOINTS } from "./BaseClient";
 Represents the CernerClient class, extending the BaseClient.
 */
 export default class CernerClient extends BaseClient {
+  EMR_TYPE: EMR = EMR.CERNER
   static readonly AUTHORIZE_ENDPOINT = "https://authorization.cerner.com/tenants/ec2458f2-1e24-41c8-b71b-0e701af7583d/protocols/oauth2/profiles/smart-v1/personas/provider/authorize"
   static readonly TOKEN_ENDPOINT = "https://authorization.cerner.com/tenants/ec2458f2-1e24-41c8-b71b-0e701af7583d/protocols/oauth2/profiles/smart-v1/token"
   static readonly R4_ENDPOINT = "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d"
@@ -17,11 +18,7 @@ export default class CernerClient extends BaseClient {
   getEndpoints(): EMR_ENDPOINTS {
     throw new Error("Method not implemented.");
   }
-
-	getEMRType(): EMR {
-		return EMR.CERNER
-	}
-
+  
   /* The `cernerRequestHeaders` property is a constant that represents the headers to be included in the request made by the CernerClient class. In this case, it
 specifies that the client accepts the "application/fhir+json" media type. The `readonly` keyword indicates that the property cannot be modified after it is
 initialized. */
