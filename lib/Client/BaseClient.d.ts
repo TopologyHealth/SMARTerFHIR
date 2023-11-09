@@ -1,7 +1,7 @@
 import * as R4 from "fhir/r4";
 import SubClient, { FhirClientTypes } from "../FhirClient";
-import { Author, FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
 import { EMR } from "../Launcher/SmartLaunchHandler";
+import { Author, FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
  * @property {URL} token - A URL that represents the endpoint for accessing the token service in an EMR (Electronic Medical Record) system.

@@ -1,5 +1,6 @@
 import * as R4 from "fhir/r4"
 import SubClient, { FhirClientTypes } from "../FhirClient"
+import { EMR } from "../Launcher/SmartLaunchHandler"
 import { Transformer } from "../Resource/transformer"
 import {
 	Author,
@@ -10,7 +11,6 @@ import {
 	R4ResourceWithRequiredType,
 	UserReadResult,
 } from "../types"
-import { EMR } from "../Launcher/SmartLaunchHandler"
 
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
@@ -29,7 +29,7 @@ Represents the BaseClient abstract class.
 export default abstract class BaseClient {
 	readonly fhirClientDefault
 	readonly defaultCreateHeaders: HeadersInit = {}
-	
+
 	abstract readonly EMR_TYPE: EMR
 	static readonly AUTHORIZE_ENDPOINT: string | undefined;
 	static readonly TOKEN_ENDPOINT: string | undefined;
@@ -218,7 +218,10 @@ export default abstract class BaseClient {
 					...(additionalHeaders ? additionalHeaders : {}),
 				})
 				.then((resource) => {
-					if (!resource.resourceType) {
+					if (!(resource as R4ResourceWithRequiredType).resourceType) {
+						return resource.body as FhirClientResourceWithRequiredType
+					}
+					if (!(resource as R4ResourceWithRequiredType).resourceType) {
 						console.log(resource)
 						throw new Error(`Resource ${resource}, must have a resource type.`)
 					}
