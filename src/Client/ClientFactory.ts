@@ -36,29 +36,33 @@ Represents the ClientFactory class for creating EMR clients.
 */
 export default class ClientFactory {
 
+
 	/**
- * The function `getEMRType` determines the type of Electronic Medical Record (EMR) based on the provided client or token.
- * @param {SubClient | JWT} clientOrToken - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
- * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
- */
+	 * The function `getEMRType` determines the type of Electronic Medical Record (EMR) based on the provided client or token.
+	 * @param {SubClient | JWT} client - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
+	 * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
+	*/
 	private getEMRType(clientOrToken: SubClient | JWT): EMR {
-		if (clientOrToken instanceof SubClient) {
+		function isClient(input: object): input is SubClient {
+			return (input as SubClient).state.serverUrl !== undefined;
+		}
+		if (isClient(clientOrToken)) {
 			if (clientOrToken.state.serverUrl.includes("cerner")) {
-				return EMR.CERNER
+				return EMR.CERNER;
 			}
 			if (clientOrToken.state.serverUrl.includes("smarthealthit")) {
-				return EMR.SMART
+				return EMR.SMART;
 			}
 			if (clientOrToken.state.serverUrl.includes("epic")) {
-				return EMR.EPIC
+				return EMR.EPIC;
 			}
-			return EMR.NONE
 		} else {
 			if ("epic.eci" in clientOrToken) {
-				return EMR.EPIC
+				return EMR.EPIC;
 			}
-			return EMR.NONE
 		}
+
+		return EMR.NONE;
 	}
 
 
@@ -68,8 +72,13 @@ export default class ClientFactory {
 	 * of `LAUNCH.EMR`.
 	 * @returns a Promise that resolves to an instance of the `BaseClient` class.
 	 */
-	async createEMRClient(launchType: LAUNCH = LAUNCH.EMR): Promise<BaseClient> {
-		const defaultFhirClient = await this.createDefaultFhirClient(launchType)
+	async createEMRClient(launchType: LAUNCH = LAUNCH.EMR, fhirClient?: SubClient): Promise<BaseClient> {
+
+		if (launchType === LAUNCH.BACKEND) {
+			if (!fhirClient) throw new Error(`FhirClient must be passed as a param for Backend Authentication`)
+		}
+
+		const defaultFhirClient = fhirClient ?? await this.createDefaultFhirClient(launchType)
 		const emrType = this.getEMRType(defaultFhirClient)
 		switch (emrType) {
 			case EMR.EPIC:
