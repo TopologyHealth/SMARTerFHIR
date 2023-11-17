@@ -148,14 +148,13 @@ export default class SmartLaunchHandler {
     );
   }
 
-
   /**
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
   async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR) {
     if (launchType === LAUNCH.BACKEND) {
-      // return await this.executeBackendAuth();
+      throw new Error(`Direct Backend Authorization not supported yet.`)
     } else {
       return await this.executeWebLaunch(launchType);
     }
@@ -191,21 +190,6 @@ export default class SmartLaunchHandler {
     }
     return;
   }
-
-  // private executeBackendAuth() {
-  //   const emrType = this.getEMRType();
-  //   // const jwtToken =
-  //    this.createJWT(emrType);
-
-  //   // const authParams: BackendAuthParams = {
-  //   //   client_id: this.clientID,
-  //   //   clientPrivateJwk: jwtToken
-
-  //   // }
-
-  //   // return FHIR.oauth2.authorize(authParams);
-
-  // }
 
   /**
    * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.

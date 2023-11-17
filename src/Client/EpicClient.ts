@@ -25,14 +25,16 @@ export default class EpicClient extends BaseClient {
 		Prefer: "return=representation",
 	}
 	/**
-   * Creates an instance of EpicClient.
-   * @param {SubClient} fhirClientDefault - The default FHIR client to use.
-   */
+	 * Creates an instance of EpicClient.
+	 * @param {SubClient} fhirClientDefault - The default FHIR client to use.
+	 */
 	constructor(fhirClientDefault: SubClient) {
 		super(fhirClientDefault)
 	}
 
-	async create<T extends R4ResourceWithRequiredType>(resource: T): Promise<T> {
-		return super.create(resource, this.createHeaders(this.epicCreateHeaders))
+	async create<T extends R4ResourceWithRequiredType>(resource: T,
+		patientId?: string,
+		encounterId?: string): Promise<T> {
+		return super.create(resource, patientId, encounterId, this.createHeaders(this.epicCreateHeaders),)
 	}
 }
