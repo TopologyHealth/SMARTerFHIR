@@ -1,4 +1,5 @@
 import SubClient from "../FhirClient"
+import { EMR } from "../Launcher/SmartLaunchHandler"
 import { R4ResourceWithRequiredType } from "../types"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 
@@ -7,6 +8,7 @@ import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
  Represents the EpicClient class, extending the BaseClient.
  */
 export default class EpicClient extends BaseClient {
+	EMR_TYPE: EMR = EMR.EPIC
 	static readonly AUTHORIZE_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize"
 	static readonly TOKEN_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token"
 	static readonly R4_ENDPOINT = "https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4"
