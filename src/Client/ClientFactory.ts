@@ -4,6 +4,7 @@ import { EMR, instanceOfEmr } from "../Launcher/SmartLaunchHandler"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
+import SmartHealthClient from "./SmartHealthClient"
 
 export enum LAUNCH {
 	EMR,
@@ -86,6 +87,7 @@ export default class ClientFactory {
 			case EMR.CERNER:
 				return new CernerClient(defaultFhirClient)
 			case EMR.SMART:
+				return new SmartHealthClient(defaultFhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")

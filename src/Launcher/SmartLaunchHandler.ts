@@ -123,30 +123,52 @@ export default class SmartLaunchHandler {
     );
   }
 
-  /**
-   * Launches the Cerner EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
-   * @param {string} redirect - The redirect URI to use for authorization.
-   * @param {string} iss - The issuer for authorization.
-   * @param {LAUNCH} launchType - The type of launch.
-   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-   */
-  async cernerLaunch(
-    redirect: string,
-    iss: string,
-    launchType: LAUNCH
-  ): Promise<string | void> {
-    const additionalScopes = cerner.scopes.map(
-      (name) => (scopes as { [key: string]: string })[name]
-    );
+/**
+ * Launches the SMART Health IT EMR application.
+ * @param {string} clientId - The client ID to use for authorization.
+ * @param {string} redirect - The redirect URI to use for authorization.
+ * @param {string} iss - The issuer for authorization.
+ * @param {LAUNCH} launchType - The type of launch.
+ * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+ */
+async smartHealthITLaunch(
+  redirect: string,
+  iss: string,
+  launchType: LAUNCH
+): Promise<string | void> {
 
-    return this.launchEMR(
-      redirect,
-      iss,
-      launchType,
-      additionalScopes
-    );
-  }
+  return this.launchEMR(
+    redirect,
+    iss,
+    launchType,
+    []
+  );
+}
+
+/**
+ * Launches the Cerner EMR application.
+ * @param {string} clientId - The client ID to use for authorization.
+ * @param {string} redirect - The redirect URI to use for authorization.
+ * @param {string} iss - The issuer for authorization.
+ * @param {LAUNCH} launchType - The type of launch.
+ * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+ */
+async cernerLaunch(
+  redirect: string,
+  iss: string,
+  launchType: LAUNCH
+): Promise<string | void> {
+  const additionalScopes = cerner.scopes.map(
+    (name) => (scopes as { [key: string]: string })[name]
+  );
+
+  return this.launchEMR(
+    redirect,
+    iss,
+    launchType,
+    additionalScopes
+  );
+}
 
   /**
    * Authorizes the EMR based on the current URL query parameters.
@@ -168,28 +190,29 @@ export default class SmartLaunchHandler {
    * @returns nothing (undefined).
    */
   private async executeWebLaunch(launchType: LAUNCH) {
-    const queryString = window.location.search;
-    const originString = window.location.origin;
-    const urlParams = new URLSearchParams(queryString);
-    const iss = urlParams.get("iss") ?? undefined;
-    if (!iss)
-      throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
-    const emrType = this.getEMRType(iss);
-    if (emrType === EMR.NONE || !emrType)
-      throw new Error('EMR type cannot be inferred from the ISS')
-    switch (emrType) {
-      case EMR.EPIC:
-        await this.epicLaunch(originString, iss, launchType);
-        break;
-      case EMR.CERNER:
-        await this.cernerLaunch(originString, iss, launchType);
-        break;
-      case EMR.SMART:
-      default:
-        break;
-    }
-    return;
+  const queryString = window.location.search;
+  const originString = window.location.origin;
+  const urlParams = new URLSearchParams(queryString);
+  const iss = urlParams.get("iss") ?? undefined;
+  if (!iss)
+    throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
+  const emrType = this.getEMRType(iss);
+  if (emrType === EMR.NONE || !emrType)
+    throw new Error('EMR type cannot be inferred from the ISS')
+  switch (emrType) {
+    case EMR.EPIC:
+      await this.epicLaunch(originString, iss, launchType);
+      break;
+    case EMR.CERNER:
+      await this.cernerLaunch(originString, iss, launchType);
+      break;
+    case EMR.SMART:
+      await this.smartHealthITLaunch(originString, iss, launchType)
+      break;
+    default:
+      break;
   }
+}
 
   /**
    * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.

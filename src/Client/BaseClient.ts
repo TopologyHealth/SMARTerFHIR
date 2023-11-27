@@ -1,5 +1,6 @@
 import * as R4 from "fhir/r4"
 import SubClient, { FhirClientTypes } from "../FhirClient"
+import { EMR } from "../Launcher/SmartLaunchHandler"
 import { Transformer } from "../Resource/transformer"
 import {
 	Author,
@@ -27,14 +28,17 @@ Represents the BaseClient abstract class.
 */
 export default abstract class BaseClient {
 	readonly fhirClientDefault
-
 	readonly defaultCreateHeaders: HeadersInit = {}
 
+	abstract readonly EMR_TYPE: EMR
 	static readonly AUTHORIZE_ENDPOINT: string | undefined;
 	static readonly TOKEN_ENDPOINT: string | undefined;
 	static readonly R4_ENDPOINT: string | undefined;
 
 	public abstract getEndpoints(): EMR_ENDPOINTS
+	public getEMRType(): EMR {
+		return this.EMR_TYPE
+	}
 
 	/**
 	 * The function constructs and returns an object containing three endpoints (token, r4, and auth) based on the provided tokenEP, r4EP, and authorizeEP values.
