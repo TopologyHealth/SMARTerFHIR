@@ -101,27 +101,27 @@ export default class SmartLaunchHandler {
     });
   }
 
-/**
- * Launches the Epic EMR application.
- * @param {string} clientId - The client ID to use for authorization.
- * @param {string} redirect - The redirect URI to use for authorization.
- * @param {string} iss - The issuer for authorization.
- * @param {LAUNCH} launchType - The type of launch.
- * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
- */
-async epicLaunch(
+  /**
+   * Launches the Epic EMR application.
+   * @param {string} clientId - The client ID to use for authorization.
+   * @param {string} redirect - The redirect URI to use for authorization.
+   * @param {string} iss - The issuer for authorization.
+   * @param {LAUNCH} launchType - The type of launch.
+   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+   */
+  async epicLaunch(
     redirect: string,
     iss: string,
     launchType: LAUNCH
   ): Promise<string | void> {
-  const emrSpecificScopes: string[] = [];
-  return this.launchEMR(
-    redirect,
-    iss,
-    launchType,
-    emrSpecificScopes
-  );
-}
+    const emrSpecificScopes: string[] = [];
+    return this.launchEMR(
+      redirect,
+      iss,
+      launchType,
+      emrSpecificScopes
+    );
+  }
 
 /**
  * Launches the SMART Health IT EMR application.
@@ -170,32 +170,19 @@ async cernerLaunch(
   );
 }
 
-
   /**
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
   async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR) {
-  if (launchType !== LAUNCH.BACKEND) {
-    return await this.executeWebLaunch(launchType);
+    if (launchType === LAUNCH.BACKEND) {
+      throw new Error(`Direct Backend Authorization not supported yet.`)
+    } else {
+      return await this.executeWebLaunch(launchType);
+    }
   }
-  // if (launchType === LAUNCH.STANDALONE) {
-  //   return this.executeStandaloneLaunch(emrType, redirectUriOverride);
-  // }
-  throw new Error('Invalid Smart Launch Type')
-}
 
-  /**
-   * The function generates a standalone URL for a given EMR type, redirect URI, and client ID.
-   * @param {EMR} emrType - The `emrType` parameter represents the type of EMR (Electronic Medical Record) system. It is of type `EMR`.
-   * @param {string} redirectUri - The `redirectUri` parameter is the URL where the user will be redirected to after completing the authentication process.
-   * @returns a URL string.
-   */
-  private generateStandaloneUrl(emrType: EMR, redirectUri: string) {
-  const { r4: r4Endpoint, auth: authEndpoint } = getEndpointsForEmr(emrType)
-  const r4EndpointBase64 = btoa(r4Endpoint.toString())
-  return `${authEndpoint}?response_type=code&redirect_uri=${redirectUri}&client_id=${this.clientID}&aud=${r4EndpointBase64}`;
-}
+
 
   /**
    * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
@@ -225,18 +212,22 @@ async cernerLaunch(
     default:
       break;
   }
-  return;
 }
 
-/**
- * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
- * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
- * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
- * returns `EMR.NONE`.
- */
-getEMRType(iss: string): EMR {
-  const isEMROfType = (emrType: EMR) => iss.includes(emrType);
-  const emrTypes = Object.values(EMR);
-  return emrTypes.find(isEMROfType) ?? EMR.NONE;
-}
+  /**
+   * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
+   * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
+   * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
+   * returns `EMR.NONE`.
+   */
+  getEMRType(iss?: string): EMR {
+    if (iss) {
+      const isEMROfType = (emrType: EMR) => iss.includes(emrType);
+      const emrTypes = Object.values(EMR);
+      return emrTypes.find(isEMROfType) ?? EMR.NONE;
+    }
+    const emrType = (process.env.REACT_APP_EMR_TYPE as string).toLowerCase() as EMR
+    if (!emrType) throw new Error('EMR type cannot be inferred. You must provide the emrType explicitly as an env variable')
+    return emrType
+  }
 }

@@ -8,12 +8,12 @@
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "./lib",
+    "sourceMap": true,
     "strict": true,
     "lib": [
       "dom",
       "es2015"
-    ],
-    "sourceMap": true
+    ]
   },
   "include": [
     "src"

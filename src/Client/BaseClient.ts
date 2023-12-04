@@ -97,7 +97,10 @@ export default abstract class BaseClient {
 	 */
 	private async getIDfromObject<T extends ObjectWithID>(objectWithId: T) {
 		const id = await objectWithId.id
-		if (!id) throw new Error("id not found")
+		if (!id) {
+			console.error(objectWithId)
+			throw new Error(`id not found`)
+		} 
 		return id
 	}
 
@@ -106,10 +109,11 @@ export default abstract class BaseClient {
 	 * @private
 	 * @returns {Promise<GenericSubject>} - A promise resolving to the patient subject.
 	 */
-	private async createPatientSubject(): Promise<GenericSubject> {
-		const patientID = await this.getIDfromObject(
+	private async createPatientSubject(patientIdParam?: string): Promise<GenericSubject> {
+		console.log(patientIdParam)
+		const patientID = patientIdParam == undefined ? await this.getIDfromObject(
 			this.fhirClientDefault.patient
-		)
+		) : patientIdParam
 		return {
 			subject: {
 				reference: `Patient/${patientID}`,
@@ -121,10 +125,10 @@ export default abstract class BaseClient {
 	 * The function creates a reference to an Encounter object by retrieving its ID from a FHIR client.
 	 * @returns An object is being returned with a property "reference" that has a value of `Encounter/`.
 	 */
-	private async createEncounterReference() {
-		const encounterID = await this.getIDfromObject(
+	private async createEncounterReference(encounterIdParam?: string) {
+		const encounterID = encounterIdParam == undefined ? await this.getIDfromObject(
 			this.fhirClientDefault.encounter
-		)
+		) : encounterIdParam
 		return {
 			reference: `Encounter/${encounterID}`,
 		}
@@ -134,8 +138,8 @@ export default abstract class BaseClient {
 	 * The function creates an array of encounter references asynchronously.
 	 * @returns An array containing the result of the `createEncounterReference` function, which is awaited.
 	 */
-	private async createEncounterReferenceArray() {
-		return [await this.createEncounterReference()]
+	private async createEncounterReferenceArray(encounterIdParam?: string) {
+		return [await this.createEncounterReference(encounterIdParam)]
 	}
 
 	/**
@@ -154,8 +158,8 @@ export default abstract class BaseClient {
 	 * The createContext function creates a context object with an encounter reference array and a period.
 	 * @returns The function `createContext` is returning an object with a property `context` which contains the values of `encounter` and `period`.
 	 */
-	private async createContext(): Promise<{ context: GenericContext }> {
-		const encounter = await this.createEncounterReferenceArray()
+	private async createContext(encounterIdParam?: string): Promise<{ context: GenericContext }> {
+		const encounter = await this.createEncounterReferenceArray(encounterIdParam)
 		const currentDateString = new Date().toISOString()
 		const period: R4.Period = this.createPeriod(currentDateString)
 		return {
@@ -188,12 +192,14 @@ export default abstract class BaseClient {
 	 * @returns {Promise<T>} - A promise resolving to the hydrated resource.
 	 */
 	async hydrateResource<T extends FhirClientResourceWithRequiredType>(
-		resource: T
+		resource: T,
+		patientId?: string,
+		encounterId?: string
 	) {
 		return {
 			...resource,
-			...("subject" in resource ? {} : await this.createPatientSubject()),
-			...("encounter" in resource ? {} : await this.createContext()),
+			...("subject" in resource ? {} : await this.createPatientSubject(patientId)),
+			...("encounter" in resource ? {} : await this.createContext(encounterId)),
 		}
 	}
 
@@ -208,32 +214,38 @@ export default abstract class BaseClient {
 	 */
 	async create<T extends R4ResourceWithRequiredType>(
 		resource: T,
+		patientId?: string,
+		encounterId?: string,
 		additionalHeaders?: FhirClientTypes.FetchOptions
 	): Promise<T> {
 		const transformedResource = Transformer.toFhirClientType(resource)
-		const hydratedResource = await this.hydrateResource(transformedResource)
+		const hydratedResource = await this.hydrateResource(transformedResource, patientId, encounterId)
 		const resultResource: FhirClientResourceWithRequiredType =
-			await this.fhirClientDefault
-				.create(hydratedResource, {
-					...(additionalHeaders ? additionalHeaders : {}),
-				})
-				.then((resource) => {
-					if (!(resource as R4ResourceWithRequiredType).resourceType) {
-						return resource.body as FhirClientResourceWithRequiredType
-					}
-					if (!(resource as R4ResourceWithRequiredType).resourceType) {
-						console.log(resource)
-						throw new Error(`Resource ${resource}, must have a resource type.`)
-					}
-					return resource as FhirClientResourceWithRequiredType
-				})
-				.catch((reason) => {
-					throw new Error("It failed with:" + reason)
-				})
+			await this.createHydratedResource(hydratedResource, additionalHeaders)
 		const resultAsR4 = Transformer.toR4FhirType<typeof resultResource, T>(
 			resultResource
 		)
 		return resultAsR4 as T
+	}
+
+	async createHydratedResource(hydratedResource: Omit<Partial<FhirClientTypes.FHIR.Resource>, "resourceType"> & Required<Pick<Partial<FhirClientTypes.FHIR.Resource>, "resourceType">> & { context?: GenericContext; subject?: R4.Reference | undefined }, additionalHeaders?: FhirClientTypes.FetchOptions | undefined): Promise<FhirClientResourceWithRequiredType> {
+		return await this.fhirClientDefault
+			.create(hydratedResource, {
+				...(additionalHeaders ? additionalHeaders : {}),
+			})
+			.then((resource) => {
+				if (!(resource as R4ResourceWithRequiredType).resourceType) {
+					return resource.body as FhirClientResourceWithRequiredType
+				}
+				if (!(resource as R4ResourceWithRequiredType).resourceType) {
+					console.log(resource)
+					throw new Error(`Resource ${resource}, must have a resource type.`)
+				}
+				return resource as FhirClientResourceWithRequiredType
+			})
+			.catch((reason) => {
+				throw new Error("It failed with:" + reason)
+			})
 	}
 
 	/**

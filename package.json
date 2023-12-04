@@ -6,7 +6,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "build-module": "tsc --module commonjs"
   },
   "author": "Josh Liben and Raghavan Chandrabalan",
   "keywords": [
@@ -16,30 +17,32 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "fhirclient": "^2.5.2",
-    "jwt-decode": "^3.1.2",
     "ansi-regex": "^5.0.1",
-    "json5": ">=1.0.2",
-    "tough-cookie": ">=4.1.3",
+    "buffer": "^6.0.3",
+    "fast-xml-parser": ">=4.2.5",
+    "fhirclient": "^2.5.2",
     "got": ">=11.8.5",
-    "xml2js": ">=0.5.0",
-    "fast-xml-parser": ">=4.2.5"
+    "json5": ">=1.0.2",
+    "process": "^0.11.10",
+    "tough-cookie": ">=4.1.3",
+    "util": "^0.12.5",
+    "xml2js": ">=0.5.0"
   },
   "devDependencies": {
     "@types/fhir": "^0.0.37",
     "@types/node": "^20.2.5",
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
+    "ansi-regex": "^5.0.1",
     "eslint": "^8.48.0",
     "eslint-plugin-react": "^7.33.2",
+    "fast-xml-parser": ">=4.2.5",
     "fhirclient": "^2.5.2",
-    "typescript": "^5.1.3",
-    "ansi-regex": "^5.0.1",
+    "got": ">=11.8.5",
     "json5": ">=1.0.2",
     "tough-cookie": ">=4.1.3",
-    "got": ">=11.8.5",
-    "xml2js": ">=0.5.0",
-    "fast-xml-parser": ">=4.2.5"
+    "typescript": "^5.1.3",
+    "xml2js": ">=0.5.0"
   },
   "peerDependencies": {
     "fhirclient": "^2.5.2"

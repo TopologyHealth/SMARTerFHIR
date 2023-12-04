@@ -1,7 +1,7 @@
 import * as R4 from "fhir/r4";
 import SubClient, { FhirClientTypes } from "../FhirClient";
 import { EMR } from "../Launcher/SmartLaunchHandler";
-import { Author, FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
+import { Author, FhirClientResourceWithRequiredType, GenericContext, R4ResourceWithRequiredType } from "../types";
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
  * @property {URL} token - A URL that represents the endpoint for accessing the token service in an EMR (Electronic Medical Record) system.
@@ -97,7 +97,7 @@ export default abstract class BaseClient {
      * @param {T} resource - The resource to hydrate.
      * @returns {Promise<T>} - A promise resolving to the hydrated resource.
      */
-    hydrateResource<T extends FhirClientResourceWithRequiredType>(resource: T): Promise<T & {
+    hydrateResource<T extends FhirClientResourceWithRequiredType>(resource: T, patientId?: string, encounterId?: string): Promise<T & {
         context?: R4.DocumentReferenceContext | undefined;
         subject?: R4.Reference | undefined;
     }>;
@@ -110,7 +110,11 @@ export default abstract class BaseClient {
      * creating a resource. It is of type `FhirClientTypes.FetchOptions`.
      * @returns a Promise of type T, which is the same type as the input resource.
      */
-    create<T extends R4ResourceWithRequiredType>(resource: T, additionalHeaders?: FhirClientTypes.FetchOptions): Promise<T>;
+    create<T extends R4ResourceWithRequiredType>(resource: T, patientId?: string, encounterId?: string, additionalHeaders?: FhirClientTypes.FetchOptions): Promise<T>;
+    createHydratedResource(hydratedResource: Omit<Partial<FhirClientTypes.FHIR.Resource>, "resourceType"> & Required<Pick<Partial<FhirClientTypes.FHIR.Resource>, "resourceType">> & {
+        context?: GenericContext;
+        subject?: R4.Reference | undefined;
+    }, additionalHeaders?: FhirClientTypes.FetchOptions | undefined): Promise<FhirClientResourceWithRequiredType>;
     /**
      * The function `requestResource` asynchronously requests a resource using a specified resource ID and optional request options.
      * @param {string} resourceID - The resourceID parameter is a string that represents the ID of the resource you want to request. It could be the URL or identifier
