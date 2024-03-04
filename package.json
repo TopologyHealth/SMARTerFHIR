@@ -1,6 +1,6 @@
 {
   "name": "@topologyhealth/smarterfhir",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Library for simplifying all things FHIR and SMART",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -27,7 +27,6 @@
     "util": "^0.12.5",
     "xml2js": ">=0.5.0"
   },
-
   "overrides": {
     "@expo/image-utils": {
       "semver": "7.5.4"
