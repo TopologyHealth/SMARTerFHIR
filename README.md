@@ -28,6 +28,12 @@ Support for the npm registry will be coming soon
 npm install smarter-fhir
 ``` -->
 
+### TypeScript
+
+This library provides versions using ESM and CommonJS, defined by the `"exports"` property in `package.json`.
+
+When using Typescript, you may want to set `"moduleResolution"` to `"node16"` or `"bundler"` in your `tsconfig.json` file, which will direct the compiler to use `"exports"` to automatically resolve any import to the correct version.
+
 ## Usage
 
 Here's a basic example demonstrating how to use the SMARTerFHIR library:
