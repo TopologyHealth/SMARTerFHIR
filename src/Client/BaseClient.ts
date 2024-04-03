@@ -318,4 +318,19 @@ export default abstract class BaseClient {
 		>(encounter)
 		return encounterInR4
 	}
+	
+	/**
+	 * The function creates a patient resource and returns it as a R4.Patient object.
+	 * @param {R4.Patient} patient - The `patient` parameter is the FHIR patient resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
+	 * FHIR specification and has a required `resourceType` property.
+	 * @returns a Promise of type R4.Patient
+	 */
+	async createPatient(patient: R4.Patient): Promise<R4.Patient> {
+		const resultResource: FhirClientResourceWithRequiredType =
+			await this.createHydratedResource(patient)
+		const resultAsR4 = Transformer.toR4FhirType<typeof resultResource, R4.Patient>(
+			resultResource
+		)
+		return resultAsR4 as R4.Patient
+	}
 }

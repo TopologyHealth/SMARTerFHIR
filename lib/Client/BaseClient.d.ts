@@ -144,4 +144,11 @@ export default abstract class BaseClient {
      */
     getPatientRead(): Promise<R4.Patient>;
     getEncounterRead(): Promise<R4.Encounter>;
+    /**
+     * The function creates a patient resource and returns it as a R4.Patient object.
+     * @param {R4.Patient} patient - The `patient` parameter is the FHIR patient resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
+     * FHIR specification and has a required `resourceType` property.
+     * @returns a Promise of type R4.Patient
+     */
+    createPatient(patient: R4.Patient): Promise<R4.Patient>;
 }
