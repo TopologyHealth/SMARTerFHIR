@@ -32,45 +32,16 @@ npm install smarter-fhir
 
 Here's a basic example demonstrating how to use the SMARTerFHIR library:
 
-### Web Launch (using EMR or Standalone Launch)
+<!-- <iframe
+  src="https://topology.health/docs/web-launch#main"
+  style="width:100%; height:300px;"
+  frameborder="0"
+></iframe> -->
 
-The following is an example of a function to handle the SMART Launch. I.e., when the EMR launches the application, it must be directed to the page that runs the following. E.g., this could be https://www.yourwebsite.com/launch
-
-```typescript
-async function handleWebLaunch() {
-    try {
-        const emrClientID = YOUR_EMR_CLIENT_ID
-        const smartLaunchHandler = new SmartLaunchHandler(emrClientID)
-        await smartLaunchHandler.authorizeEMR(LAUNCH.EMR) //Replace with 'LAUNCH.STANDALONE' for Standalone Launch
-    }
-    catch (e) {
-        if (e instanceof Error) {
-            throw e;
-        }
-        throw new Error(`Unknown Error: ${e}`)
-    }
-}
-```
-
-### SMART Client
-
-The following is an example of a function to instantiate the SMART Client after a Web Launch has completed. During Launch, the EMR will authenticate your application. Once completed, it will redirect to the assigned redirect url. The code below should run upon successful authentication and redirect:
-
-```typescript
-async function mySmartClientInstantiator() {
-    try {
-        const clientFactory = new ClientFactory();
-        const client = await clientFactory.createEMRClient(LAUNCH.EMR) //Replace with 'LAUNCH.STANDALONE' for Standalone Launch
-        if (!client) throw new Error('no client found')
-    } catch (reason) {
-        if (!(reason instanceof Error))
-            throw new Error(`Unknown Error: ${reason}`)
-        console.error(reason.message)
-    }
-}
-```
-
-Make sure to import the necessary classes, interfaces, and types based on your requirements.
+<div style="overflow: hidden; margin: 15px auto;">
+<iframe scrolling="no" src="https://topology.health/docs/web-launch#main" style="border: 0px none; height: 2450px; margin-top: -300px; margin-bottom: 10px; width: 926px;">
+</iframe>
+</div>
 
 ## Documentation
 
