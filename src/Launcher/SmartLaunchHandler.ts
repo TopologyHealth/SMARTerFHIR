@@ -123,62 +123,62 @@ export default class SmartLaunchHandler {
     );
   }
 
-/**
- * Launches the SMART Health IT EMR application.
- * @param {string} clientId - The client ID to use for authorization.
- * @param {string} redirect - The redirect URI to use for authorization.
- * @param {string} iss - The issuer for authorization.
- * @param {LAUNCH} launchType - The type of launch.
- * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
- */
-async smartHealthITLaunch(
-  redirect: string,
-  iss: string,
-  launchType: LAUNCH
-): Promise<string | void> {
+  /**
+   * Launches the SMART Health IT EMR application.
+   * @param {string} clientId - The client ID to use for authorization.
+   * @param {string} redirect - The redirect URI to use for authorization.
+   * @param {string} iss - The issuer for authorization.
+   * @param {LAUNCH} launchType - The type of launch.
+   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+   */
+  async smartHealthITLaunch(
+    redirect: string,
+    iss: string,
+    launchType: LAUNCH
+  ): Promise<string | void> {
 
-  return this.launchEMR(
-    redirect,
-    iss,
-    launchType,
-    []
-  );
-}
+    return this.launchEMR(
+      redirect,
+      iss,
+      launchType,
+      []
+    );
+  }
 
-/**
- * Launches the Cerner EMR application.
- * @param {string} clientId - The client ID to use for authorization.
- * @param {string} redirect - The redirect URI to use for authorization.
- * @param {string} iss - The issuer for authorization.
- * @param {LAUNCH} launchType - The type of launch.
- * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
- */
-async cernerLaunch(
-  redirect: string,
-  iss: string,
-  launchType: LAUNCH
-): Promise<string | void> {
-  const additionalScopes = cerner.scopes.map(
-    (name) => (scopes as { [key: string]: string })[name]
-  );
+  /**
+   * Launches the Cerner EMR application.
+   * @param {string} clientId - The client ID to use for authorization.
+   * @param {string} redirect - The redirect URI to use for authorization.
+   * @param {string} iss - The issuer for authorization.
+   * @param {LAUNCH} launchType - The type of launch.
+   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+   */
+  async cernerLaunch(
+    redirect: string,
+    iss: string,
+    launchType: LAUNCH
+  ): Promise<string | void> {
+    const additionalScopes = cerner.scopes.map(
+      (name) => (scopes as { [key: string]: string })[name]
+    );
 
-  return this.launchEMR(
-    redirect,
-    iss,
-    launchType,
-    additionalScopes
-  );
-}
+    return this.launchEMR(
+      redirect,
+      iss,
+      launchType,
+      additionalScopes
+    );
+  }
 
   /**
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
-  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR) {
+  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR, redirectPath?: string) {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error(`Direct Backend Authorization not supported yet.`)
     } else {
-      return await this.executeWebLaunch(launchType);
+      return await this.executeWebLaunch(launchType, redirectPath);
     }
   }
 
@@ -189,30 +189,37 @@ async cernerLaunch(
    * corresponding EMR system.
    * @returns nothing (undefined).
    */
-  private async executeWebLaunch(launchType: LAUNCH) {
-  const queryString = window.location.search;
-  const originString = window.location.origin;
-  const urlParams = new URLSearchParams(queryString);
-  const iss = urlParams.get("iss") ?? undefined;
-  if (!iss)
-    throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
-  const emrType = this.getEMRType(iss);
-  if (emrType === EMR.NONE || !emrType)
-    throw new Error('EMR type cannot be inferred from the ISS')
-  switch (emrType) {
-    case EMR.EPIC:
-      await this.epicLaunch(originString, iss, launchType);
-      break;
-    case EMR.CERNER:
-      await this.cernerLaunch(originString, iss, launchType);
-      break;
-    case EMR.SMART:
-      await this.smartHealthITLaunch(originString, iss, launchType)
-      break;
-    default:
-      break;
+  private async executeWebLaunch(launchType: LAUNCH, redirectPath?: string) {
+    const queryString = window.location.search;
+    const origin = window.location.origin;
+    const redirect = origin + (
+      redirectPath
+        ? redirectPath.startsWith('/')
+          ? redirectPath
+          : '/' + redirectPath
+        : ''
+      );
+    const urlParams = new URLSearchParams(queryString);
+    const iss = urlParams.get("iss") ?? undefined;
+    if (!iss)
+      throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
+    const emrType = this.getEMRType(iss);
+    if (emrType === EMR.NONE || !emrType)
+      throw new Error('EMR type cannot be inferred from the ISS')
+    switch (emrType) {
+      case EMR.EPIC:
+        await this.epicLaunch(redirect, iss, launchType);
+        break;
+      case EMR.CERNER:
+        await this.cernerLaunch(redirect, iss, launchType);
+        break;
+      case EMR.SMART:
+        await this.smartHealthITLaunch(redirect, iss, launchType)
+        break;
+      default:
+        break;
+    }
   }
-}
 
   /**
    * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
