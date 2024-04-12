@@ -1,6 +1,6 @@
 {
   "name": "@topologyhealth/smarterfhir",
-  "version": "0.4.0",
+  "version": "0.3.5",
   "description": "Library for simplifying all things FHIR and SMART",
   "main": "lib/cjs/index.js",
   "types": "lib/esm/index.d.ts",
