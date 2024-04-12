@@ -1,5 +1,7 @@
-import SubClient from "../FhirClient";
+/// <reference types="node" />
 import BaseClient from "./BaseClient";
+import { ServerResponse, IncomingMessage } from "http";
+import { FhirClientConfig } from "../types";
 export declare enum LAUNCH {
     EMR = 0,
     STANDALONE = 1,
@@ -21,7 +23,16 @@ export default class ClientFactory {
      * of `LAUNCH.EMR`.
      * @returns a Promise that resolves to an instance of the `BaseClient` class.
      */
-    createEMRClient(launchType?: LAUNCH, fhirClient?: SubClient): Promise<BaseClient>;
+    createEMRClient(launchType: LAUNCH.EMR | LAUNCH.STANDALONE): Promise<BaseClient>;
+    /**
+     * The function `createEMRClientBackend` creates an EMR client based on the specified launch type.
+     * @param {IncomingMessage} req - The `req` parameter is an incoming message object that represents the request made by the client.
+     * @param {ServerResponse} res - The `res` parameter is a server response object that represents the response sent by the server.
+     * @param {FhirClientConfig} serverConfig - The `serverConfig` parameter is an object that contains the configuration for the FHIR client. It includes the server URL, token response, client ID, and token URI.
+     * @returns a Promise that resolves to an instance of the `BaseClient` class.
+     */
+    createEMRClientBackend(req: IncomingMessage, res: ServerResponse, serverConfig: FhirClientConfig): Promise<BaseClient>;
+    private createSmarterFhirClient;
     /**
      * The function creates a default FHIR client based on the launch type.
      * @param {LAUNCH} launchType - The `launchType` parameter is an enum type called `LAUNCH`. It represents the type of launch for the FHIR client. There are two

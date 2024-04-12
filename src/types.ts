@@ -73,3 +73,17 @@ export type UserReadResult = SubClient["user"]["read"] extends (
   : never
   : R
   : never;
+
+/**
+ * The FhirClientConfig interface represents the configuration for the FHIR client.
+ * @property {string} serverUrl - The server URL for the FHIR client.
+ * @property {string} tokenUri - The token URI for the FHIR client.
+ * @property {FhirClientTypes.TokenResponse} tokenResponse - The token response for the FHIR client.
+ * @property {string} clientId - The client ID for the FHIR client.
+ */
+export interface FhirClientConfig {
+  serverUrl: string;
+  tokenUri: string;
+  tokenResponse: FhirClientTypes.TokenResponse;
+  clientId: string;
+}

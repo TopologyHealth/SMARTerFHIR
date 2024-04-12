@@ -5,36 +5,6 @@
   "main": "lib/cjs/index.js",
   "types": "lib/esm/index.d.ts",
   "module": "lib/esm/index.js",
-  "exports": {
-    ".": {
-      "types": {
-        "import": "./lib/esm/index.d.ts",
-        "require": "./lib/cjs/index.d.ts"
-      },
-      "node": {
-        "import": "./lib/esm/index.js",
-        "require": "./lib/cjs/index.js"
-      },
-      "default": {
-        "import": "./lib/esm/index.js",
-        "require": "./lib/cjs/index.js"
-      }
-    },
-    "./lib/*": {
-      "types": {
-        "import": "./lib/esm/*.d.ts",
-        "require": "./lib/cjs/*.d.ts"
-      },
-      "node": {
-        "import": "./lib/esm/*.js",
-        "require": "./lib/cjs/*.js"
-      },
-      "default": {
-        "import": "./lib/esm/*.js",
-        "require": "./lib/cjs/*.js"
-      }
-    }
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run build-module && npm run build-esm",
