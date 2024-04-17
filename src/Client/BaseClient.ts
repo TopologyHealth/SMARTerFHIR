@@ -11,6 +11,10 @@ import {
 	R4ResourceWithRequiredType,
 	UserReadResult,
 } from "../types"
+import {
+	resourceMayContainEncounter,
+	resourceMayContainSubject
+} from "../Resource/resourceUtils"
 
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
@@ -100,7 +104,7 @@ export default abstract class BaseClient {
 		if (!id) {
 			console.error(objectWithId)
 			throw new Error(`id not found`)
-		} 
+		}
 		return id
 	}
 
@@ -110,7 +114,6 @@ export default abstract class BaseClient {
 	 * @returns {Promise<GenericSubject>} - A promise resolving to the patient subject.
 	 */
 	private async createPatientSubject(patientIdParam?: string): Promise<GenericSubject> {
-		console.log(patientIdParam)
 		const patientID = patientIdParam == undefined ? await this.getIDfromObject(
 			this.fhirClientDefault.patient
 		) : patientIdParam
@@ -198,8 +201,16 @@ export default abstract class BaseClient {
 	) {
 		return {
 			...resource,
-			...("subject" in resource ? {} : await this.createPatientSubject(patientId)),
-			...("encounter" in resource ? {} : await this.createContext(encounterId)),
+			...(!resourceMayContainSubject(resource)
+				? {}
+				: "subject" in resource
+					? {}
+					: await this.createPatientSubject(patientId)),
+			...(!resourceMayContainEncounter(resource)
+				? {}
+				: "encounter" in resource
+					? {}
+					: await this.createContext(encounterId)),
 		}
 	}
 
@@ -318,7 +329,7 @@ export default abstract class BaseClient {
 		>(encounter)
 		return encounterInR4
 	}
-	
+
 	/**
 	 * The function creates a patient resource and returns it as a R4.Patient object.
 	 * @param {R4.Patient} patient - The `patient` parameter is the FHIR patient resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
@@ -326,11 +337,6 @@ export default abstract class BaseClient {
 	 * @returns a Promise of type R4.Patient
 	 */
 	async createPatient(patient: R4.Patient): Promise<R4.Patient> {
-		const resultResource: FhirClientResourceWithRequiredType =
-			await this.createHydratedResource(patient)
-		const resultAsR4 = Transformer.toR4FhirType<typeof resultResource, R4.Patient>(
-			resultResource
-		)
-		return resultAsR4 as R4.Patient
+		return this.create(patient)
 	}
 }
