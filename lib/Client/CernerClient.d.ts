@@ -1,6 +1,6 @@
 import SubClient from "../FhirClient";
 import { EMR } from "../Launcher/SmartLaunchHandler";
-import { FhirClientResourceWithRequiredType } from "../types";
+import { FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient";
 /**
 Represents the CernerClient class, extending the BaseClient.
@@ -23,10 +23,9 @@ export default class CernerClient extends BaseClient {
      * @param {T} resource - The resource to hydrate.
      * @returns {Promise<T>} - A promise resolving to the hydrated resource.
      */
-    hydrateResource<T extends FhirClientResourceWithRequiredType>(resource: T): Promise<T & {
+    hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(fhirClientResource: T, r4Resource: U): Promise<T & {
         author?: import("fhir/r4").Reference[] | undefined;
         context?: import("fhir/r4").DocumentReferenceContext | undefined;
-        subject?: import("fhir/r4").Reference | undefined;
     }>;
     /**
      * The function `requestResource` is an asynchronous function that makes a request for a resource using a resource ID and Cerner request headers.

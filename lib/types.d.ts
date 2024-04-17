@@ -11,7 +11,7 @@ export type PartiallyRequired<T, K extends keyof T> = Omit<Partial<T>, K> & Requ
  * Represents the R4ResourceWithRequiredType type, which is a resource with required resource type.
  * @typedef {PartiallyRequired<R4.Resource, "resourceType">} R4ResourceWithRequiredType
  */
-export type R4ResourceWithRequiredType = PartiallyRequired<R4.Resource, "resourceType">;
+export type R4ResourceWithRequiredType = PartiallyRequired<R4.FhirResource, "resourceType">;
 /**
  * Represents the FhirClientResourceWithRequiredType type, which is a FHIR client resource with required resource type.
  * @typedef {PartiallyRequired<FhirClientTypes.FHIR.Resource, "resourceType">} FhirClientResourceWithRequiredType

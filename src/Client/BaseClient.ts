@@ -1,6 +1,10 @@
 import * as R4 from "fhir/r4"
 import SubClient, { FhirClientTypes } from "../FhirClient"
 import { EMR } from "../Launcher/SmartLaunchHandler"
+import {
+	isResourceMissingSubject,
+	resourceMayContainEncounter
+} from "../Resource/resourceUtils"
 import { Transformer } from "../Resource/transformer"
 import {
 	Author,
@@ -11,10 +15,6 @@ import {
 	R4ResourceWithRequiredType,
 	UserReadResult,
 } from "../types"
-import {
-	resourceMayContainEncounter,
-	resourceMayContainSubject
-} from "../Resource/resourceUtils"
 
 /**
  * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
@@ -191,24 +191,26 @@ export default abstract class BaseClient {
 
 	/**
 	 * Hydrates a resource with subject and encounter context.
-	 * @param {T} resource - The resource to hydrate.
+	 * @param {T} fhirClientResource - The resource to hydrate.
 	 * @returns {Promise<T>} - A promise resolving to the hydrated resource.
 	 */
-	async hydrateResource<T extends FhirClientResourceWithRequiredType>(
-		resource: T,
+	async hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(
+		fhirClientResource: T,
+		r4Resource: U,
 		patientId?: string,
 		encounterId?: string
 	) {
+
+		const subject = async () => {
+			if (isResourceMissingSubject(r4Resource)) return await this.createPatientSubject(patientId)
+			return {}
+		}
 		return {
-			...resource,
-			...(!resourceMayContainSubject(resource)
+			...fhirClientResource,
+			...subject,
+			...(!resourceMayContainEncounter(r4Resource)
 				? {}
-				: "subject" in resource
-					? {}
-					: await this.createPatientSubject(patientId)),
-			...(!resourceMayContainEncounter(resource)
-				? {}
-				: "encounter" in resource
+				: "encounter" in fhirClientResource
 					? {}
 					: await this.createContext(encounterId)),
 		}
@@ -217,20 +219,20 @@ export default abstract class BaseClient {
 	/**
 	 * The function creates a resource of type T, transforms it to a FhirClientType, hydrates it, sends a create request to the FhirClientDefault, transforms the
 	 * result back to type T, and returns it.
-	 * @param {T} resource - The `resource` parameter is the FHIR resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
+	 * @param {T} r4Resource - The `resource` parameter is the FHIR resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
 	 * FHIR specification and has a required `resourceType` property.
 	 * @param [additionalHeaders] - The `additionalHeaders` parameter is an optional object that represents additional headers to be included in the HTTP request when
 	 * creating a resource. It is of type `FhirClientTypes.FetchOptions`.
 	 * @returns a Promise of type T, which is the same type as the input resource.
 	 */
 	async create<T extends R4ResourceWithRequiredType>(
-		resource: T,
+		r4Resource: T,
 		patientId?: string,
 		encounterId?: string,
 		additionalHeaders?: FhirClientTypes.FetchOptions
 	): Promise<T> {
-		const transformedResource = Transformer.toFhirClientType(resource)
-		const hydratedResource = await this.hydrateResource(transformedResource, patientId, encounterId)
+		const transformedResource = Transformer.toFhirClientType(r4Resource)
+		const hydratedResource = await this.hydrateResource(transformedResource, r4Resource, patientId, encounterId)
 		const resultResource: FhirClientResourceWithRequiredType =
 			await this.createHydratedResource(hydratedResource, additionalHeaders)
 		const resultAsR4 = Transformer.toR4FhirType<typeof resultResource, T>(

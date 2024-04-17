@@ -1,6 +1,6 @@
 import SubClient from "../FhirClient";
 import { EMR } from "../Launcher/SmartLaunchHandler";
-import { FhirClientResourceWithRequiredType } from "../types";
+import { FhirClientResourceWithRequiredType, R4ResourceWithRequiredType } from "../types";
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient";
 
 /**
@@ -38,12 +38,13 @@ initialized. */
    * @param {T} resource - The resource to hydrate.
    * @returns {Promise<T>} - A promise resolving to the hydrated resource.
    */
-  async hydrateResource<T extends FhirClientResourceWithRequiredType>(
-    resource: T
+  async hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(
+    fhirClientResource: T,
+    r4Resource: U,
   ) {
     return {
-      ...(await super.hydrateResource(resource)),
-      ...("author" in resource ? {} : await super.createReferenceArrayAuthor()),
+      ...(await super.hydrateResource(fhirClientResource, r4Resource)),
+      ...("author" in r4Resource ? {} : await super.createReferenceArrayAuthor()),
     };
   }
 

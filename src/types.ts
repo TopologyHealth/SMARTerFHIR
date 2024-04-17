@@ -15,7 +15,7 @@ export type PartiallyRequired<T, K extends keyof T> = Omit<Partial<T>, K> &
  * @typedef {PartiallyRequired<R4.Resource, "resourceType">} R4ResourceWithRequiredType
  */
 export type R4ResourceWithRequiredType = PartiallyRequired<
-  R4.Resource,
+  R4.FhirResource,
   "resourceType"
 >;
 
