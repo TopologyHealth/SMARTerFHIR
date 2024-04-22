@@ -1,10 +1,12 @@
-import * as FHIR from "fhirclient"
+import smart, * as FHIR from "fhirclient"
 import SubClient from "../FhirClient"
 import { EMR, instanceOfEmr } from "../Launcher/SmartLaunchHandler"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
 import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
+import { ServerResponse, IncomingMessage } from "http"
+import { FhirClientConfig } from "../types"
 
 export enum LAUNCH {
 	EMR,
@@ -73,21 +75,38 @@ export default class ClientFactory {
 	 * of `LAUNCH.EMR`.
 	 * @returns a Promise that resolves to an instance of the `BaseClient` class.
 	 */
-	async createEMRClient(launchType: LAUNCH = LAUNCH.EMR, fhirClient?: SubClient): Promise<BaseClient> {
+	async createEMRClient(launchType: LAUNCH.EMR | LAUNCH.STANDALONE): Promise<BaseClient> {
+		const fhirClient = await this.createDefaultFhirClient(launchType)
+		return await this.createSmarterFhirClient(fhirClient)
+	}
 
-		if (launchType === LAUNCH.BACKEND) {
-			if (!fhirClient) throw new Error(`FhirClient must be passed as a param for Backend Authentication`)
-		}
+	/**
+	 * The function `createEMRClientBackend` creates an EMR client based on the specified launch type.
+	 * @param {IncomingMessage} req - The `req` parameter is an incoming message object that represents the request made by the client.
+	 * @param {ServerResponse} res - The `res` parameter is a server response object that represents the response sent by the server.
+	 * @param {FhirClientConfig} serverConfig - The `serverConfig` parameter is an object that contains the configuration for the FHIR client. It includes the server URL, token response, client ID, and token URI.
+	 * @returns a Promise that resolves to an instance of the `BaseClient` class.
+	 */
+	async createEMRClientBackend(req: IncomingMessage, res: ServerResponse, serverConfig: FhirClientConfig): Promise<BaseClient> {
+		const fhirClient = smart(req, res).client({
+			serverUrl: serverConfig.serverUrl,
+			tokenResponse: serverConfig.tokenResponse,
+			clientId: serverConfig.clientId,
+			tokenUri: serverConfig.tokenUri
+		});
 
-		const defaultFhirClient = fhirClient ?? await this.createDefaultFhirClient(launchType)
-		const emrType = this.getEMRType(defaultFhirClient)
+		return this.createSmarterFhirClient(fhirClient)
+	}
+
+	private async createSmarterFhirClient(fhirClient: SubClient) {
+		const emrType = this.getEMRType(fhirClient)
 		switch (emrType) {
 			case EMR.EPIC:
-				return new EpicClient(defaultFhirClient)
+				return new EpicClient(fhirClient)
 			case EMR.CERNER:
-				return new CernerClient(defaultFhirClient)
+				return new CernerClient(fhirClient)
 			case EMR.SMART:
-				return new SmartHealthClient(defaultFhirClient)
+				return new SmartHealthClient(fhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")
