@@ -1,13 +1,15 @@
 {
   "name": "@topologyhealth/smarterfhir",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "Library for simplifying all things FHIR and SMART",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/cjs/index.js",
+  "types": "lib/esm/index.d.ts",
+  "module": "lib/esm/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "build-module": "tsc --module commonjs"
+    "build": "npm run build-module && npm run build-esm",
+    "build-module": "tsc --project tsconfig.json",
+    "build-esm": "tsc --project tsconfig.esm.json"
   },
   "author": "Josh Liben and Raghavan Chandrabalan",
   "keywords": [

@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "es6",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
+    "esModuleInterop": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "outDir": "./lib",
+    "rootDir": "./src",
+    "outDir": "./lib/cjs",
     "sourceMap": true,
     "strict": true,
     "lib": [

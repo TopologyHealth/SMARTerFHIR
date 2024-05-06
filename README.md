@@ -22,56 +22,6 @@ Using npm's git repo support: `npm install git@github.com:TopologyHealth/SMARTer
 
 Support for the npm registry will be coming soon
 
- <!-- npm: -->
-<!--
-```bash
-npm install smarter-fhir
-``` -->
-
-## Usage
-
-Here's a basic example demonstrating how to use the SMARTerFHIR library:
-
-### Web Launch (using EMR or Standalone Launch)
-
-The following is an example of a function to handle the SMART Launch. I.e., when the EMR launches the application, it must be directed to the page that runs the following. E.g., this could be https://www.yourwebsite.com/launch
-
-```typescript
-async function handleWebLaunch() {
-    try {
-        const emrClientID = YOUR_EMR_CLIENT_ID
-        const smartLaunchHandler = new SmartLaunchHandler(emrClientID)
-        await smartLaunchHandler.authorizeEMR(LAUNCH.EMR) //Replace with 'LAUNCH.STANDALONE' for Standalone Launch
-    }
-    catch (e) {
-        if (e instanceof Error) {
-            throw e;
-        }
-        throw new Error(`Unknown Error: ${e}`)
-    }
-}
-```
-
-### SMART Client
-
-The following is an example of a function to instantiate the SMART Client after a Web Launch has completed. During Launch, the EMR will authenticate your application. Once completed, it will redirect to the assigned redirect url. The code below should run upon successful authentication and redirect:
-
-```typescript
-async function mySmartClientInstantiator() {
-    try {
-        const clientFactory = new ClientFactory();
-        const client = await clientFactory.createEMRClient(LAUNCH.EMR) //Replace with 'LAUNCH.STANDALONE' for Standalone Launch
-        if (!client) throw new Error('no client found')
-    } catch (reason) {
-        if (!(reason instanceof Error))
-            throw new Error(`Unknown Error: ${reason}`)
-        console.error(reason.message)
-    }
-}
-```
-
-Make sure to import the necessary classes, interfaces, and types based on your requirements.
-
 ## Documentation
 
 For detailed documentation on the SMARTerFHIR library, including classes, methods, and usage examples, please refer to the official documentation at [https://topology.health/docs](https://topology.health/docs).
