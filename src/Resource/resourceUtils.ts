@@ -17,11 +17,28 @@ export function isResourceMissingSubject(resource: R4ResourceWithRequiredType): 
   return requiresSubject && isSubjectAbsentFromResource
 }
 
-/**
- * The function `resourceMayContainEncounter` checks if a resource may contain an encounter.
- * @param {R4.Resource} resource - The `resource` parameter is of type `R4.Resource`, which is a FHIR resource object.
- * @returns a boolean value indicating whether the resource may contain an encounter.
- */
-export function resourceMayContainEncounter(resource: R4ResourceWithRequiredType): boolean {
-  return resource.resourceType === "DocumentReference";
+const encounterRequiredResourceList: ResourceType[] = [
+  "AdverseEvent", "AllergyIntolerance", "CarePlan", "CareTeam",
+  "ClinicalImpression", "Communication", "CommunicationRequest", "Composition",
+  "Condition", "DeviceRequest", "DiagnosticReport", "Flag", "GuidanceResponse",
+  "ImagingStudy", "Immunization", "List", "Media", "MedicationRequest",
+  "NutritionOrder", "Observation", "Procedure", "QuestionnaireResponse",
+  "RequestGroup", "RiskAssessment", "ServiceRequest", "Task", "VisionPrescription"
+];
+export function isResourceMissingEncounter(resource: R4ResourceWithRequiredType): boolean {
+  const encounterRequiredResourceTypes: Set<ResourceType> = new Set(encounterRequiredResourceList);
+  const requiresEncounter = encounterRequiredResourceTypes.has(resource.resourceType);
+  const isEncounterAbsentFromResource = !('encounter' in resource);
+  return requiresEncounter && isEncounterAbsentFromResource
+}
+
+const contextRequiredResourceList: ResourceType[] = [
+  "ChargeItem", "DocumentReference", "MedicationAdministration",
+  "MedicationDispense", "MedicationStatement"
+];
+export function isResourceMissingContext(resource: R4ResourceWithRequiredType): boolean {
+  const contextRequiredResourceTypes: Set<ResourceType> = new Set(contextRequiredResourceList);
+  const requiresContext = contextRequiredResourceTypes.has(resource.resourceType);
+  const isContextAbsentFromResource = !('context' in resource);
+  return requiresContext && isContextAbsentFromResource
 }

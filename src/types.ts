@@ -39,13 +39,9 @@ export type ObjectWithID = SubClient["patient" | "encounter" | "user"];
  */
 export type GenericSubject = { subject: R4.Reference };
 
-/**
- * The GenericEncounter type is an object that contains an array of R4.Reference objects named "encounter".
- * @property {R4.Reference[]} encounter - The `encounter` property is an array of `R4.Reference` objects.
- */
-export type GenericEncounter = { encounter: R4.Reference[] };
+export type GenericEncounterReference = { encounter: R4.Reference | R4.Reference[] };
 
-export type GenericContext = R4.DocumentReference["context"];
+export type GenericContext = { context: R4.Reference | R4.DocumentReference["context"] | undefined };
 
 /**
  * The above type defines an object with a property called "author" which is an array of R4.Reference objects.

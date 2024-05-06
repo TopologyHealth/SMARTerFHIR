@@ -25,7 +25,6 @@ export default class CernerClient extends BaseClient {
      */
     hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(fhirClientResource: T, r4Resource: U): Promise<T & {
         author?: import("fhir/r4").Reference[] | undefined;
-        context?: import("fhir/r4").DocumentReferenceContext | undefined;
     }>;
     /**
      * The function `requestResource` is an asynchronous function that makes a request for a resource using a resource ID and Cerner request headers.

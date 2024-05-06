@@ -2,14 +2,16 @@ import * as R4 from "fhir/r4"
 import SubClient, { FhirClientTypes } from "../FhirClient"
 import { EMR } from "../Launcher/SmartLaunchHandler"
 import {
+	isResourceMissingContext,
+	isResourceMissingEncounter,
 	isResourceMissingSubject,
-	resourceMayContainEncounter
 } from "../Resource/resourceUtils"
 import { Transformer } from "../Resource/transformer"
 import {
 	Author,
 	FhirClientResourceWithRequiredType,
 	GenericContext,
+	GenericEncounterReference,
 	GenericSubject,
 	ObjectWithID,
 	R4ResourceWithRequiredType,
@@ -124,11 +126,22 @@ export default abstract class BaseClient {
 		}
 	}
 
+	private async createEncounterReference(encounterIdParam?: string): Promise<GenericEncounterReference> {
+		const encounterID = encounterIdParam == undefined ? await this.getIDfromObject(
+			this.fhirClientDefault.encounter
+		) : encounterIdParam
+		return {
+			encounter: {
+				reference: `Encounter/${encounterID}`,
+			},
+		}
+	}
+
 	/**
 	 * The function creates a reference to an Encounter object by retrieving its ID from a FHIR client.
 	 * @returns An object is being returned with a property "reference" that has a value of `Encounter/`.
 	 */
-	private async createEncounterReference(encounterIdParam?: string) {
+	private async createReferenceToEncounter(encounterIdParam?: string): Promise<R4.Reference> {
 		const encounterID = encounterIdParam == undefined ? await this.getIDfromObject(
 			this.fhirClientDefault.encounter
 		) : encounterIdParam
@@ -139,10 +152,10 @@ export default abstract class BaseClient {
 
 	/**
 	 * The function creates an array of encounter references asynchronously.
-	 * @returns An array containing the result of the `createEncounterReference` function, which is awaited.
+	 * @returns An array containing the result of the `createReferenceToEncounter` function, which is awaited.
 	 */
 	private async createEncounterReferenceArray(encounterIdParam?: string) {
-		return [await this.createEncounterReference(encounterIdParam)]
+		return [await this.createReferenceToEncounter(encounterIdParam)]
 	}
 
 	/**
@@ -161,7 +174,7 @@ export default abstract class BaseClient {
 	 * The createContext function creates a context object with an encounter reference array and a period.
 	 * @returns The function `createContext` is returning an object with a property `context` which contains the values of `encounter` and `period`.
 	 */
-	private async createContext(encounterIdParam?: string): Promise<{ context: GenericContext }> {
+	private async createContext(encounterIdParam?: string): Promise<GenericContext> {
 		const encounter = await this.createEncounterReferenceArray(encounterIdParam)
 		const currentDateString = new Date().toISOString()
 		const period: R4.Period = this.createPeriod(currentDateString)
@@ -205,14 +218,22 @@ export default abstract class BaseClient {
 			if (isResourceMissingSubject(r4Resource)) return await this.createPatientSubject(patientId)
 			return {}
 		}
+
+		const encounter = async () => {
+			if (isResourceMissingEncounter(r4Resource)) return await this.createEncounterReference(encounterId)
+			return {}
+		}
+
+		const context = async () => {
+			if (isResourceMissingContext(r4Resource)) return await this.createContext(encounterId)
+			return {}
+		}
+
 		return {
 			...fhirClientResource,
-			...subject,
-			...(!resourceMayContainEncounter(r4Resource)
-				? {}
-				: "encounter" in fhirClientResource
-					? {}
-					: await this.createContext(encounterId)),
+			...await subject(),
+			...await encounter(),
+			...await context(),
 		}
 	}
 
