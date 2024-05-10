@@ -65,12 +65,14 @@ export default abstract class BaseClient {
      * @returns {Promise<GenericSubject>} - A promise resolving to the patient subject.
      */
     private createPatientSubject;
-    private createEncounterReference;
     /**
-     * The function creates a reference to an Encounter object by retrieving its ID from a FHIR client.
-     * @returns An object is being returned with a property "reference" that has a value of `Encounter/`.
+     * Creates a reference to an encounter in a FHIR system. The function takes two optional parameters: `encounterIdParam` which is the ID of the encounter, and `encounterType` which specifies the type of reference to be created ('GenericEncounterReference' or 'R4.Reference').
+     * @template T
+     * @param [encounterIdParam]
+     * @param [encounterType]
+     * @returns encounter reference
      */
-    private createReferenceToEncounter;
+    private createEncounterReference;
     /**
      * The function creates an array of encounter references asynchronously.
      * @returns An array containing the result of the `createReferenceToEncounter` function, which is awaited.
@@ -98,7 +100,7 @@ export default abstract class BaseClient {
      * @param {T} fhirClientResource - The resource to hydrate.
      * @returns {Promise<T>} - A promise resolving to the hydrated resource.
      */
-    hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(fhirClientResource: T, r4Resource: U, patientId?: string, encounterId?: string): Promise<T & {}>;
+    hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(fhirClientResource: T, r4Resource: U, patientId?: string, encounterId?: string): Promise<T>;
     /**
      * The function creates a resource of type T, transforms it to a FhirClientType, hydrates it, sends a create request to the FhirClientDefault, transforms the
      * result back to type T, and returns it.

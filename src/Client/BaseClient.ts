@@ -126,36 +126,32 @@ export default abstract class BaseClient {
 		}
 	}
 
-	private async createEncounterReference(encounterIdParam?: string): Promise<GenericEncounterReference> {
-		const encounterID = encounterIdParam == undefined ? await this.getIDfromObject(
-			this.fhirClientDefault.encounter
-		) : encounterIdParam
-		return {
-			encounter: {
-				reference: `Encounter/${encounterID}`,
-			},
-		}
-	}
+
 
 	/**
-	 * The function creates a reference to an Encounter object by retrieving its ID from a FHIR client.
-	 * @returns An object is being returned with a property "reference" that has a value of `Encounter/`.
+	 * Creates a reference to an encounter in a FHIR system. The function takes two optional parameters: `encounterIdParam` which is the ID of the encounter, and `encounterType` which specifies the type of reference to be created ('GenericEncounterReference' or 'R4.Reference').
+	 * @template T 
+	 * @param [encounterIdParam] 
+	 * @param [encounterType] 
+	 * @returns encounter reference 
 	 */
-	private async createReferenceToEncounter(encounterIdParam?: string): Promise<R4.Reference> {
+	private async createEncounterReference<T extends 'GenericEncounterReference' | 'R4.Reference'>(encounterIdParam?: string, encounterType?: T): Promise<T extends 'GenericEncounterReference' ? GenericEncounterReference : R4.Reference>
+	private async createEncounterReference(encounterIdParam?: string, encounterType?: 'GenericEncounterReference' | 'R4.Reference') {
 		const encounterID = encounterIdParam == undefined ? await this.getIDfromObject(
 			this.fhirClientDefault.encounter
 		) : encounterIdParam
-		return {
+		const reference: R4.Reference = {
 			reference: `Encounter/${encounterID}`,
 		}
+		return encounterType == 'GenericEncounterReference' ? { encounter: reference } : reference
 	}
 
 	/**
 	 * The function creates an array of encounter references asynchronously.
 	 * @returns An array containing the result of the `createReferenceToEncounter` function, which is awaited.
 	 */
-	private async createEncounterReferenceArray(encounterIdParam?: string) {
-		return [await this.createReferenceToEncounter(encounterIdParam)]
+	private async createEncounterReferenceArray(encounterIdParam?: string): Promise<R4.Reference[]> {
+		return [await this.createEncounterReference(encounterIdParam, 'R4.Reference')]
 	}
 
 	/**
@@ -212,28 +208,25 @@ export default abstract class BaseClient {
 		r4Resource: U,
 		patientId?: string,
 		encounterId?: string
-	) {
+	): Promise<T> {
 
-		const subject = async () => {
+		const subject = async (): Promise<GenericSubject | undefined> => {
 			if (isResourceMissingSubject(r4Resource)) return await this.createPatientSubject(patientId)
-			return {}
 		}
 
-		const encounter = async () => {
-			if (isResourceMissingEncounter(r4Resource)) return await this.createEncounterReference(encounterId)
-			return {}
+		const encounter = async (): Promise<GenericEncounterReference | undefined> => {
+			if (isResourceMissingEncounter(r4Resource)) return await this.createEncounterReference(encounterId, 'GenericEncounterReference')
 		}
 
-		const context = async () => {
+		const context = async (): Promise<GenericContext | undefined> => {
 			if (isResourceMissingContext(r4Resource)) return await this.createContext(encounterId)
-			return {}
 		}
 
 		return {
 			...fhirClientResource,
-			...await subject(),
-			...await encounter(),
-			...await context(),
+			...await subject() ?? {},
+			...await encounter() ?? {},
+			...await context() ?? {},
 		}
 	}
 
