@@ -11,7 +11,7 @@ export type PartiallyRequired<T, K extends keyof T> = Omit<Partial<T>, K> & Requ
  * Represents the R4ResourceWithRequiredType type, which is a resource with required resource type.
  * @typedef {PartiallyRequired<R4.Resource, "resourceType">} R4ResourceWithRequiredType
  */
-export type R4ResourceWithRequiredType = PartiallyRequired<R4.Resource, "resourceType">;
+export type R4ResourceWithRequiredType = PartiallyRequired<R4.FhirResource, "resourceType">;
 /**
  * Represents the FhirClientResourceWithRequiredType type, which is a FHIR client resource with required resource type.
  * @typedef {PartiallyRequired<FhirClientTypes.FHIR.Resource, "resourceType">} FhirClientResourceWithRequiredType
@@ -28,14 +28,12 @@ export type ObjectWithID = SubClient["patient" | "encounter" | "user"];
 export type GenericSubject = {
     subject: R4.Reference;
 };
-/**
- * The GenericEncounter type is an object that contains an array of R4.Reference objects named "encounter".
- * @property {R4.Reference[]} encounter - The `encounter` property is an array of `R4.Reference` objects.
- */
-export type GenericEncounter = {
-    encounter: R4.Reference[];
+export type GenericEncounterReference = {
+    encounter: R4.Reference | R4.Reference[];
 };
-export type GenericContext = R4.DocumentReference["context"];
+export type GenericContext = {
+    context: R4.Reference | R4.DocumentReference["context"] | undefined;
+};
 /**
  * The above type defines an object with a property called "author" which is an array of R4.Reference objects.
  * @property {R4.Reference[]} author - An array of references to authors. Each reference is of type R4.Reference.

@@ -1,11 +1,17 @@
 import * as R4 from "fhir/r4"
 import SubClient, { FhirClientTypes } from "../FhirClient"
 import { EMR } from "../Launcher/SmartLaunchHandler"
+import {
+	isResourceMissingContext,
+	isResourceMissingEncounter,
+	isResourceMissingSubject,
+} from "../Resource/resourceUtils"
 import { Transformer } from "../Resource/transformer"
 import {
 	Author,
 	FhirClientResourceWithRequiredType,
 	GenericContext,
+	GenericEncounterReference,
 	GenericSubject,
 	ObjectWithID,
 	R4ResourceWithRequiredType,
@@ -100,7 +106,7 @@ export default abstract class BaseClient {
 		if (!id) {
 			console.error(objectWithId)
 			throw new Error(`id not found`)
-		} 
+		}
 		return id
 	}
 
@@ -110,7 +116,6 @@ export default abstract class BaseClient {
 	 * @returns {Promise<GenericSubject>} - A promise resolving to the patient subject.
 	 */
 	private async createPatientSubject(patientIdParam?: string): Promise<GenericSubject> {
-		console.log(patientIdParam)
 		const patientID = patientIdParam == undefined ? await this.getIDfromObject(
 			this.fhirClientDefault.patient
 		) : patientIdParam
@@ -121,25 +126,32 @@ export default abstract class BaseClient {
 		}
 	}
 
+
+
 	/**
-	 * The function creates a reference to an Encounter object by retrieving its ID from a FHIR client.
-	 * @returns An object is being returned with a property "reference" that has a value of `Encounter/`.
+	 * Creates a reference to an encounter in a FHIR system. The function takes two optional parameters: `encounterIdParam` which is the ID of the encounter, and `encounterType` which specifies the type of reference to be created ('GenericEncounterReference' or 'R4.Reference').
+	 * @template T 
+	 * @param [encounterIdParam] 
+	 * @param [encounterType] 
+	 * @returns encounter reference 
 	 */
-	private async createEncounterReference(encounterIdParam?: string) {
+	private async createEncounterReference<T extends 'GenericEncounterReference' | 'R4.Reference'>(encounterIdParam?: string, encounterType?: T): Promise<T extends 'GenericEncounterReference' ? GenericEncounterReference : R4.Reference>
+	private async createEncounterReference(encounterIdParam?: string, encounterType?: 'GenericEncounterReference' | 'R4.Reference') {
 		const encounterID = encounterIdParam == undefined ? await this.getIDfromObject(
 			this.fhirClientDefault.encounter
 		) : encounterIdParam
-		return {
+		const reference: R4.Reference = {
 			reference: `Encounter/${encounterID}`,
 		}
+		return encounterType == 'GenericEncounterReference' ? { encounter: reference } : reference
 	}
 
 	/**
 	 * The function creates an array of encounter references asynchronously.
-	 * @returns An array containing the result of the `createEncounterReference` function, which is awaited.
+	 * @returns An array containing the result of the `createReferenceToEncounter` function, which is awaited.
 	 */
-	private async createEncounterReferenceArray(encounterIdParam?: string) {
-		return [await this.createEncounterReference(encounterIdParam)]
+	private async createEncounterReferenceArray(encounterIdParam?: string): Promise<R4.Reference[]> {
+		return [await this.createEncounterReference(encounterIdParam, 'R4.Reference')]
 	}
 
 	/**
@@ -158,7 +170,7 @@ export default abstract class BaseClient {
 	 * The createContext function creates a context object with an encounter reference array and a period.
 	 * @returns The function `createContext` is returning an object with a property `context` which contains the values of `encounter` and `period`.
 	 */
-	private async createContext(encounterIdParam?: string): Promise<{ context: GenericContext }> {
+	private async createContext(encounterIdParam?: string): Promise<GenericContext> {
 		const encounter = await this.createEncounterReferenceArray(encounterIdParam)
 		const currentDateString = new Date().toISOString()
 		const period: R4.Period = this.createPeriod(currentDateString)
@@ -188,38 +200,53 @@ export default abstract class BaseClient {
 
 	/**
 	 * Hydrates a resource with subject and encounter context.
-	 * @param {T} resource - The resource to hydrate.
+	 * @param {T} fhirClientResource - The resource to hydrate.
 	 * @returns {Promise<T>} - A promise resolving to the hydrated resource.
 	 */
-	async hydrateResource<T extends FhirClientResourceWithRequiredType>(
-		resource: T,
+	async hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(
+		fhirClientResource: T,
+		r4Resource: U,
 		patientId?: string,
 		encounterId?: string
-	) {
+	): Promise<T> {
+
+		const subject = async (): Promise<GenericSubject | undefined> => {
+			if (isResourceMissingSubject(r4Resource)) return await this.createPatientSubject(patientId)
+		}
+
+		const encounter = async (): Promise<GenericEncounterReference | undefined> => {
+			if (isResourceMissingEncounter(r4Resource)) return await this.createEncounterReference(encounterId, 'GenericEncounterReference')
+		}
+
+		const context = async (): Promise<GenericContext | undefined> => {
+			if (isResourceMissingContext(r4Resource)) return await this.createContext(encounterId)
+		}
+
 		return {
-			...resource,
-			...("subject" in resource ? {} : await this.createPatientSubject(patientId)),
-			...("encounter" in resource ? {} : await this.createContext(encounterId)),
+			...fhirClientResource,
+			...await subject() ?? {},
+			...await encounter() ?? {},
+			...await context() ?? {},
 		}
 	}
 
 	/**
 	 * The function creates a resource of type T, transforms it to a FhirClientType, hydrates it, sends a create request to the FhirClientDefault, transforms the
 	 * result back to type T, and returns it.
-	 * @param {T} resource - The `resource` parameter is the FHIR resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
+	 * @param {T} r4Resource - The `resource` parameter is the FHIR resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
 	 * FHIR specification and has a required `resourceType` property.
 	 * @param [additionalHeaders] - The `additionalHeaders` parameter is an optional object that represents additional headers to be included in the HTTP request when
 	 * creating a resource. It is of type `FhirClientTypes.FetchOptions`.
 	 * @returns a Promise of type T, which is the same type as the input resource.
 	 */
 	async create<T extends R4ResourceWithRequiredType>(
-		resource: T,
+		r4Resource: T,
 		patientId?: string,
 		encounterId?: string,
 		additionalHeaders?: FhirClientTypes.FetchOptions
 	): Promise<T> {
-		const transformedResource = Transformer.toFhirClientType(resource)
-		const hydratedResource = await this.hydrateResource(transformedResource, patientId, encounterId)
+		const transformedResource = Transformer.toFhirClientType(r4Resource)
+		const hydratedResource = await this.hydrateResource(transformedResource, r4Resource, patientId, encounterId)
 		const resultResource: FhirClientResourceWithRequiredType =
 			await this.createHydratedResource(hydratedResource, additionalHeaders)
 		const resultAsR4 = Transformer.toR4FhirType<typeof resultResource, T>(
@@ -317,5 +344,15 @@ export default abstract class BaseClient {
 			R4.Encounter
 		>(encounter)
 		return encounterInR4
+	}
+
+	/**
+	 * The function creates a patient resource and returns it as a R4.Patient object.
+	 * @param {R4.Patient} patient - The `patient` parameter is the FHIR patient resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
+	 * FHIR specification and has a required `resourceType` property.
+	 * @returns a Promise of type R4.Patient
+	 */
+	async createPatient(patient: R4.Patient): Promise<R4.Patient> {
+		return this.create(patient)
 	}
 }
