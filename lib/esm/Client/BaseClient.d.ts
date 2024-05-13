@@ -66,13 +66,16 @@ export default abstract class BaseClient {
      */
     private createPatientSubject;
     /**
-     * The function creates a reference to an Encounter object by retrieving its ID from a FHIR client.
-     * @returns An object is being returned with a property "reference" that has a value of `Encounter/`.
+     * Creates a reference to an encounter in a FHIR system. The function takes two optional parameters: `encounterIdParam` which is the ID of the encounter, and `encounterType` which specifies the type of reference to be created ('GenericEncounterReference' or 'R4.Reference').
+     * @template T
+     * @param [encounterIdParam]
+     * @param [encounterType]
+     * @returns encounter reference
      */
     private createEncounterReference;
     /**
      * The function creates an array of encounter references asynchronously.
-     * @returns An array containing the result of the `createEncounterReference` function, which is awaited.
+     * @returns An array containing the result of the `createReferenceToEncounter` function, which is awaited.
      */
     private createEncounterReferenceArray;
     /**
@@ -94,23 +97,20 @@ export default abstract class BaseClient {
     createReferenceArrayAuthor(): Promise<Author>;
     /**
      * Hydrates a resource with subject and encounter context.
-     * @param {T} resource - The resource to hydrate.
+     * @param {T} fhirClientResource - The resource to hydrate.
      * @returns {Promise<T>} - A promise resolving to the hydrated resource.
      */
-    hydrateResource<T extends FhirClientResourceWithRequiredType>(resource: T, patientId?: string, encounterId?: string): Promise<T & {
-        context?: R4.DocumentReferenceContext | undefined;
-        subject?: R4.Reference | undefined;
-    }>;
+    hydrateResource<T extends FhirClientResourceWithRequiredType, U extends R4ResourceWithRequiredType>(fhirClientResource: T, r4Resource: U, patientId?: string, encounterId?: string): Promise<T>;
     /**
      * The function creates a resource of type T, transforms it to a FhirClientType, hydrates it, sends a create request to the FhirClientDefault, transforms the
      * result back to type T, and returns it.
-     * @param {T} resource - The `resource` parameter is the FHIR resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
+     * @param {T} r4Resource - The `resource` parameter is the FHIR resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
      * FHIR specification and has a required `resourceType` property.
      * @param [additionalHeaders] - The `additionalHeaders` parameter is an optional object that represents additional headers to be included in the HTTP request when
      * creating a resource. It is of type `FhirClientTypes.FetchOptions`.
      * @returns a Promise of type T, which is the same type as the input resource.
      */
-    create<T extends R4ResourceWithRequiredType>(resource: T, patientId?: string, encounterId?: string, additionalHeaders?: FhirClientTypes.FetchOptions): Promise<T>;
+    create<T extends R4ResourceWithRequiredType>(r4Resource: T, patientId?: string, encounterId?: string, additionalHeaders?: FhirClientTypes.FetchOptions): Promise<T>;
     createHydratedResource(hydratedResource: Omit<Partial<FhirClientTypes.FHIR.Resource>, "resourceType"> & Required<Pick<Partial<FhirClientTypes.FHIR.Resource>, "resourceType">> & {
         context?: GenericContext;
         subject?: R4.Reference | undefined;
@@ -144,4 +144,11 @@ export default abstract class BaseClient {
      */
     getPatientRead(): Promise<R4.Patient>;
     getEncounterRead(): Promise<R4.Encounter>;
+    /**
+     * The function creates a patient resource and returns it as a R4.Patient object.
+     * @param {R4.Patient} patient - The `patient` parameter is the FHIR patient resource object that you want to create. It should be an object that conforms to the R4 (Release 4)
+     * FHIR specification and has a required `resourceType` property.
+     * @returns a Promise of type R4.Patient
+     */
+    createPatient(patient: R4.Patient): Promise<R4.Patient>;
 }
