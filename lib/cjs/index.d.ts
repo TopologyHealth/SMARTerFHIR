@@ -1,4 +1,5 @@
-import ClientFactory, { LAUNCH } from "./Client/ClientFactory";
-import SmartLaunchHandler, { EMR } from "./Launcher/SmartLaunchHandler";
 import BaseClient from "./Client/BaseClient";
-export { ClientFactory, SmartLaunchHandler, BaseClient, EMR, LAUNCH };
+import ClientFactory, { LAUNCH } from "./Client/ClientFactory";
+import * as ClientUtils from "./Client/utils";
+import SmartLaunchHandler, { EMR } from "./Launcher/SmartLaunchHandler";
+export { BaseClient, ClientFactory, EMR, LAUNCH, SmartLaunchHandler, ClientUtils };

@@ -1,4 +1,3 @@
-import { EMR_ENDPOINTS } from "../Client/BaseClient";
 import { LAUNCH } from "../Client/ClientFactory";
 export declare enum EMR {
     CERNER = "cerner",
@@ -12,13 +11,6 @@ export declare enum EMR {
  * @returns a boolean value.
  */
 export declare function instanceOfEmr(object: unknown): object is EMR;
-/**
-* The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
-* @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
-* systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
-* @returns an object of type EMR_ENDPOINTS.
-*/
-export declare function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS;
 /**
  * Represents the SmartLaunchHandler class.
  */
