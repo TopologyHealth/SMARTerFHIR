@@ -7,6 +7,7 @@ export enum EMR {
   CERNER = "cerner",
   EPIC = "epic",
   SMART = "smart",
+  ECW = "ecw",
   NONE = "none",
 }
 
@@ -51,10 +52,12 @@ export default class SmartLaunchHandler {
    * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
    */
   private async launchEMR(
+    emrType: EMR,
     redirect: string,
     iss: string,
-    launchType: LAUNCH,
-    emrSpecificScopes: string[]
+    launchType: LAUNCH
+    // ,
+    // emrSpecificScopes: string[]
   ): Promise<string | void> {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error("This doesn't work for backend launch");
@@ -66,7 +69,7 @@ export default class SmartLaunchHandler {
       "openid",
       "fhirUser",
     ];
-
+    const emrSpecificScopes: string[] = getEmrSpecificScopes(emrType);
     const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
     const redirect_uri = redirect ?? "";
 
@@ -79,74 +82,6 @@ export default class SmartLaunchHandler {
     });
   }
 
-  /**
-   * Launches the Epic EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
-   * @param {string} redirect - The redirect URI to use for authorization.
-   * @param {string} iss - The issuer for authorization.
-   * @param {LAUNCH} launchType - The type of launch.
-   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-   */
-  async epicLaunch(
-    redirect: string,
-    iss: string,
-    launchType: LAUNCH
-  ): Promise<string | void> {
-    const emrSpecificScopes: string[] = [];
-    return this.launchEMR(
-      redirect,
-      iss,
-      launchType,
-      emrSpecificScopes
-    );
-  }
-
-  /**
-   * Launches the SMART Health IT EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
-   * @param {string} redirect - The redirect URI to use for authorization.
-   * @param {string} iss - The issuer for authorization.
-   * @param {LAUNCH} launchType - The type of launch.
-   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-   */
-  async smartHealthITLaunch(
-    redirect: string,
-    iss: string,
-    launchType: LAUNCH
-  ): Promise<string | void> {
-
-    return this.launchEMR(
-      redirect,
-      iss,
-      launchType,
-      []
-    );
-  }
-
-  /**
-   * Launches the Cerner EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
-   * @param {string} redirect - The redirect URI to use for authorization.
-   * @param {string} iss - The issuer for authorization.
-   * @param {LAUNCH} launchType - The type of launch.
-   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-   */
-  async cernerLaunch(
-    redirect: string,
-    iss: string,
-    launchType: LAUNCH
-  ): Promise<string | void> {
-    const additionalScopes = cerner.scopes.map(
-      (name) => (scopes as { [key: string]: string })[name]
-    );
-
-    return this.launchEMR(
-      redirect,
-      iss,
-      launchType,
-      additionalScopes
-    );
-  }
 
   /**
    * Authorizes the EMR based on the current URL query parameters.
@@ -184,19 +119,7 @@ export default class SmartLaunchHandler {
     const emrType = this.getEMRType(iss);
     if (emrType === EMR.NONE || !emrType)
       throw new Error('EMR type cannot be inferred from the ISS')
-    switch (emrType) {
-      case EMR.EPIC:
-        await this.epicLaunch(redirect, iss, launchType);
-        break;
-      case EMR.CERNER:
-        await this.cernerLaunch(redirect, iss, launchType);
-        break;
-      case EMR.SMART:
-        await this.smartHealthITLaunch(redirect, iss, launchType)
-        break;
-      default:
-        break;
-    }
+    await this.launchEMR(emrType, redirect, iss, launchType)
   }
 
   /**
@@ -216,3 +139,15 @@ export default class SmartLaunchHandler {
     return emrType
   }
 }
+function getEmrSpecificScopes(emrType: EMR): string[] {
+  switch (emrType) {
+    case EMR.CERNER:
+      return cerner.scopes.map(name => (scopes as { [key: string]: string })[name]);
+    case EMR.EPIC:
+    case EMR.SMART:
+    case EMR.ECW:
+    default:
+      return [];
+  }
+}
+
