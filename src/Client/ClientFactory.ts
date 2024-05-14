@@ -7,6 +7,7 @@ import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
 import { ServerResponse, IncomingMessage } from "http"
 import { FhirClientConfig } from "../types"
+import ECWClient from "./ECWClient"
 
 export enum LAUNCH {
 	EMR,
@@ -107,6 +108,8 @@ export default class ClientFactory {
 				return new CernerClient(fhirClient)
 			case EMR.SMART:
 				return new SmartHealthClient(fhirClient)
+			case EMR.ECW:
+				return new ECWClient(fhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")
