@@ -1,4 +1,5 @@
 import * as FHIR from "fhirclient";
+import { fhirclient } from "fhirclient/lib/types";
 import { LAUNCH } from "../Client/ClientFactory";
 import { cerner } from "./Config";
 import scopes from "./scopes.json";
@@ -71,7 +72,9 @@ export default class SmartLaunchHandler {
     ];
     const emrSpecificScopes: string[] = getEmrSpecificScopes(emrType);
     const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
+    const pkceMode: fhirclient.AuthorizeParams['pkceMode'] = getEMRSpecificPkceMode(emrType)
     const redirect_uri = redirect ?? "";
+    pkceMode;
 
     return FHIR.oauth2.authorize({
       client_id: this.clientID,
@@ -79,6 +82,7 @@ export default class SmartLaunchHandler {
       redirect_uri: redirect_uri,
       scope: scope,
       clientSecret: this.clientSecret,
+      pkceMode: pkceMode
     });
   }
 
@@ -148,6 +152,18 @@ function getEmrSpecificScopes(emrType: EMR): string[] {
     case EMR.ECW:
     default:
       return [];
+  }
+}
+
+function getEMRSpecificPkceMode(emrType: EMR): fhirclient.AuthorizeParams['pkceMode'] {
+  switch (emrType) {
+    case EMR.ECW:
+      return 'unsafeV1'
+    case EMR.CERNER:
+    case EMR.EPIC:
+    case EMR.SMART:
+    default:
+      return 'ifSupported';
   }
 }
 
