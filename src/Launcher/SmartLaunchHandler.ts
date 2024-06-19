@@ -70,18 +70,18 @@ export default class SmartLaunchHandler {
     ];
     const emrSpecificScopes: string[] = getEmrSpecificScopes(emrType, launchType);
     const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
-    const pkceMode: fhirclient.AuthorizeParams['pkceMode'] = getEMRSpecificPkceMode(emrType)
+    const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
-    pkceMode;
 
-    return FHIR.oauth2.authorize({
+    const authorizeParams = {
       client_id: this.clientID,
       iss: iss,
       redirect_uri: redirect_uri,
       scope: scope,
       clientSecret: this.clientSecret,
-      pkceMode: pkceMode
-    });
+      ...emrSpecificAuthorizeParams
+    };
+    return FHIR.oauth2.authorize(authorizeParams);
   }
 
 
@@ -157,15 +157,20 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
   }
 }
 
-function getEMRSpecificPkceMode(emrType: EMR): fhirclient.AuthorizeParams['pkceMode'] {
-  switch (emrType) {
-    case EMR.ECW:
-      return 'unsafeV1'
-    case EMR.CERNER:
-    case EMR.EPIC:
-    case EMR.SMART:
-    default:
-      return 'ifSupported';
-  }
+function getEMRSpecificAuthorizeParams(emrType: EMR): Partial<fhirclient.AuthorizeParams> {
+ switch (emrType) {
+   case EMR.ECW:
+    return {
+      pkceMode: 'unsafeV1',
+      completeInTarget: true
+    }
+   case EMR.CERNER:
+   case EMR.EPIC:
+   case EMR.SMART:
+   default:
+     return {
+      pkceMode: 'ifSupported'
+     };
+ }
 }
 
