@@ -65,12 +65,10 @@ export default class SmartLaunchHandler {
     }
 
     const defaultScopes = [
-      launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
-      "online_access",
       "openid",
       "fhirUser",
     ];
-    const emrSpecificScopes: string[] = getEmrSpecificScopes(emrType);
+    const emrSpecificScopes: string[] = getEmrSpecificScopes(emrType, launchType);
     const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
     const pkceMode: fhirclient.AuthorizeParams['pkceMode'] = getEMRSpecificPkceMode(emrType)
     const redirect_uri = redirect ?? "";
@@ -143,15 +141,19 @@ export default class SmartLaunchHandler {
     return emrType
   }
 }
-function getEmrSpecificScopes(emrType: EMR): string[] {
+function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
+
+  const standardScopes = [launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
+    "online_access"]
   switch (emrType) {
     case EMR.CERNER:
-      return cerner.scopes.map(name => (scopes as { [key: string]: string })[name]);
+      return [...standardScopes,  ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
+    case EMR.ECW:
+      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch"]
     case EMR.EPIC:
     case EMR.SMART:
-    case EMR.ECW:
     default:
-      return [];
+      return standardScopes;
   }
 }
 
