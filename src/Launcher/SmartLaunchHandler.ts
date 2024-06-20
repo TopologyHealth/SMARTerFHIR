@@ -118,7 +118,7 @@ export default class SmartLaunchHandler {
     const iss = urlParams.get("iss") ?? undefined;
     if (!iss)
       throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
-    const emrType = this.getEMRType(iss);
+    const emrType = SmartLaunchHandler.getEMRType(iss);
     if (emrType === EMR.NONE || !emrType)
       throw new Error('EMR type cannot be inferred from the ISS')
     await this.launchEMR(emrType, redirect, iss, launchType)
@@ -130,7 +130,7 @@ export default class SmartLaunchHandler {
    * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
    * returns `EMR.NONE`.
    */
-  getEMRType(iss?: string): EMR {
+  static getEMRType(iss?: string): EMR {
     if (iss) {
       const isEMROfType = (emrType: EMR) => iss.includes(emrType);
       const emrTypes = Object.values(EMR);

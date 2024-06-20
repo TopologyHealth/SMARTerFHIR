@@ -55,5 +55,5 @@ export default class SmartLaunchHandler {
      * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
      * returns `EMR.NONE`.
      */
-    getEMRType(iss?: string): EMR;
+    static getEMRType(iss?: string): EMR;
 }
