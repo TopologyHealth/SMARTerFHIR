@@ -149,7 +149,7 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
     case EMR.CERNER:
       return [...standardScopes,  ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
     case EMR.ECW:
-      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch"]
+      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", "user/Patient.read", "user/Encounter.read"]
     case EMR.EPIC:
     case EMR.SMART:
     default:
