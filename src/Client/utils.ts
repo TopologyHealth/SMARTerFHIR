@@ -4,6 +4,7 @@ import CernerClient from "./CernerClient";
 import EpicClient from "./EpicClient";
 import SubClient from "../FhirClient"
 import { JWT, instanceOfJWT } from "./ClientFactory";
+import ECWClient from "./ECWClient";
 
 /**
 * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
@@ -18,6 +19,8 @@ export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
       return EpicClient.getEndpoints();
     case EMR.CERNER:
       return CernerClient.getEndpoints();
+    case EMR.ECW:
+      return ECWClient.getEndpoints();
     case EMR.SMART:
     case EMR.NONE:
     default:
