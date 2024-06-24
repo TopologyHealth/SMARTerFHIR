@@ -3,6 +3,8 @@ import { fhirclient } from "fhirclient/lib/types";
 import { LAUNCH } from "../Client/ClientFactory";
 import { cerner } from "./Config";
 import scopes from "./scopes.json";
+import { FhirResource, Patient } from 'fhir/r4';
+import { Action, Actor, FhirScopePermissions } from "./Scopes";
 
 export enum EMR {
   CERNER = "cerner",
@@ -68,7 +70,7 @@ export default class SmartLaunchHandler {
       "openid",
       "fhirUser",
     ];
-    const emrSpecificScopes: string[] = getEmrSpecificScopes(emrType, launchType);
+    const emrSpecificScopes = getEmrSpecificScopes(emrType, launchType);
     const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
     const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
@@ -149,7 +151,7 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
     case EMR.CERNER:
       return [...standardScopes,  ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
     case EMR.ECW:
-      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", "user/Patient.read", "user/Encounter.read", "user/Practitioner.read"]
+      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
     case EMR.EPIC:
     case EMR.SMART:
     default:
