@@ -1,22 +1,31 @@
 /// <reference types="node" />
-import BaseClient from "./BaseClient";
-import { ServerResponse, IncomingMessage } from "http";
+import { IncomingMessage, ServerResponse } from "http";
 import { FhirClientConfig } from "../types";
+import BaseClient from "./BaseClient";
 export declare enum LAUNCH {
     EMR = 0,
     STANDALONE = 1,
     BACKEND = 2
 }
 /**
+ * The type represents a JSON Web Token (JWT) with properties for client_id and an optional epic.eci property.
+ * @property {string} client_id - A string representing the client ID.
+ * @property {string}  - - `client_id`: A string representing the client ID associated with the JWT.
+ */
+export type JWT = {
+    client_id: string;
+    "epic.eci"?: string;
+};
+/**
+ * The function checks if an object is an instance of the JWT class by verifying if it has a client_id property.
+ * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type.
+ * @returns a boolean value.
+ */
+export declare function instanceOfJWT(object: unknown): object is JWT;
+/**
 Represents the ClientFactory class for creating EMR clients.
 */
 export default class ClientFactory {
-    /**
-     * The function `getEMRType` determines the type of Electronic Medical Record (EMR) based on the provided client or token.
-     * @param {SubClient | JWT} client - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
-     * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
-    */
-    private getEMRType;
     /**
      * The function `createEMRClient` creates an EMR client based on the specified launch type.
      * @param {LAUNCH} launchType - The `launchType` parameter is an optional parameter of type `LAUNCH` that specifies the type of EMR launch. It has a default value
@@ -47,12 +56,4 @@ export default class ClientFactory {
      * @returns an object of type EMR_ENDPOINTS.
      */
     private getEmrEndpoints;
-    /**
-     * The function `getEmrTypeFromObject` takes an object as input and returns the corresponding EMR type if the object is of type JWT or EMR, otherwise it throws an
-     * error.
-     * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type. It is used as input to determine the EMR (Electronic
-     * Medical Record) type. The function checks if the `object` is an instance of JWT (JSON Web Token) or EMR, and returns
-     * @returns an EMR (Electronic Medical Record) object.
-     */
-    private getEmrTypeFromObject;
 }
