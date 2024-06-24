@@ -24,7 +24,7 @@ export class FhirScopePermissions {
   }
 
   toString() {
-    return this.resourceTypes.map(resourceType => `${this.actor}/${resourceType}.${this.action}`).join(", ")
+    return this.resourceTypes.map(resourceType => `${this.actor}/${resourceType}.${this.action}`).join(" ")
   }
 
   static get(actor: Actor, action: Action, resourceTypes: ResourceType[]) {
