@@ -5,11 +5,13 @@ import { LAUNCH } from "../Client/ClientFactory";
 import EpicClient from "../Client/EpicClient";
 import { cerner } from "./Config";
 import scopes from "./scopes.json";
+import AthenaClient from "../Client/AthenaClient";
 
 export enum EMR {
   CERNER = "cerner",
   EPIC = "epic",
   SMART = "smart",
+  ATHENA = "athena",
   NONE = "none",
 }
 
@@ -34,6 +36,8 @@ export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
       return EpicClient.getEndpoints()
     case EMR.CERNER:
       return CernerClient.getEndpoints()
+    case EMR.ATHENA:
+      return AthenaClient.getEndpoints()
     case EMR.SMART:
     case EMR.NONE:
     default:
@@ -83,20 +87,26 @@ export default class SmartLaunchHandler {
     }
 
     const defaultScopes = [
-      launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
-      "online_access",
+      launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch",
+      // "online_access",
+      "offline_access",
       "openid",
       "fhirUser",
     ];
 
     const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
-    const redirect_uri = redirect ?? "";
+    let redirect_uri = redirect ?? "";
+    // Add a slash to the end of the redirect_uri if it doesn't already have one
+    if (!redirect_uri.endsWith("/")) {
+      redirect_uri += "/";
+    }
 
     return FHIR.oauth2.authorize({
       client_id: this.clientID,
       iss: iss,
       redirect_uri: redirect_uri,
       scope: scope,
+      // scope: ["openid", "profile", "offline_access", "launch/patient", "fhirUser"].join(" "),
       clientSecret: this.clientSecret,
     });
   }
@@ -171,6 +181,28 @@ export default class SmartLaunchHandler {
   }
 
   /**
+   * Launches the Athena EMR application.
+   * @param {string} clientId - The client ID to use for authorization.
+   * @param {string} redirect - The redirect URI to use for authorization.
+   * @param {string} iss - The issuer for authorization.
+   * @param {LAUNCH} launchType - The type of launch.
+   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
+   */
+  async athenaLaunch(
+    redirect: string,
+    iss: string,
+    launchType: LAUNCH
+  ): Promise<string | void> {
+
+    return this.launchEMR(
+      redirect,
+      iss,
+      launchType,
+      []
+    );
+  }
+
+  /**
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
@@ -215,6 +247,9 @@ export default class SmartLaunchHandler {
         break;
       case EMR.SMART:
         await this.smartHealthITLaunch(redirect, iss, launchType)
+        break;
+      case EMR.ATHENA:
+        await this.athenaLaunch(redirect, iss, launchType)
         break;
       default:
         break;

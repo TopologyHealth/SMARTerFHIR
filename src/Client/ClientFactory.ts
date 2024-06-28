@@ -7,6 +7,7 @@ import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
 import { ServerResponse, IncomingMessage } from "http"
 import { FhirClientConfig } from "../types"
+import AthenaClient from "./AthenaClient"
 
 export enum LAUNCH {
 	EMR,
@@ -59,6 +60,9 @@ export default class ClientFactory {
 			if (clientOrToken.state.serverUrl.includes("epic")) {
 				return EMR.EPIC;
 			}
+			if (clientOrToken.state.serverUrl.includes("athena")) {
+				return EMR.ATHENA;
+			}
 		} else {
 			if ("epic.eci" in clientOrToken) {
 				return EMR.EPIC;
@@ -107,6 +111,8 @@ export default class ClientFactory {
 				return new CernerClient(fhirClient)
 			case EMR.SMART:
 				return new SmartHealthClient(fhirClient)
+			case EMR.ATHENA:
+				return new AthenaClient(fhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")
@@ -143,6 +149,8 @@ export default class ClientFactory {
 				return EpicClient.getEndpoints()
 			case EMR.CERNER:
 				return CernerClient.getEndpoints()
+			case EMR.ATHENA:
+				return AthenaClient.getEndpoints()
 			case EMR.SMART:
 			case EMR.NONE:
 			default:
