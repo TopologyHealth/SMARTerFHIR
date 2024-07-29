@@ -1,12 +1,16 @@
 import * as FHIR from "fhirclient";
+import { fhirclient } from "fhirclient/lib/types";
 import { LAUNCH } from "../Client/ClientFactory";
 import { cerner } from "./Config";
 import scopes from "./scopes.json";
+import { FhirResource, Patient } from 'fhir/r4';
+import { Action, Actor, FhirScopePermissions } from "./Scopes";
 
 export enum EMR {
   CERNER = "cerner",
   EPIC = "epic",
   SMART = "smart",
+  ECW = "ecw",
   NONE = "none",
 }
 
@@ -51,102 +55,37 @@ export default class SmartLaunchHandler {
    * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
    */
   private async launchEMR(
+    emrType: EMR,
     redirect: string,
     iss: string,
-    launchType: LAUNCH,
-    emrSpecificScopes: string[]
+    launchType: LAUNCH
+    // ,
+    // emrSpecificScopes: string[]
   ): Promise<string | void> {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error("This doesn't work for backend launch");
     }
 
     const defaultScopes = [
-      launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
-      "online_access",
       "openid",
       "fhirUser",
     ];
-
+    const emrSpecificScopes = getEmrSpecificScopes(emrType, launchType);
     const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
+    const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
 
-    return FHIR.oauth2.authorize({
+    const authorizeParams = {
       client_id: this.clientID,
       iss: iss,
       redirect_uri: redirect_uri,
       scope: scope,
       clientSecret: this.clientSecret,
-    });
+      ...emrSpecificAuthorizeParams
+    };
+    return FHIR.oauth2.authorize(authorizeParams);
   }
 
-  /**
-   * Launches the Epic EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
-   * @param {string} redirect - The redirect URI to use for authorization.
-   * @param {string} iss - The issuer for authorization.
-   * @param {LAUNCH} launchType - The type of launch.
-   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-   */
-  async epicLaunch(
-    redirect: string,
-    iss: string,
-    launchType: LAUNCH
-  ): Promise<string | void> {
-    const emrSpecificScopes: string[] = [];
-    return this.launchEMR(
-      redirect,
-      iss,
-      launchType,
-      emrSpecificScopes
-    );
-  }
-
-  /**
-   * Launches the SMART Health IT EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
-   * @param {string} redirect - The redirect URI to use for authorization.
-   * @param {string} iss - The issuer for authorization.
-   * @param {LAUNCH} launchType - The type of launch.
-   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-   */
-  async smartHealthITLaunch(
-    redirect: string,
-    iss: string,
-    launchType: LAUNCH
-  ): Promise<string | void> {
-
-    return this.launchEMR(
-      redirect,
-      iss,
-      launchType,
-      []
-    );
-  }
-
-  /**
-   * Launches the Cerner EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
-   * @param {string} redirect - The redirect URI to use for authorization.
-   * @param {string} iss - The issuer for authorization.
-   * @param {LAUNCH} launchType - The type of launch.
-   * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-   */
-  async cernerLaunch(
-    redirect: string,
-    iss: string,
-    launchType: LAUNCH
-  ): Promise<string | void> {
-    const additionalScopes = cerner.scopes.map(
-      (name) => (scopes as { [key: string]: string })[name]
-    );
-
-    return this.launchEMR(
-      redirect,
-      iss,
-      launchType,
-      additionalScopes
-    );
-  }
 
   /**
    * Authorizes the EMR based on the current URL query parameters.
@@ -181,22 +120,10 @@ export default class SmartLaunchHandler {
     const iss = urlParams.get("iss") ?? undefined;
     if (!iss)
       throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
-    const emrType = this.getEMRType(iss);
+    const emrType = SmartLaunchHandler.getEMRType(iss);
     if (emrType === EMR.NONE || !emrType)
       throw new Error('EMR type cannot be inferred from the ISS')
-    switch (emrType) {
-      case EMR.EPIC:
-        await this.epicLaunch(redirect, iss, launchType);
-        break;
-      case EMR.CERNER:
-        await this.cernerLaunch(redirect, iss, launchType);
-        break;
-      case EMR.SMART:
-        await this.smartHealthITLaunch(redirect, iss, launchType)
-        break;
-      default:
-        break;
-    }
+    await this.launchEMR(emrType, redirect, iss, launchType)
   }
 
   /**
@@ -205,7 +132,7 @@ export default class SmartLaunchHandler {
    * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
    * returns `EMR.NONE`.
    */
-  getEMRType(iss?: string): EMR {
+  static getEMRType(iss?: string): EMR {
     if (iss) {
       const isEMROfType = (emrType: EMR) => iss.includes(emrType);
       const emrTypes = Object.values(EMR);
@@ -216,3 +143,36 @@ export default class SmartLaunchHandler {
     return emrType
   }
 }
+function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
+
+  const standardScopes = [launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
+    "online_access"]
+  switch (emrType) {
+    case EMR.CERNER:
+      return [...standardScopes,  ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
+    case EMR.ECW:
+      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
+    case EMR.EPIC:
+    case EMR.SMART:
+    default:
+      return standardScopes;
+  }
+}
+
+function getEMRSpecificAuthorizeParams(emrType: EMR): Partial<fhirclient.AuthorizeParams> {
+ switch (emrType) {
+   case EMR.ECW:
+    return {
+      pkceMode: 'unsafeV1',
+      completeInTarget: true
+    }
+   case EMR.CERNER:
+   case EMR.EPIC:
+   case EMR.SMART:
+   default:
+     return {
+      pkceMode: 'ifSupported'
+     };
+ }
+}
+

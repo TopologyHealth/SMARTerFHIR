@@ -3,6 +3,7 @@ export declare enum EMR {
     CERNER = "cerner",
     EPIC = "epic",
     SMART = "smart",
+    ECW = "ecw",
     NONE = "none"
 }
 /**
@@ -38,33 +39,6 @@ export default class SmartLaunchHandler {
      */
     private launchEMR;
     /**
-     * Launches the Epic EMR application.
-     * @param {string} clientId - The client ID to use for authorization.
-     * @param {string} redirect - The redirect URI to use for authorization.
-     * @param {string} iss - The issuer for authorization.
-     * @param {LAUNCH} launchType - The type of launch.
-     * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-     */
-    epicLaunch(redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
-    /**
-     * Launches the SMART Health IT EMR application.
-     * @param {string} clientId - The client ID to use for authorization.
-     * @param {string} redirect - The redirect URI to use for authorization.
-     * @param {string} iss - The issuer for authorization.
-     * @param {LAUNCH} launchType - The type of launch.
-     * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-     */
-    smartHealthITLaunch(redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
-    /**
-     * Launches the Cerner EMR application.
-     * @param {string} clientId - The client ID to use for authorization.
-     * @param {string} redirect - The redirect URI to use for authorization.
-     * @param {string} iss - The issuer for authorization.
-     * @param {LAUNCH} launchType - The type of launch.
-     * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
-     */
-    cernerLaunch(redirect: string, iss: string, launchType: LAUNCH): Promise<string | void>;
-    /**
      * Authorizes the EMR based on the current URL query parameters.
      * @returns {Promise<void>} - A promise resolving to void.
      */
@@ -81,5 +55,5 @@ export default class SmartLaunchHandler {
      * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
      * returns `EMR.NONE`.
      */
-    getEMRType(iss?: string): EMR;
+    static getEMRType(iss?: string): EMR;
 }

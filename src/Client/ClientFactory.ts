@@ -1,12 +1,14 @@
 import smart, * as FHIR from "fhirclient"
+import { IncomingMessage, ServerResponse } from "http"
+import { ClientUtils } from ".."
 import SubClient from "../FhirClient"
-import { EMR, instanceOfEmr } from "../Launcher/SmartLaunchHandler"
+import { EMR } from "../Launcher/SmartLaunchHandler"
+import { FhirClientConfig } from "../types"
 import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
 import CernerClient from "./CernerClient"
+import ECWClient from "./ECWClient"
 import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
-import { ServerResponse, IncomingMessage } from "http"
-import { FhirClientConfig } from "../types"
 
 export enum LAUNCH {
 	EMR,
@@ -19,7 +21,7 @@ export enum LAUNCH {
  * @property {string} client_id - A string representing the client ID.
  * @property {string}  - - `client_id`: A string representing the client ID associated with the JWT.
  */
-type JWT = {
+export type JWT = {
 	client_id: string
 	"epic.eci"?: string
 }
@@ -29,7 +31,7 @@ type JWT = {
  * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type.
  * @returns a boolean value.
  */
-function instanceOfJWT(object: unknown): object is JWT {
+export function instanceOfJWT(object: unknown): object is JWT {
 	return (object as JWT).client_id !== undefined
 }
 
@@ -40,33 +42,7 @@ Represents the ClientFactory class for creating EMR clients.
 export default class ClientFactory {
 
 
-	/**
-	 * The function `getEMRType` determines the type of Electronic Medical Record (EMR) based on the provided client or token.
-	 * @param {SubClient | JWT} client - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
-	 * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
-	*/
-	private getEMRType(clientOrToken: SubClient | JWT): EMR {
-		function isClient(input: object): input is SubClient {
-			return (input as SubClient).state.serverUrl !== undefined;
-		}
-		if (isClient(clientOrToken)) {
-			if (clientOrToken.state.serverUrl.includes("cerner")) {
-				return EMR.CERNER;
-			}
-			if (clientOrToken.state.serverUrl.includes("smarthealthit")) {
-				return EMR.SMART;
-			}
-			if (clientOrToken.state.serverUrl.includes("epic")) {
-				return EMR.EPIC;
-			}
-		} else {
-			if ("epic.eci" in clientOrToken) {
-				return EMR.EPIC;
-			}
-		}
 
-		return EMR.NONE;
-	}
 
 
 	/**
@@ -99,7 +75,7 @@ export default class ClientFactory {
 	}
 
 	private async createSmarterFhirClient(fhirClient: SubClient) {
-		const emrType = this.getEMRType(fhirClient)
+		const emrType = ClientUtils.getEMRType(fhirClient)
 		switch (emrType) {
 			case EMR.EPIC:
 				return new EpicClient(fhirClient)
@@ -107,6 +83,8 @@ export default class ClientFactory {
 				return new CernerClient(fhirClient)
 			case EMR.SMART:
 				return new SmartHealthClient(fhirClient)
+			case EMR.ECW:
+				return new ECWClient(fhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")
@@ -138,7 +116,7 @@ export default class ClientFactory {
 	private getEmrEndpoints(emrType: EMR): EMR_ENDPOINTS;
 	private getEmrEndpoints(jwt: JWT): EMR_ENDPOINTS;
 	private getEmrEndpoints(object: unknown): EMR_ENDPOINTS {
-		switch (this.getEmrTypeFromObject(object)) {
+		switch (ClientUtils.getEmrTypeFromObject(object)) {
 			case EMR.EPIC:
 				return EpicClient.getEndpoints()
 			case EMR.CERNER:
@@ -148,20 +126,6 @@ export default class ClientFactory {
 			default:
 				throw new Error('EMR type not defined.')
 		}
-	}
-
-
-	/**
-	 * The function `getEmrTypeFromObject` takes an object as input and returns the corresponding EMR type if the object is of type JWT or EMR, otherwise it throws an
-	 * error.
-	 * @param {unknown} object - The `object` parameter is of type `unknown`, which means it can be any type. It is used as input to determine the EMR (Electronic
-	 * Medical Record) type. The function checks if the `object` is an instance of JWT (JSON Web Token) or EMR, and returns
-	 * @returns an EMR (Electronic Medical Record) object.
-	 */
-	private getEmrTypeFromObject(object: unknown): EMR {
-		if (instanceOfJWT(object)) return this.getEMRType(object)
-		if (instanceOfEmr(object)) return (object as EMR)
-		throw new Error('Invalid object type.')
 	}
 
 }
