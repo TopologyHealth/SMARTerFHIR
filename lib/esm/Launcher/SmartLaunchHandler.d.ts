@@ -2,6 +2,7 @@ import { LAUNCH } from "../Client/ClientFactory";
 export declare enum EMR {
     CERNER = "cerner",
     EPIC = "epic",
+    ATHENA = "athena",
     SMART = "smart",
     ECW = "ecw",
     NONE = "none"
