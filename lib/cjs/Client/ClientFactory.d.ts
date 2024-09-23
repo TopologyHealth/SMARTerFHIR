@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { IncomingMessage, ServerResponse } from "http";
 import { FhirClientConfig } from "../types";
 import BaseClient from "./BaseClient";
