@@ -56,17 +56,20 @@ export default abstract class BaseClient {
 	 * @returns An object with three properties: "token", "r4", and "auth". Each property is assigned a new URL object based on the corresponding input parameters.
 	 */
 	protected static constructEndpoints(tokenEP: string | undefined, r4EP: string | undefined, authorizeEP: string | undefined) {
+		const authorizeEnv = process.env.NEXT_PUBLIC_AUTHORIZE_ENDPOINT ?? process.env.REACT_APP_AUTHORIZE_ENDPOINT
+		const tokenEnv = process.env.NEXT_PUBLIC_TOKEN_ENDPOINT ?? process.env.REACT_APP_TOKEN_ENDPOINT
+		const r4Env = process.env.NEXT_PUBLIC_R4_ENDPOINT ?? process.env.REACT_APP_R4_ENDPOINT
+		const isAllEndpointsAreEnvVars = authorizeEnv && tokenEnv && r4Env
+
+		if (isAllEndpointsAreEnvVars)
+			return returnEndpointUrls(authorizeEnv, tokenEnv, r4Env)
 		if (tokenEP == undefined)
 			throw Error('Token Endpoint not defined')
 		if (r4EP === undefined)
 			throw Error('R4 Endpoint not defined')
 		if (authorizeEP === undefined)
 			throw Error('Auth Endpoint not defined')
-		return {
-			token: new URL(tokenEP),
-			r4: new URL(r4EP),
-			auth: new URL(authorizeEP)
-		}
+		return returnEndpointUrls(tokenEP, r4EP, authorizeEP)
 	}
 
 	/**
@@ -356,3 +359,11 @@ export default abstract class BaseClient {
 		return this.create(patient)
 	}
 }
+function returnEndpointUrls(tokenEP: string, r4EP: string, authorizeEP: string) {
+	return {
+		token: new URL(tokenEP),
+		r4: new URL(r4EP),
+		auth: new URL(authorizeEP)
+	}
+}
+
