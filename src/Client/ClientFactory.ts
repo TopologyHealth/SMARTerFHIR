@@ -9,6 +9,7 @@ import CernerClient from "./CernerClient"
 import ECWClient from "./ECWClient"
 import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
+import MedplumClient from "./MedplumClient"
 
 export enum LAUNCH {
 	EMR,
@@ -40,11 +41,6 @@ export function instanceOfJWT(object: unknown): object is JWT {
 Represents the ClientFactory class for creating EMR clients.
 */
 export default class ClientFactory {
-
-
-
-
-
 	/**
 	 * The function `createEMRClient` creates an EMR client based on the specified launch type.
 	 * @param {LAUNCH} launchType - The `launchType` parameter is an optional parameter of type `LAUNCH` that specifies the type of EMR launch. It has a default value
@@ -85,6 +81,8 @@ export default class ClientFactory {
 				return new SmartHealthClient(fhirClient)
 			case EMR.ECW:
 				return new ECWClient(fhirClient)
+			case EMR.MEDPLUM:
+				return new MedplumClient(fhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")

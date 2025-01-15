@@ -148,7 +148,7 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
   if (scopesEnv) {
     const hasCommaSeparators = scopesEnv.includes(',')
     if (!hasCommaSeparators) throw new Error('Scopes Env var is of invalid format. Scopes must be provided as a string of comma-separated values')
-    const scopesEnvList = scopesEnv.split(',').map(String.prototype.trim)
+    const scopesEnvList = scopesEnv.split(',').map(item => item.trim())
     return scopesEnvList
   }
 

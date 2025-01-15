@@ -4,6 +4,7 @@ export declare enum EMR {
     EPIC = "epic",
     SMART = "smart",
     ECW = "ecw",
+    MEDPLUM = "medplum",
     NONE = "none"
 }
 /**
