@@ -2,15 +2,15 @@ import * as FHIR from "fhirclient";
 import { fhirclient } from "fhirclient/lib/types";
 import { LAUNCH } from "../Client/ClientFactory";
 import { cerner } from "./Config";
-import scopes from "./scopes.json";
-import { FhirResource, Patient } from 'fhir/r4';
 import { Action, Actor, FhirScopePermissions } from "./Scopes";
+import scopes from "./scopes.json";
 
 export enum EMR {
   CERNER = "cerner",
   EPIC = "epic",
   SMART = "smart",
   ECW = "ecw",
+  MEDPLUM = "medplum",
   NONE = "none",
 }
 
@@ -144,35 +144,45 @@ export default class SmartLaunchHandler {
   }
 }
 function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
+  const scopesEnv = process.env.REACT_APP_SCOPES ?? process.env.NEXT_PUBLIC_SCOPES
+  if (scopesEnv) {
+    const hasCommaSeparators = scopesEnv.includes(',')
+    if (!hasCommaSeparators) throw new Error('Scopes Env var is of invalid format. Scopes must be provided as a string of comma-separated values')
+    const scopesEnvList = scopesEnv.split(',').map(String.prototype.trim)
+    return scopesEnvList
+  }
 
+  if (!emrType) throw new Error('EMR type cannot be inferred. You must provide the emrType explicitly as an env variable')
   const standardScopes = [launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
     "online_access"]
   switch (emrType) {
     case EMR.CERNER:
-      return [...standardScopes,  ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
+      return [...standardScopes, ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
     case EMR.ECW:
       return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
     case EMR.EPIC:
     case EMR.SMART:
+    case EMR.MEDPLUM:
     default:
       return standardScopes;
   }
 }
 
 function getEMRSpecificAuthorizeParams(emrType: EMR): Partial<fhirclient.AuthorizeParams> {
- switch (emrType) {
-   case EMR.ECW:
-    return {
-      pkceMode: 'unsafeV1',
-      completeInTarget: true
-    }
-   case EMR.CERNER:
-   case EMR.EPIC:
-   case EMR.SMART:
-   default:
-     return {
-      pkceMode: 'ifSupported'
-     };
- }
+  switch (emrType) {
+    case EMR.ECW:
+      return {
+        pkceMode: 'unsafeV1',
+        completeInTarget: true
+      }
+    case EMR.CERNER:
+    case EMR.EPIC:
+    case EMR.SMART:
+    case EMR.MEDPLUM:
+    default:
+      return {
+        pkceMode: 'ifSupported'
+      };
+  }
 }
 
