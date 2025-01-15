@@ -41,7 +41,8 @@ export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
     { substring: "cerner", emr: EMR.CERNER },
     { substring: "smarthealthit", emr: EMR.SMART },
     { substring: "epic", emr: EMR.EPIC },
-    { substring: "ecw", emr: EMR.ECW }
+    { substring: "ecw", emr: EMR.ECW },
+    { substring: "medplum", emr: EMR.MEDPLUM}
   ];
 
   if (isClient(clientOrToken)) {
