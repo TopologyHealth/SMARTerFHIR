@@ -4,6 +4,8 @@ export declare enum EMR {
     EPIC = "epic",
     SMART = "smart",
     ECW = "ecw",
+    ATHENA = "athena",
+    ATHENAPRACTICE = "athenapractice",
     NONE = "none"
 }
 /**
@@ -29,12 +31,10 @@ export default class SmartLaunchHandler {
     constructor(clientID: string, clientSecret?: string);
     /**
      * Launches an EMR application.
-     * @param {string} clientId - The client ID to use for authorization.
      * @param {string} redirect - The redirect URI to use for authorization.
      * @param {string} iss - The issuer for authorization.
      * @param {LAUNCH} launchType - The type of launch.
-     * @param {string[]} emrSpecificScopes - Additional scopes specific to the EMR.
-     * @param {string} clientSecret - The client secret for authorization.
+     * @param {string[]} scopes - Additional scopes to request.
      * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
      */
     private launchEMR;

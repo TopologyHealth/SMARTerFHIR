@@ -11,6 +11,8 @@ export enum EMR {
   EPIC = "epic",
   SMART = "smart",
   ECW = "ecw",
+  ATHENA = "athena",
+  ATHENAPRACTICE = "athenapractice",
   NONE = "none",
 }
 
@@ -46,21 +48,18 @@ export default class SmartLaunchHandler {
 
   /**
    * Launches an EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
    * @param {string} redirect - The redirect URI to use for authorization.
    * @param {string} iss - The issuer for authorization.
    * @param {LAUNCH} launchType - The type of launch.
-   * @param {string[]} emrSpecificScopes - Additional scopes specific to the EMR.
-   * @param {string} clientSecret - The client secret for authorization.
+   * @param {string[]} scopes - Additional scopes to request.
    * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
    */
   private async launchEMR(
     emrType: EMR,
     redirect: string,
     iss: string,
-    launchType: LAUNCH
-    // ,
-    // emrSpecificScopes: string[]
+    launchType: LAUNCH,
+    scopes?: string[]
   ): Promise<string | void> {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error("This doesn't work for backend launch");
@@ -71,7 +70,7 @@ export default class SmartLaunchHandler {
       "fhirUser",
     ];
     const emrSpecificScopes = getEmrSpecificScopes(emrType, launchType);
-    const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
+    const scope = [...defaultScopes, ...emrSpecificScopes, ...(scopes ?? [])].join(" ");
     const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
 
@@ -149,9 +148,13 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
     "online_access"]
   switch (emrType) {
     case EMR.CERNER:
-      return [...standardScopes,  ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
+      return [...standardScopes, ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
     case EMR.ECW:
       return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
+    case EMR.ATHENAPRACTICE:
+      return ["profile", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch"]
+    case EMR.ATHENA:
+      return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch"]
     case EMR.EPIC:
     case EMR.SMART:
     default:
@@ -160,19 +163,19 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
 }
 
 function getEMRSpecificAuthorizeParams(emrType: EMR): Partial<fhirclient.AuthorizeParams> {
- switch (emrType) {
-   case EMR.ECW:
-    return {
-      pkceMode: 'unsafeV1',
-      completeInTarget: true
-    }
-   case EMR.CERNER:
-   case EMR.EPIC:
-   case EMR.SMART:
-   default:
-     return {
-      pkceMode: 'ifSupported'
-     };
- }
+  switch (emrType) {
+    case EMR.ECW:
+      return {
+        pkceMode: 'unsafeV1',
+        completeInTarget: true
+      }
+    case EMR.CERNER:
+    case EMR.EPIC:
+    case EMR.SMART:
+    default:
+      return {
+        pkceMode: 'ifSupported'
+      };
+  }
 }
 
