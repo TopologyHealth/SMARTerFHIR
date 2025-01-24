@@ -152,9 +152,9 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
     case EMR.ECW:
       return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
     case EMR.ATHENAPRACTICE:
-      return ["profile", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch"]
+      return ["profile", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
     case EMR.ATHENA:
-      return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch"]
+      return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
     case EMR.EPIC:
     case EMR.SMART:
     default:
