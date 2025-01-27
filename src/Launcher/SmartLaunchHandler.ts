@@ -108,13 +108,24 @@ export default class SmartLaunchHandler {
   private async executeWebLaunch(launchType: LAUNCH, redirectPath?: string) {
     const queryString = window.location.search;
     const origin = window.location.origin;
-    const redirect = origin + (
-      redirectPath
-        ? redirectPath.startsWith('/')
-          ? redirectPath
-          : '/' + redirectPath
-        : ''
-    );
+
+    const isAbsoluteUrl = (url: string): boolean => {
+      try {
+        new URL(url); // Throws error for relative URLs
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const redirect = redirectPath
+      ? isAbsoluteUrl(redirectPath)
+        ? redirectPath // Preserve full URLs (including external domains)
+        : origin + (redirectPath.startsWith('/')
+          ? redirectPath // Already root-relative path
+          : '/' + redirectPath) // Make path root-relative
+      : origin; // Default to current origin
+
     const urlParams = new URLSearchParams(queryString);
     const iss = urlParams.get("iss") ?? undefined;
     if (!iss)
