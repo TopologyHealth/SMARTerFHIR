@@ -10,6 +10,8 @@ import ECWClient from "./ECWClient"
 import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
 import MedplumClient from "./MedplumClient"
+import AthenaPracticeClient from "./AthenaPracticeClient"
+import AthenaClient from "./AthenaClient"
 
 export enum LAUNCH {
 	EMR,
@@ -83,6 +85,10 @@ export default class ClientFactory {
 				return new ECWClient(fhirClient)
 			case EMR.MEDPLUM:
 				return new MedplumClient(fhirClient)
+			case EMR.ATHENAPRACTICE:
+				return new AthenaPracticeClient(fhirClient)
+			case EMR.ATHENA:
+				return new AthenaClient(fhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")

@@ -11,6 +11,8 @@ export enum EMR {
   SMART = "smart",
   ECW = "ecw",
   MEDPLUM = "medplum",
+  ATHENA = "athena",
+  ATHENAPRACTICE = "athenapractice",
   NONE = "none",
 }
 
@@ -46,21 +48,18 @@ export default class SmartLaunchHandler {
 
   /**
    * Launches an EMR application.
-   * @param {string} clientId - The client ID to use for authorization.
    * @param {string} redirect - The redirect URI to use for authorization.
    * @param {string} iss - The issuer for authorization.
    * @param {LAUNCH} launchType - The type of launch.
-   * @param {string[]} emrSpecificScopes - Additional scopes specific to the EMR.
-   * @param {string} clientSecret - The client secret for authorization.
+   * @param {string[]} scopes - Additional scopes to request.
    * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
    */
   private async launchEMR(
     emrType: EMR,
     redirect: string,
     iss: string,
-    launchType: LAUNCH
-    // ,
-    // emrSpecificScopes: string[]
+    launchType: LAUNCH,
+    scopes?: string[]
   ): Promise<string | void> {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error("This doesn't work for backend launch");
@@ -71,7 +70,7 @@ export default class SmartLaunchHandler {
       "fhirUser",
     ];
     const emrSpecificScopes = getEmrSpecificScopes(emrType, launchType);
-    const scope = [...defaultScopes, ...emrSpecificScopes].join(" ");
+    const scope = [...defaultScopes, ...emrSpecificScopes, ...(scopes ?? [])].join(" ");
     const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
 
@@ -109,13 +108,24 @@ export default class SmartLaunchHandler {
   private async executeWebLaunch(launchType: LAUNCH, redirectPath?: string) {
     const queryString = window.location.search;
     const origin = window.location.origin;
-    const redirect = origin + (
-      redirectPath
-        ? redirectPath.startsWith('/')
-          ? redirectPath
-          : '/' + redirectPath
-        : ''
-    );
+
+    const isAbsoluteUrl = (url: string): boolean => {
+      try {
+        new URL(url); // Throws error for relative URLs
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const redirect = redirectPath
+      ? isAbsoluteUrl(redirectPath)
+        ? redirectPath // Preserve full URLs (including external domains)
+        : origin + (redirectPath.startsWith('/')
+          ? redirectPath // Already root-relative path
+          : '/' + redirectPath) // Make path root-relative
+      : origin; // Default to current origin
+
     const urlParams = new URLSearchParams(queryString);
     const iss = urlParams.get("iss") ?? undefined;
     if (!iss)
@@ -160,6 +170,10 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
       return [...standardScopes, ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
     case EMR.ECW:
       return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
+    case EMR.ATHENAPRACTICE:
+      return ["profile", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
+    case EMR.ATHENA:
+      return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
     case EMR.EPIC:
     case EMR.SMART:
     case EMR.MEDPLUM:
