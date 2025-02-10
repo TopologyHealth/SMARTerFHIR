@@ -10,8 +10,8 @@ export enum EMR {
   EPIC = "epic",
   SMART = "smart",
   ECW = "ecw",
-  ATHENA = "athena",
-  ATHENAPRACTICE = "athenapractice",
+  ATHENA = "platform.athena",
+  ATHENAPRACTICE = "fhirapi.athena",
   NONE = "none",
 }
 
@@ -152,12 +152,12 @@ export default class SmartLaunchHandler {
   static getEMRType(iss?: string): EMR {
     if (iss) {
       // Handle specific cases
-      if (iss.includes('https://ap23sandbox.fhirapi.athenahealth.com/demoAPIServer/fhir/r4')) {
-        return EMR.ATHENAPRACTICE
-      }
+      // if (iss.includes('https://ap23sandbox.fhirapi.athenahealth.com/demoAPIServer/fhir/r4')) {
+      //   return EMR.ATHENAPRACTICE
+      // }
       const isEMROfType = (emrType: EMR) => iss.includes(emrType);
-      const emrTypes = Object.values(EMR);
-      return emrTypes.find(isEMROfType) ?? EMR.NONE;
+      const sortedEMRTypes = (Object.values(EMR)).sort((a, b) => b.length - a.length)
+      return sortedEMRTypes.find(isEMROfType) ?? EMR.NONE;
     }
     const emrType = (process.env.REACT_APP_EMR_TYPE as string).toLowerCase() as EMR
     if (!emrType) throw new Error('EMR type cannot be inferred. You must provide the emrType explicitly as an env variable')
