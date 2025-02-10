@@ -82,7 +82,7 @@ export default class SmartLaunchHandler {
       noRedirect: true,
       ...emrSpecificAuthorizeParams
     };
-    FHIR.oauth2.authorize(authorizeParams).then(url => {
+    return FHIR.oauth2.authorize(authorizeParams).then(url => {
       if (typeof url === 'string') {
         addSearchParams(emrType, url);
       } else {
@@ -139,7 +139,7 @@ export default class SmartLaunchHandler {
     if (!iss)
       throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
     if (emrType === undefined) emrType = SmartLaunchHandler.getEMRType(iss);
-    if (emrType === EMR.NONE || !emrType) throw new Error('EMR type cannot be inferred from the ISS')
+    if (emrType === EMR.NONE) throw new Error('EMR type cannot be inferred from the ISS')
     await this.launchEMR(emrType, redirect, iss, launchType)
   }
 
