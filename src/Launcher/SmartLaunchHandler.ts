@@ -2,9 +2,8 @@ import * as FHIR from "fhirclient";
 import { fhirclient } from "fhirclient/lib/types";
 import { LAUNCH } from "../Client/ClientFactory";
 import { cerner } from "./Config";
-import scopes from "./scopes.json";
-import { FhirResource, Patient } from 'fhir/r4';
 import { Action, Actor, FhirScopePermissions } from "./Scopes";
+import scopes from "./scopes.json";
 
 export enum EMR {
   CERNER = "cerner",
@@ -73,7 +72,6 @@ export default class SmartLaunchHandler {
     const scope = [...defaultScopes, ...emrSpecificScopes, ...(scopes ?? [])].join(" ");
     const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
-    const emrSpecificUrlsParams = getEMRSpecificUrlParams(emrType)
 
     const authorizeParams = {
       client_id: this.clientID,
@@ -84,10 +82,16 @@ export default class SmartLaunchHandler {
       noRedirect: true,
       ...emrSpecificAuthorizeParams
     };
-    const url = await FHIR.oauth2.authorize(authorizeParams);
-    if (!url) throw new Error("Failed to build authorize URL");
-    self.location.href = url + emrSpecificUrlsParams;
+    FHIR.oauth2.authorize(authorizeParams).then(url => {
+      if (typeof url === 'string') {
+        addSearchParams(emrType, url);
+      } else {
+        console.error("Failed to build authorize URL")
+      }
+    })
   }
+
+
 
 
   /**
@@ -160,6 +164,7 @@ export default class SmartLaunchHandler {
     return emrType
   }
 }
+
 function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
 
   const standardScopes = [launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
@@ -170,13 +175,14 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
     case EMR.ECW:
       return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
     case EMR.ATHENAPRACTICE:
-      const emrScopes = [
-        "profile",
-        "offline_access",
-        FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"]),
-      ];
-      if (launchType === LAUNCH.EMR) emrScopes.push("launch");
-      return emrScopes;
+      return [
+        launchType === LAUNCH.EMR ? ["launch"] : [],
+        [
+          "profile",
+          "offline_access",
+          FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])
+        ]
+      ].flat()
     case EMR.ATHENA:
       return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
     case EMR.EPIC:
@@ -203,11 +209,23 @@ function getEMRSpecificAuthorizeParams(emrType: EMR): Partial<fhirclient.Authori
   }
 }
 
-function getEMRSpecificUrlParams(emrType: EMR): string {
+function getEMRSpecificUrlParams(emrType: EMR): URLSearchParams {
+  const urlSearchParams = new URLSearchParams()
   switch (emrType) {
     case EMR.ATHENAPRACTICE:
-      return '&response_mode=query'
+      urlSearchParams.set('response_mode', 'query')
+      break;
     default:
-      return '';
   }
+  return urlSearchParams
 }
+
+function addSearchParams(emrType: EMR, url: string) {
+  const emrSpecificUrlsParams = getEMRSpecificUrlParams(emrType);
+  const newUrl = new URL(url);
+  (Object.keys(emrSpecificUrlsParams) as Array<keyof typeof emrSpecificUrlsParams>).forEach(key => {
+    newUrl.searchParams.append(`${String(key)}`, `${emrSpecificUrlsParams[key]}`);
+  });
+  self.location.href = newUrl.toString();
+}
+
