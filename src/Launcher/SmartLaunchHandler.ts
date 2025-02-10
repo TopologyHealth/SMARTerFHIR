@@ -94,11 +94,11 @@ export default class SmartLaunchHandler {
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
-  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR, redirectPath?: string, emrType?: EMR): Promise<void> {
+  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR, redirectPath?: string): Promise<void> {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error(`Direct Backend Authorization not supported yet.`)
     } else {
-      return await this.executeWebLaunch(launchType, redirectPath, emrType);
+      return await this.executeWebLaunch(launchType, redirectPath);
     }
   }
 
@@ -109,7 +109,7 @@ export default class SmartLaunchHandler {
    * corresponding EMR system.
    * @returns nothing (undefined).
    */
-  private async executeWebLaunch(launchType: LAUNCH, redirectPath?: string, emrType?: EMR) {
+  private async executeWebLaunch(launchType: LAUNCH, redirectPath?: string) {
     const queryString = window.location.search;
     const origin = window.location.origin;
 
@@ -134,7 +134,7 @@ export default class SmartLaunchHandler {
     const iss = urlParams.get("iss") ?? undefined;
     if (!iss)
       throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
-    if (emrType === undefined) emrType = SmartLaunchHandler.getEMRType(iss);
+    const emrType = SmartLaunchHandler.getEMRType(iss);
     if (emrType === EMR.NONE || !emrType) throw new Error('EMR type cannot be inferred from the ISS')
     await this.launchEMR(emrType, redirect, iss, launchType)
   }
