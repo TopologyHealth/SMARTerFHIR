@@ -42,7 +42,7 @@ export default class SmartLaunchHandler {
      * Authorizes the EMR based on the current URL query parameters.
      * @returns {Promise<void>} - A promise resolving to void.
      */
-    authorizeEMR(launchType?: LAUNCH, redirectPath?: string): Promise<void>;
+    authorizeEMR(launchType?: LAUNCH, redirectPath?: string, emrType?: EMR): Promise<void>;
     /**
      * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
      * corresponding EMR system.

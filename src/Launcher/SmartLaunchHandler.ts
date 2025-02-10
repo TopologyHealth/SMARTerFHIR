@@ -73,6 +73,7 @@ export default class SmartLaunchHandler {
     const scope = [...defaultScopes, ...emrSpecificScopes, ...(scopes ?? [])].join(" ");
     const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
+    const emrSpecificUrlsParams = getEMRSpecificUrlParams(emrType)
 
     const authorizeParams = {
       client_id: this.clientID,
@@ -80,9 +81,12 @@ export default class SmartLaunchHandler {
       redirect_uri: redirect_uri,
       scope: scope,
       clientSecret: this.clientSecret,
+      noRedirect: true,
       ...emrSpecificAuthorizeParams
     };
-    return FHIR.oauth2.authorize(authorizeParams);
+    const url = await FHIR.oauth2.authorize(authorizeParams);
+    if (!url) throw new Error("Failed to build authorize URL");
+    self.location.href = url + emrSpecificUrlsParams;
   }
 
 
@@ -90,11 +94,11 @@ export default class SmartLaunchHandler {
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
    */
-  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR, redirectPath?: string) {
+  async authorizeEMR(launchType: LAUNCH = LAUNCH.EMR, redirectPath?: string, emrType?: EMR): Promise<void> {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error(`Direct Backend Authorization not supported yet.`)
     } else {
-      return await this.executeWebLaunch(launchType, redirectPath);
+      return await this.executeWebLaunch(launchType, redirectPath, emrType);
     }
   }
 
@@ -105,7 +109,7 @@ export default class SmartLaunchHandler {
    * corresponding EMR system.
    * @returns nothing (undefined).
    */
-  private async executeWebLaunch(launchType: LAUNCH, redirectPath?: string) {
+  private async executeWebLaunch(launchType: LAUNCH, redirectPath?: string, emrType?: EMR) {
     const queryString = window.location.search;
     const origin = window.location.origin;
 
@@ -130,9 +134,8 @@ export default class SmartLaunchHandler {
     const iss = urlParams.get("iss") ?? undefined;
     if (!iss)
       throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
-    const emrType = SmartLaunchHandler.getEMRType(iss);
-    if (emrType === EMR.NONE || !emrType)
-      throw new Error('EMR type cannot be inferred from the ISS')
+    if (emrType === undefined) emrType = SmartLaunchHandler.getEMRType(iss);
+    if (emrType === EMR.NONE || !emrType) throw new Error('EMR type cannot be inferred from the ISS')
     await this.launchEMR(emrType, redirect, iss, launchType)
   }
 
@@ -144,6 +147,10 @@ export default class SmartLaunchHandler {
    */
   static getEMRType(iss?: string): EMR {
     if (iss) {
+      // Handle specific cases
+      if (iss.includes('https://ap23sandbox.fhirapi.athenahealth.com/demoAPIServer/fhir/r4')) {
+        return EMR.ATHENAPRACTICE
+      }
       const isEMROfType = (emrType: EMR) => iss.includes(emrType);
       const emrTypes = Object.values(EMR);
       return emrTypes.find(isEMROfType) ?? EMR.NONE;
@@ -163,7 +170,13 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
     case EMR.ECW:
       return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
     case EMR.ATHENAPRACTICE:
-      return ["profile", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
+      const emrScopes = [
+        "profile",
+        "offline_access",
+        FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"]),
+      ];
+      if (launchType === LAUNCH.EMR) emrScopes.push("launch");
+      return emrScopes;
     case EMR.ATHENA:
       return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
     case EMR.EPIC:
@@ -190,3 +203,11 @@ function getEMRSpecificAuthorizeParams(emrType: EMR): Partial<fhirclient.Authori
   }
 }
 
+function getEMRSpecificUrlParams(emrType: EMR): string {
+  switch (emrType) {
+    case EMR.ATHENAPRACTICE:
+      return '&response_mode=query'
+    default:
+      return '';
+  }
+}
