@@ -14,7 +14,7 @@ export declare function getEndpointsForEmr(emrType: EMR): void;
  * @param {SubClient | JWT} client - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
  * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
 */
-export declare function getEMRType(clientOrToken: SubClient | JWT): EMR;
+export declare function getEMRType(object: SubClient | JWT | URL): EMR;
 /**
  * The function `getEmrTypeFromObject` takes an object as input and returns the corresponding EMR type if the object is of type JWT or EMR, otherwise it throws an
  * error.

@@ -4,6 +4,7 @@ import { LAUNCH } from "../Client/ClientFactory";
 import { cerner } from "./Config";
 import { Action, Actor, FhirScopePermissions } from "./Scopes";
 import scopes from "./scopes.json";
+import { getEMRType } from "../Client/utils";
 
 export enum EMR {
   CERNER = "cerner",
@@ -91,9 +92,6 @@ export default class SmartLaunchHandler {
     })
   }
 
-
-
-
   /**
    * Authorizes the EMR based on the current URL query parameters.
    * @returns {Promise<void>} - A promise resolving to void.
@@ -105,8 +103,6 @@ export default class SmartLaunchHandler {
       return await this.executeWebLaunch(launchType, redirectPath, emrType);
     }
   }
-
-
 
   /**
    * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
@@ -138,32 +134,12 @@ export default class SmartLaunchHandler {
     const iss = urlParams.get("iss") ?? undefined;
     if (!iss)
       throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
-    if (emrType === undefined) emrType = SmartLaunchHandler.getEMRType(iss);
+    if (emrType === undefined) emrType = getEMRType(new URL(iss));
     if (emrType === EMR.NONE) throw new Error('EMR type cannot be inferred from the ISS')
     await this.launchEMR(emrType, redirect, iss, launchType)
   }
-
-  /**
-   * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
-   * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
-   * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
-   * returns `EMR.NONE`.
-   */
-  static getEMRType(iss?: string): EMR {
-    if (iss) {
-      // Handle specific cases
-      // if (iss.includes('https://ap23sandbox.fhirapi.athenahealth.com/demoAPIServer/fhir/r4')) {
-      //   return EMR.ATHENAPRACTICE
-      // }
-      const isEMROfType = (emrType: EMR) => iss.includes(emrType);
-      const sortedEMRTypes = (Object.values(EMR)).sort((a, b) => b.length - a.length)
-      return sortedEMRTypes.find(isEMROfType) ?? EMR.NONE;
-    }
-    const emrType = (process.env.REACT_APP_EMR_TYPE as string).toLowerCase() as EMR
-    if (!emrType) throw new Error('EMR type cannot be inferred. You must provide the emrType explicitly as an env variable')
-    return emrType
-  }
 }
+
 
 function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
   const scopesEnv = process.env.REACT_APP_SCOPES ?? process.env.NEXT_PUBLIC_SCOPES ?? process.env.SCOPES

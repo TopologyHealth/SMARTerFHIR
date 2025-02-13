@@ -19,33 +19,32 @@ export function getEndpointsForEmr(emrType: EMR) {
  * @param {SubClient | JWT} client - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
  * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
 */
-export function getEMRType(clientOrToken: SubClient | JWT): EMR {
+export function getEMRType(object: SubClient | JWT | URL): EMR {
   function isClient(input: object): input is SubClient {
     return (input as SubClient).state.serverUrl !== undefined;
   }
-  const EMR_MAPPING = [
-    { substring: "cerner", emr: EMR.CERNER },
-    { substring: "smarthealthit", emr: EMR.SMART },
-    { substring: "epic", emr: EMR.EPIC },
-    { substring: "ecw", emr: EMR.ECW },
-    { substring: "platform.athenahealth.com", emr: EMR.ATHENA },
-    { substring: "fhirapi.athenahealth.com", emr: EMR.ATHENAPRACTICE }
-  ];
-
-  if (isClient(clientOrToken)) {
-    const serverUrl = clientOrToken.state.serverUrl;
-    for (const { substring, emr } of EMR_MAPPING) {
-      if (serverUrl.includes(substring)) {
-        return emr;
-      }
-    }
-  } else {
-    if ("epic.eci" in clientOrToken) {
-      return EMR.EPIC;
-    }
+  function isJWT(input: object): input is JWT {
+    return (input as JWT).client_id !== undefined
   }
 
-  return EMR.NONE;
+  if (isJWT(object)) {
+    if ("epic.eci" in object) {
+      return EMR.EPIC;
+    } else {
+      console.error('Unknown JWT', object)
+      throw new Error('Could not determine EMR Type from JWT')
+    }
+  }
+  if (isClient(object)) {
+    const serverUrl = object.state.serverUrl;
+    return getEMRType(new URL(serverUrl))
+    
+  } else {      //Is a URL
+    const urlAsString = object.toString()    
+    const isEMROfType = (emrType: EMR) => urlAsString.includes(emrType);
+    const sortedEMRTypes = (Object.values(EMR)).sort((a, b) => b.length - a.length)
+    return sortedEMRTypes.find(isEMROfType) ?? EMR.NONE;
+  }
 }
 
 
