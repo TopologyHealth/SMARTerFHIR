@@ -18,17 +18,7 @@ import {
 	UserReadResult,
 } from "../types"
 
-/**
- * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
- * @property {URL} token - A URL that represents the endpoint for accessing the token service in an EMR (Electronic Medical Record) system.
- * @property {URL} r4 - The "r4" property in the EMR_ENDPOINTS type represents a URL that is used to access the R4 version of an EMR (Electronic Medical Record)
- * endpoint.
- */
-export type EMR_ENDPOINTS = {
-	token: URL,
-	r4: URL,
-	auth: URL
-}
+
 /**
 Represents the BaseClient abstract class.
 */
@@ -37,11 +27,12 @@ export default abstract class BaseClient {
 	readonly defaultCreateHeaders: HeadersInit = {}
 
 	abstract readonly EMR_TYPE: EMR
-	static readonly AUTHORIZE_ENDPOINT: string | undefined;
-	static readonly TOKEN_ENDPOINT: string | undefined;
 	static readonly R4_ENDPOINT: string | undefined;
 
-	public abstract getEndpoints(): EMR_ENDPOINTS
+	public getR4Endpoint(): URL {
+		return new URL(this.fhirClientDefault.state.serverUrl)
+	}
+
 	public getEMRType(): EMR {
 		return this.EMR_TYPE
 	}
@@ -55,18 +46,10 @@ export default abstract class BaseClient {
 	 * authorization process and obtaining an authorization code or access token.
 	 * @returns An object with three properties: "token", "r4", and "auth". Each property is assigned a new URL object based on the corresponding input parameters.
 	 */
-	protected static constructEndpoints(tokenEP: string | undefined, r4EP: string | undefined, authorizeEP: string | undefined) {
-		if (tokenEP == undefined)
-			throw Error('Token Endpoint not defined')
-		if (r4EP === undefined)
+	protected static setR4Endpoint(r4Endpoint: string | undefined) {
+		if (r4Endpoint === undefined)
 			throw Error('R4 Endpoint not defined')
-		if (authorizeEP === undefined)
-			throw Error('Auth Endpoint not defined')
-		return {
-			token: new URL(tokenEP),
-			r4: new URL(r4EP),
-			auth: new URL(authorizeEP)
-		}
+		return new URL(r4Endpoint)
 	}
 
 	/**

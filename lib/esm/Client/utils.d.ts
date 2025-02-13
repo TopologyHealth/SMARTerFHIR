@@ -1,14 +1,14 @@
-import { EMR } from "../Launcher/SmartLaunchHandler";
-import { EMR_ENDPOINTS } from "./BaseClient";
 import SubClient from "../FhirClient";
+import { EMR } from "../Launcher/SmartLaunchHandler";
 import { JWT } from "./ClientFactory";
 /**
+ * @deprecated Endpoints are no longer assumed in-code. This function will only throw an error if used. Please obtain an R4 endpoint from your EMR Vendor.
 * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
 * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
 * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
 * @returns an object of type EMR_ENDPOINTS.
 */
-export declare function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS;
+export declare function getEndpointsForEmr(emrType: EMR): void;
 /**
  * The function `getEMRType` determines the type of Electronic Medical Record (EMR) based on the provided client or token.
  * @param {SubClient | JWT} client - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).

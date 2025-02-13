@@ -48,11 +48,4 @@ export default class ClientFactory {
      * @returns a Promise that resolves to a SubClient object.
      */
     private createDefaultFhirClient;
-    /**
-     * The function `getEmrEndpoints` returns the endpoints based on the EMR type obtained from the JWT.
-     * @param {JWT} jwt - The "jwt" parameter is a JSON Web Token (JWT) that is used for authentication and authorization purposes. It contains information about the
-     * user and their permissions.
-     * @returns an object of type EMR_ENDPOINTS.
-     */
-    private getEmrEndpoints;
 }
