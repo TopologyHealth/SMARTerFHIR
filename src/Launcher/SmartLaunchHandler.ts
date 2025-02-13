@@ -166,14 +166,24 @@ export default class SmartLaunchHandler {
 }
 
 function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
+  const scopesEnv = process.env.REACT_APP_SCOPES ?? process.env.NEXT_PUBLIC_SCOPES ?? process.env.SCOPES
+  if (scopesEnv) {
+    const hasCommaSeparators = scopesEnv.includes(',')
+    if (!hasCommaSeparators) throw new Error('Scopes Env var is of invalid format. Scopes must be provided as a string of comma-separated values')
+    const scopesEnvList = scopesEnv.split(',').map(String.prototype.trim)
+    return scopesEnvList
+  }
+  return generatePreconfiguredScopes(launchType, emrType);
+}
 
+function generatePreconfiguredScopes(launchType: LAUNCH, emrType: EMR) {
   const standardScopes = [launchType === LAUNCH.STANDALONE ? "launch/practitioner" : "launch",
-    "online_access"]
+    "online_access"];
   switch (emrType) {
     case EMR.CERNER:
-      return [...standardScopes, ...cerner.scopes.map(name => (scopes as { [key: string]: string })[name])];
+      return [...standardScopes, ...cerner.scopes.map(name => (scopes as { [key: string]: string; })[name])];
     case EMR.ECW:
-      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])]
+      return [launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient", "Encounter", "Practitioner"])];
     case EMR.ATHENAPRACTICE:
       return [
         launchType === LAUNCH.EMR ? ["launch"] : [],
@@ -182,9 +192,9 @@ function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
           "offline_access",
           FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])
         ]
-      ].flat()
+      ].flat();
     case EMR.ATHENA:
-      return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])]
+      return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])];
     case EMR.EPIC:
     case EMR.SMART:
     default:
