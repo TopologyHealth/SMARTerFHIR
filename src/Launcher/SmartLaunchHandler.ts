@@ -35,15 +35,36 @@ export default class SmartLaunchHandler {
    */
   readonly clientID: string;
 
-  readonly clientSecret?: string
+  readonly clientSecret?: string;
+
+  /**
+   * Scopes to be requested during launch, overriding SMARTerFHIR defaults.
+   * @readonly
+   */
+  readonly scopeOverride?: string[];
 
   /**
    * Creates an instance of SmartLaunchHandler.
    * @param {string} clientID - The client ID to use for authorization.
+   * @param {string} clientSecret - The client secret to use for authorization.
+   * Set as `undefined` if the application does not require a client secret.
+   * @param {string} scope - The scopes to request during launch. If unset,
+   * defaults will be computed by SMARTerFHIR based on the EMR type. **If
+   * provided, this function expects a string containing scopes separated by
+   * commas** (e.g., "openid, fhirUser, profile, offline_access, user/Patient.*,
+   * user/Practitioner.read")
    */
-  constructor(clientID: string, clientSecret?: string) {
+  constructor(clientID: string, clientSecret?: string, scope?: string) {
     this.clientID = clientID;
-    this.clientSecret = clientSecret
+    this.clientSecret = clientSecret;
+    if (scope) {
+      const hasCommaSeparators = scope.includes(",");
+      if (!hasCommaSeparators)
+        throw new Error(
+          "`scope` argument is of invalid format. `scope` must be provided as a string of comma-separated values"
+        );
+      this.scopeOverride = scope.split(",").map((s) => s.trim());
+    }
   }
 
   /**
@@ -69,7 +90,7 @@ export default class SmartLaunchHandler {
       "openid",
       "fhirUser",
     ];
-    const emrSpecificScopes = getEmrSpecificScopes(emrType, launchType);
+    const emrSpecificScopes = this.getEmrSpecificScopes(emrType, launchType);
     const scope = [...defaultScopes, ...emrSpecificScopes, ...(scopes ?? [])].join(" ");
     const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
     const redirect_uri = redirect ?? "";
@@ -135,21 +156,22 @@ export default class SmartLaunchHandler {
     if (!iss)
       throw new Error("Iss Search parameter must be provided as part of EMR Web Launch")
     if (emrType === undefined) emrType = getEMRType(new URL(iss));
-    if (emrType === EMR.NONE) throw new Error('EMR type cannot be inferred from the ISS')
-    await this.launchEMR(emrType, redirect, iss, launchType)
+    if (emrType === EMR.NONE)
+      throw new Error("EMR type cannot be inferred from the ISS");
+    await this.launchEMR(emrType, redirect, iss, launchType);
   }
-}
 
-
-function getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
-  const scopesEnv = process.env.REACT_APP_SCOPES ?? process.env.NEXT_PUBLIC_SCOPES ?? process.env.SCOPES
-  if (scopesEnv) {
-    const hasCommaSeparators = scopesEnv.includes(',')
-    if (!hasCommaSeparators) throw new Error('Scopes Env var is of invalid format. Scopes must be provided as a string of comma-separated values')
-    const scopesEnvList = scopesEnv.split(',').map(String.prototype.trim)
-    return scopesEnvList
+  /**
+   * Returns the scopes to be used during launch
+   * @param emrType
+   * @param launchType
+   * @returns {string[]} - The list of scopes
+   */
+  private getEmrSpecificScopes(emrType: EMR, launchType: LAUNCH): string[] {
+    if (this.scopeOverride && this.scopeOverride.length > 0)
+      return this.scopeOverride;
+    return generatePreconfiguredScopes(launchType, emrType);
   }
-  return generatePreconfiguredScopes(launchType, emrType);
 }
 
 function generatePreconfiguredScopes(launchType: LAUNCH, emrType: EMR) {

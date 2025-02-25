@@ -21,7 +21,7 @@ export function getEndpointsForEmr(emrType: EMR) {
 */
 export function getEMRType(object: SubClient | JWT | URL): EMR {
   function isClient(input: object): input is SubClient {
-    return (input as SubClient).state.serverUrl !== undefined;
+    return "state" in input && (input as SubClient).state.serverUrl !== undefined;
   }
   function isJWT(input: object): input is JWT {
     return (input as JWT).client_id !== undefined

@@ -25,10 +25,22 @@ export default class SmartLaunchHandler {
     readonly clientID: string;
     readonly clientSecret?: string;
     /**
+     * Scopes to be requested during launch, overriding SMARTerFHIR defaults.
+     * @readonly
+     */
+    readonly scopeOverride?: string[];
+    /**
      * Creates an instance of SmartLaunchHandler.
      * @param {string} clientID - The client ID to use for authorization.
+     * @param {string} clientSecret - The client secret to use for authorization.
+     * Set as `undefined` if the application does not require a client secret.
+     * @param {string} scope - The scopes to request during launch. If unset,
+     * defaults will be computed by SMARTerFHIR based on the EMR type. **If
+     * provided, this function expects a string containing scopes separated by
+     * commas** (e.g., "openid, fhirUser, profile, offline_access, user/Patient.*,
+     * user/Practitioner.read")
      */
-    constructor(clientID: string, clientSecret?: string);
+    constructor(clientID: string, clientSecret?: string, scope?: string);
     /**
      * Launches an EMR application.
      * @param {string} redirect - The redirect URI to use for authorization.
@@ -49,4 +61,11 @@ export default class SmartLaunchHandler {
      * @returns nothing (undefined).
      */
     private executeWebLaunch;
+    /**
+     * Returns the scopes to be used during launch
+     * @param emrType
+     * @param launchType
+     * @returns {string[]} - The list of scopes
+     */
+    private getEmrSpecificScopes;
 }
