@@ -41,7 +41,7 @@ export default class SmartLaunchHandler {
    * Scopes to be requested during launch, overriding SMARTerFHIR defaults.
    * @readonly
    */
-  readonly scopeOverride?: string[];
+  readonly scopeOverride?: string[] = undefined;
 
   /**
    * Creates an instance of SmartLaunchHandler.
@@ -49,50 +49,57 @@ export default class SmartLaunchHandler {
    * @param {string} clientSecret - The client secret to use for authorization.
    * Set as `undefined` if the application does not require a client secret.
    * @param {string} scope - The scopes to request during launch. If unset,
-   * defaults will be computed by SMARTerFHIR based on the EMR type. **If
-   * provided, this function expects a string containing scopes separated by
-   * commas** (e.g., "openid, fhirUser, profile, offline_access, user/Patient.*,
-   * user/Practitioner.read")
+   * defaults will be computed by SMARTerFHIR based on the EMR type. This can be
+   * a list of scopes or it can be a space-delimited string of scopes (e.g. 
+   * "openid fhirUser profile user/Patient.read")
    */
-  constructor(clientID: string, clientSecret?: string, scope?: string) {
+  constructor(
+    clientID: string,
+    clientSecret?: string,
+    scope?: string | string[]
+  ) {
     this.clientID = clientID;
     this.clientSecret = clientSecret;
     if (scope) {
-      const hasCommaSeparators = scope.includes(",");
-      if (!hasCommaSeparators)
-        throw new Error(
-          "`scope` argument is of invalid format. `scope` must be provided as a string of comma-separated values"
-        );
-      this.scopeOverride = scope.split(",").map((s) => s.trim());
+      if (Array.isArray(scope)) {
+        this.scopeOverride = scope;
+      } else {
+        this.scopeOverride = scope.split(" ");
+      }
     }
   }
 
   /**
    * Launches an EMR application.
+   * @param {EMR} emrType - The EMR type.
    * @param {string} redirect - The redirect URI to use for authorization.
    * @param {string} iss - The issuer for authorization.
    * @param {LAUNCH} launchType - The type of launch.
-   * @param {string[]} scopes - Additional scopes to request.
    * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
    */
   private async launchEMR(
     emrType: EMR,
     redirect: string,
     iss: string,
-    launchType: LAUNCH,
-    scopes?: string[]
+    launchType: LAUNCH
   ): Promise<string | void> {
     if (launchType === LAUNCH.BACKEND) {
       throw new Error("This doesn't work for backend launch");
     }
 
-    const defaultScopes = [
-      "openid",
-      "fhirUser",
-    ];
+    const defaultScopes = ["openid", "fhirUser"];
     const emrSpecificScopes = this.getEmrSpecificScopes(emrType, launchType);
-    const scope = [...defaultScopes, ...emrSpecificScopes, ...(scopes ?? [])].join(" ");
-    const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> = getEMRSpecificAuthorizeParams(emrType)
+    const scope = [...defaultScopes, ...emrSpecificScopes]
+      .reduce((acc, val) => {
+        // Deduplicate scopes
+        if (!acc.includes(val)) acc.push(val);
+        return acc;
+      }, [] as string[])
+      .join(" ");
+
+    const emrSpecificAuthorizeParams: Partial<fhirclient.AuthorizeParams> =
+      getEMRSpecificAuthorizeParams(emrType);
+
     const redirect_uri = redirect ?? "";
 
     const authorizeParams = {

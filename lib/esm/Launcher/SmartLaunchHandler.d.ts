@@ -35,18 +35,17 @@ export default class SmartLaunchHandler {
      * @param {string} clientSecret - The client secret to use for authorization.
      * Set as `undefined` if the application does not require a client secret.
      * @param {string} scope - The scopes to request during launch. If unset,
-     * defaults will be computed by SMARTerFHIR based on the EMR type. **If
-     * provided, this function expects a string containing scopes separated by
-     * commas** (e.g., "openid, fhirUser, profile, offline_access, user/Patient.*,
-     * user/Practitioner.read")
+     * defaults will be computed by SMARTerFHIR based on the EMR type. This can be
+     * a list of scopes or it can be a space-delimited string of scopes (e.g.
+     * "openid fhirUser profile user/Patient.read")
      */
-    constructor(clientID: string, clientSecret?: string, scope?: string);
+    constructor(clientID: string, clientSecret?: string, scope?: string | string[]);
     /**
      * Launches an EMR application.
+     * @param {EMR} emrType - The EMR type.
      * @param {string} redirect - The redirect URI to use for authorization.
      * @param {string} iss - The issuer for authorization.
      * @param {LAUNCH} launchType - The type of launch.
-     * @param {string[]} scopes - Additional scopes to request.
      * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
      */
     private launchEMR;
