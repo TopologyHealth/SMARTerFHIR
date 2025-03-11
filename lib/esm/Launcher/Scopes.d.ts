@@ -8,12 +8,13 @@ export declare enum Actor {
     PATIENT = "patient"
 }
 type ResourceType = FhirResource['resourceType'];
+type WildCard = '*';
 export declare class FhirScopePermissions {
     actor: Actor;
     action: Action;
-    resourceTypes: ResourceType[];
-    constructor(actor: Actor, action: Action, resourceTypes: ResourceType[]);
+    resourceTypes: ResourceType[] | WildCard;
+    constructor(actor: Actor, action: Action, resourceTypes: ResourceType[] | WildCard);
     toString(): string;
-    static get(actor: Actor, action: Action, resourceTypes: ResourceType[]): string;
+    static get(actor: Actor, action: Action, resourceTypes: ResourceType[] | WildCard): string;
 }
 export {};

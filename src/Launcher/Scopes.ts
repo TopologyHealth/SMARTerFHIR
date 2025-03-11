@@ -11,23 +11,27 @@ export enum Actor {
   PATIENT = "patient"
 }
 type ResourceType = FhirResource['resourceType'];
+type WildCard = '*'
 
 export class FhirScopePermissions {
   actor: Actor
   action: Action
-  resourceTypes: ResourceType[]
+  resourceTypes: ResourceType[] | WildCard
 
-  constructor(actor: Actor, action: Action, resourceTypes: ResourceType[]) {
+  constructor(actor: Actor, action: Action, resourceTypes: ResourceType[] | WildCard) {
     this.actor = actor,
       this.action = action,
       this.resourceTypes = resourceTypes
   }
 
   toString() {
-    return this.resourceTypes.map(resourceType => `${this.actor}/${resourceType}.${this.action}`).join(" ")
+    const toScopeString = (resourceScope: string) => `${this.actor}/${resourceScope}.${this.action}`
+    if (typeof this.resourceTypes === 'string')
+        return toScopeString(this.resourceTypes)
+    return this.resourceTypes.map(toScopeString).join(" ")
   }
 
-  static get(actor: Actor, action: Action, resourceTypes: ResourceType[]) {
+  static get(actor: Actor, action: Action, resourceTypes: ResourceType[] | WildCard) {
     return (new FhirScopePermissions(actor, action, resourceTypes)).toString()
   }
 }

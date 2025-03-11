@@ -6,6 +6,7 @@ export declare enum EMR {
     ECW = "ecw",
     ATHENA = "platform.athena",
     ATHENAPRACTICE = "fhirapi.athena",
+    MEDITECH = "meditech",
     NONE = "none"
 }
 /**

@@ -13,6 +13,7 @@ export enum EMR {
   ECW = "ecw",
   ATHENA = "platform.athena",
   ATHENAPRACTICE = "fhirapi.athena",
+  MEDITECH = "meditech",
   NONE = "none",
 }
 
@@ -203,6 +204,8 @@ function generatePreconfiguredScopes(launchType: LAUNCH, emrType: EMR) {
       ].flat();
     case EMR.ATHENA:
       return ["profile", "offline_access", launchType === LAUNCH.STANDALONE ? "launch/patient" : "launch", FhirScopePermissions.get(Actor.USER, Action.READ, ["Patient"])];
+    case EMR.MEDITECH:
+      return ["launch/patient", FhirScopePermissions.get(Actor.PATIENT, Action.READ, '*')]
     case EMR.EPIC:
     case EMR.SMART:
     default:

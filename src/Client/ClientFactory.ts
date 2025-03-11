@@ -11,6 +11,7 @@ import CernerClient from "./CernerClient"
 import ECWClient from "./ECWClient"
 import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
+import MeditechClient from "./MeditechClient"
 
 export enum LAUNCH {
 	EMR,
@@ -91,6 +92,8 @@ export default class ClientFactory {
 				return new AthenaPracticeClient(fhirClient)
 			case EMR.ATHENA:
 				return new AthenaClient(fhirClient)
+			case EMR.MEDITECH:
+				return new MeditechClient(fhirClient)
 			case EMR.NONE:
 			default:
 				throw new Error("Unsupported provider for EMR Client creation")
