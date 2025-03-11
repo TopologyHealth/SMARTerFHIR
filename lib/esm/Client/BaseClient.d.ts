@@ -3,27 +3,14 @@ import SubClient, { FhirClientTypes } from "../FhirClient";
 import { EMR } from "../Launcher/SmartLaunchHandler";
 import { Author, FhirClientResourceWithRequiredType, GenericContext, R4ResourceWithRequiredType } from "../types";
 /**
- * The EMR_ENDPOINTS type represents an object with two properties, "token" and "r4", both of which are URLs.
- * @property {URL} token - A URL that represents the endpoint for accessing the token service in an EMR (Electronic Medical Record) system.
- * @property {URL} r4 - The "r4" property in the EMR_ENDPOINTS type represents a URL that is used to access the R4 version of an EMR (Electronic Medical Record)
- * endpoint.
- */
-export type EMR_ENDPOINTS = {
-    token: URL;
-    r4: URL;
-    auth: URL;
-};
-/**
 Represents the BaseClient abstract class.
 */
 export default abstract class BaseClient {
     readonly fhirClientDefault: SubClient;
     readonly defaultCreateHeaders: HeadersInit;
     abstract readonly EMR_TYPE: EMR;
-    static readonly AUTHORIZE_ENDPOINT: string | undefined;
-    static readonly TOKEN_ENDPOINT: string | undefined;
     static readonly R4_ENDPOINT: string | undefined;
-    abstract getEndpoints(): EMR_ENDPOINTS;
+    getR4Endpoint(): URL;
     getEMRType(): EMR;
     /**
      * The function constructs and returns an object containing three endpoints (token, r4, and auth) based on the provided tokenEP, r4EP, and authorizeEP values.
@@ -34,11 +21,7 @@ export default abstract class BaseClient {
      * authorization process and obtaining an authorization code or access token.
      * @returns An object with three properties: "token", "r4", and "auth". Each property is assigned a new URL object based on the corresponding input parameters.
      */
-    protected static constructEndpoints(tokenEP: string | undefined, r4EP: string | undefined, authorizeEP: string | undefined): {
-        token: URL;
-        r4: URL;
-        auth: URL;
-    };
+    protected static setR4Endpoint(r4Endpoint: string | undefined): URL;
     /**
      * Fetch options for create operation headers.
      * @private

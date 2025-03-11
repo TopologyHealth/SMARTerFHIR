@@ -4,13 +4,13 @@ import { ClientUtils } from ".."
 import SubClient from "../FhirClient"
 import { EMR } from "../Launcher/SmartLaunchHandler"
 import { FhirClientConfig } from "../types"
-import BaseClient, { EMR_ENDPOINTS } from "./BaseClient"
+import AthenaClient from "./AthenaClient"
+import AthenaPracticeClient from "./AthenaPracticeClient"
+import BaseClient from "./BaseClient"
 import CernerClient from "./CernerClient"
 import ECWClient from "./ECWClient"
 import EpicClient from "./EpicClient"
 import SmartHealthClient from "./SmartHealthClient"
-import AthenaPracticeClient from "./AthenaPracticeClient"
-import AthenaClient from "./AthenaClient"
 
 export enum LAUNCH {
 	EMR,
@@ -112,28 +112,6 @@ export default class ClientFactory {
 				throw new Error("Unsupported provider for standalone launch")
 		}
 	}
-
-	/**
-	 * The function `getEmrEndpoints` returns the endpoints based on the EMR type obtained from the JWT.
-	 * @param {JWT} jwt - The "jwt" parameter is a JSON Web Token (JWT) that is used for authentication and authorization purposes. It contains information about the
-	 * user and their permissions.
-	 * @returns an object of type EMR_ENDPOINTS.
-	 */
-	private getEmrEndpoints(emrType: EMR): EMR_ENDPOINTS;
-	private getEmrEndpoints(jwt: JWT): EMR_ENDPOINTS;
-	private getEmrEndpoints(object: unknown): EMR_ENDPOINTS {
-		switch (ClientUtils.getEmrTypeFromObject(object)) {
-			case EMR.EPIC:
-				return EpicClient.getEndpoints()
-			case EMR.CERNER:
-				return CernerClient.getEndpoints()
-			case EMR.SMART:
-			case EMR.NONE:
-			default:
-				throw new Error('EMR type not defined.')
-		}
-	}
-
 }
 
 

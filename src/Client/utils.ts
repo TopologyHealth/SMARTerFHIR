@@ -1,37 +1,17 @@
+import SubClient from "../FhirClient";
 import { EMR, instanceOfEmr } from "../Launcher/SmartLaunchHandler";
-import { EMR_ENDPOINTS } from "./BaseClient";
-import CernerClient from "./CernerClient";
-import EpicClient from "./EpicClient";
-import SubClient from "../FhirClient"
 import { JWT, instanceOfJWT } from "./ClientFactory";
-import ECWClient from "./ECWClient";
-import AthenaPracticeClient from "./AthenaPracticeClient";
-import AthenaClient from "./AthenaClient";
 
 /**
+ * @deprecated Endpoints are no longer assumed in-code. This function will only throw an error if used. Please obtain an R4 endpoint from your EMR Vendor.
 * The function `getEndpointsForEmr` returns the endpoints for a given EMR type, such as Epic, Cerner, or SMART.
 * @param {EMR} emrType - The `emrType` parameter is of type `EMR`, which is an enumeration representing different types of Electronic Medical Record (EMR)
 * systems. The possible values for `emrType` are `EMR.EPIC`, `EMR.CERNER`, `EMR.SMART`,
 * @returns an object of type EMR_ENDPOINTS.
 */
 
-export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
-  switch (emrType) {
-    case EMR.EPIC:
-      return EpicClient.getEndpoints();
-    case EMR.CERNER:
-      return CernerClient.getEndpoints();
-    case EMR.ECW:
-      return ECWClient.getEndpoints();
-    case EMR.ATHENAPRACTICE:
-      return AthenaPracticeClient.getEndpoints();
-    case EMR.ATHENA:
-      return AthenaClient.getEndpoints();
-    case EMR.SMART:
-    case EMR.NONE:
-    default:
-      throw new Error(`Endpoints not found for EMR type: ${emrType}`);
-  }
+export function getEndpointsForEmr(emrType: EMR) {
+  throw new Error(`Endpoints not found for EMR type: ${emrType}`);
 }
 
 /**
@@ -39,33 +19,32 @@ export function getEndpointsForEmr(emrType: EMR): EMR_ENDPOINTS {
  * @param {SubClient | JWT} client - The parameter `clientOrToken` can be either a `SubClient` object or a JWT (JSON Web Token).
  * @returns the type of Electronic Medical Record (EMR) based on the input parameter. The possible return values are EMR.CERNER, EMR.SMART, EMR.EPIC, or EMR.NONE.
 */
-export function getEMRType(clientOrToken: SubClient | JWT): EMR {
+export function getEMRType(object: SubClient | JWT | URL): EMR {
   function isClient(input: object): input is SubClient {
-    return (input as SubClient).state.serverUrl !== undefined;
+    return "state" in input && (input as SubClient).state.serverUrl !== undefined;
   }
-  const EMR_MAPPING = [
-    { substring: "cerner", emr: EMR.CERNER },
-    { substring: "smarthealthit", emr: EMR.SMART },
-    { substring: "epic", emr: EMR.EPIC },
-    { substring: "ecw", emr: EMR.ECW },
-    { substring: "platform.athenahealth.com", emr: EMR.ATHENA },
-    { substring: "fhirapi.athenahealth.com", emr: EMR.ATHENAPRACTICE }
-  ];
+  function isJWT(input: object): input is JWT {
+    return (input as JWT).client_id !== undefined
+  }
 
-  if (isClient(clientOrToken)) {
-    const serverUrl = clientOrToken.state.serverUrl;
-    for (const { substring, emr } of EMR_MAPPING) {
-      if (serverUrl.includes(substring)) {
-        return emr;
-      }
-    }
-  } else {
-    if ("epic.eci" in clientOrToken) {
+  if (isJWT(object)) {
+    if ("epic.eci" in object) {
       return EMR.EPIC;
+    } else {
+      console.error('Unknown JWT', object)
+      throw new Error('Could not determine EMR Type from JWT')
     }
   }
-
-  return EMR.NONE;
+  if (isClient(object)) {
+    const serverUrl = object.state.serverUrl;
+    return getEMRType(new URL(serverUrl))
+    
+  } else {      //Is a URL
+    const urlAsString = object.toString()    
+    const isEMROfType = (emrType: EMR) => urlAsString.includes(emrType);
+    const sortedEMRTypes = (Object.values(EMR)).sort((a, b) => b.length - a.length)
+    return sortedEMRTypes.find(isEMROfType) ?? EMR.NONE;
+  }
 }
 
 

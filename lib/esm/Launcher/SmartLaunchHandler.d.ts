@@ -4,8 +4,8 @@ export declare enum EMR {
     EPIC = "epic",
     SMART = "smart",
     ECW = "ecw",
-    ATHENA = "athena",
-    ATHENAPRACTICE = "athenapractice",
+    ATHENA = "platform.athena",
+    ATHENAPRACTICE = "fhirapi.athena",
     NONE = "none"
 }
 /**
@@ -25,16 +25,27 @@ export default class SmartLaunchHandler {
     readonly clientID: string;
     readonly clientSecret?: string;
     /**
+     * Scopes to be requested during launch, overriding SMARTerFHIR defaults.
+     * @readonly
+     */
+    readonly scopeOverride?: string[];
+    /**
      * Creates an instance of SmartLaunchHandler.
      * @param {string} clientID - The client ID to use for authorization.
+     * @param {string} clientSecret - The client secret to use for authorization.
+     * Set as `undefined` if the application does not require a client secret.
+     * @param {string} scope - The scopes to request during launch. If unset,
+     * defaults will be computed by SMARTerFHIR based on the EMR type. This can be
+     * a list of scopes or it can be a space-delimited string of scopes (e.g.
+     * "openid fhirUser profile user/Patient.read")
      */
-    constructor(clientID: string, clientSecret?: string);
+    constructor(clientID: string, clientSecret?: string, scope?: string | string[]);
     /**
      * Launches an EMR application.
+     * @param {EMR} emrType - The EMR type.
      * @param {string} redirect - The redirect URI to use for authorization.
      * @param {string} iss - The issuer for authorization.
      * @param {LAUNCH} launchType - The type of launch.
-     * @param {string[]} scopes - Additional scopes to request.
      * @returns {Promise<string | void>} - A promise resolving to the authorization response or void.
      */
     private launchEMR;
@@ -42,7 +53,7 @@ export default class SmartLaunchHandler {
      * Authorizes the EMR based on the current URL query parameters.
      * @returns {Promise<void>} - A promise resolving to void.
      */
-    authorizeEMR(launchType?: LAUNCH, redirectPath?: string): Promise<void>;
+    authorizeEMR(launchType?: LAUNCH, redirectPath?: string, emrType?: EMR): Promise<void>;
     /**
      * The function `executeEMRLaunch` checks the URL parameters for an "iss" value, determines the EMR type based on the "iss" value, and then launches the
      * corresponding EMR system.
@@ -50,10 +61,10 @@ export default class SmartLaunchHandler {
      */
     private executeWebLaunch;
     /**
-     * The function `getEMRType` takes a string `iss` and returns the corresponding EMR type based on whether the string includes any of the EMR types.
-     * @param {string} iss - The `iss` parameter is a string that represents the issuer of an Electronic Medical Record (EMR).
-     * @returns the EMR type that matches the input string `iss`. If a matching EMR type is found, it is returned. If no matching EMR type is found, the function
-     * returns `EMR.NONE`.
+     * Returns the scopes to be used during launch
+     * @param emrType
+     * @param launchType
+     * @returns {string[]} - The list of scopes
      */
-    static getEMRType(iss?: string): EMR;
+    private getEmrSpecificScopes;
 }
